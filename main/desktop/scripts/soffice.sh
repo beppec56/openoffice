@@ -28,6 +28,19 @@
 # file locking now enabled by default
 SAL_ENABLE_FILE_LOCKING=1
 export SAL_ENABLE_FILE_LOCKING
+ 
+#  uncomment the following two lines if gnome desktop is to be forced, disabling the kde desktop
+# the following two lines shuold be set in par in order to force a desktop, pairs are:
+# none    gen                   no desktop, use AOO internal
+# cde     ??
+# gnome   gtk                   Gnome desktop
+# kde     kde                   Kde desktop
+# kde4    kde4                  Kde4 dektop
+#export OOO_FORCE_DESKTOP="gnome"
+#export SAL_USE_VCLPLUGIN="gtk"
+
+#for valgrind, include the patch: valgrind-alloc.diff
+#OOO_FORCE_SYSALLOC=1
 
 # Uncomment the line below if you suspect that OpenGL is not
 # working on your system.
