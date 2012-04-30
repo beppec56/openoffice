@@ -123,7 +123,7 @@ ProfileItem gid_Profileitem_Soffice_ProgressBarColor
     Section = "Bootstrap";
     Order = 2;
     Key = "ProgressBarColor";
-    Value = "0,0,128";
+    Value = "0,128,128";
 End
 
 ProfileItem gid_Profileitem_Soffice_ProgressSize
