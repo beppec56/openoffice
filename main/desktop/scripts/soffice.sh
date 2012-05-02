@@ -61,7 +61,7 @@ cd "`dirname "$sd_res"`"
 sd_prog=`pwd`
 cd "$sd_cwd"
 
-sd_binary=`basename "$0"`.bin
+sd_binary=`basename "$0" | sed 's/-hs//g'`.bin
 
 #collect all bootstrap variables specified on the command line
 #so that they can be passed as arguments to javaldx later on
