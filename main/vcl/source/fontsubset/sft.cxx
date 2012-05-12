@@ -1149,16 +1149,17 @@ static void GetNames(TrueTypeFont *t)
     }
 
     /* Font family and subfamily names: preferred Apple */
+    // a few comments added for clarity
     t->family = NULL;
-    if ((r = findname(table, n, 0, 0, 0, 1)) != -1)
+    if ((r = findname(table, n, 0, 0, 0, 1)) != -1) //platform Unicode, encoding Unicode 1.0 semantics, no lang
         t->family = nameExtract(table, nTableSize, r, 1, &t->ufamily);
-    if ( ! t->family && (r = findname(table, n, 3, 1, 0x0409, 1)) != -1)
+    if ( ! t->family && (r = findname(table, n, 3, 1, 0x0409, 1)) != -1) //platform Microsoft, encoding Unicode BMP only, lang US English
         t->family = nameExtract(table, nTableSize, r, 1, &t->ufamily);
-    if ( ! t->family && (r = findname(table, n, 1, 0, 0, 1)) != -1)
+    if ( ! t->family && (r = findname(table, n, 1, 0, 0, 1)) != -1) // platform Apple, encoding roman, lang English
         t->family = nameExtract(table, nTableSize, r, 0, NULL);
-    if ( ! t->family && (r = findname(table, n, 3, 1, 0x0411, 1)) != -1)
+    if ( ! t->family && (r = findname(table, n, 3, 1, 0x0411, 1)) != -1) //platform Microsoft, encoding Unicode BMP only, lang Japanese
         t->family = nameExtract(table, nTableSize, r, 1, &t->ufamily);
-    if ( ! t->family && (r = findname(table, n, 3, 0, 0x0409, 1)) != -1)
+    if ( ! t->family && (r = findname(table, n, 3, 0, 0x0409, 1)) != -1) //platform Microsoft, encoding symbol, lang US English
         t->family = nameExtract(table, nTableSize, r, 1, &t->ufamily);
     if ( ! t->family )
     {
@@ -1168,9 +1169,9 @@ static void GetNames(TrueTypeFont *t)
 
     t->subfamily = NULL;
     t->usubfamily = NULL;
-    if ((r = findname(table, n, 1, 0, 0, 2)) != -1)
+    if ((r = findname(table, n, 1, 0, 0, 2)) != -1) // platform Apple, encoding roman, lang English
         t->subfamily = nameExtract(table, nTableSize, r, 0, &t->usubfamily);
-    if ( ! t->subfamily && (r = findname(table, n, 3, 1, 0x0409, 2)) != -1)
+    if ( ! t->subfamily && (r = findname(table, n, 3, 1, 0x0409, 2)) != -1) // platform Microsoft, encoding Unicode BPM only, lang English
         t->subfamily = nameExtract(table, nTableSize, r, 1, &t->usubfamily);
     if ( ! t->subfamily )
     {

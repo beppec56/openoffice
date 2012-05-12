@@ -87,6 +87,11 @@ using namespace psp;
 using namespace osl;
 using namespace rtl;
 
+namespace
+{
+    typedef std::pair<FcChar8*, FcChar8*> lang_and_element;
+}
+
 class FontCfgWrapper
 {
     oslModule		m_pLib;
@@ -253,6 +258,11 @@ public:
     FT_UInt FcFreeTypeCharIndex( FT_Face face, FcChar32 ucs4 )
     { return m_pFcFreeTypeCharIndex ? m_pFcFreeTypeCharIndex( face, ucs4 ) : 0; }
 
+public:
+   FcResult LocalizedElementFromPattern(FcPattern* pPattern, FcChar8 **family,
+                                              const char *elementtype, const char *elementlangtype);
+private:
+   void cacheLocalizedFontNames(const FcChar8 *origfontname, const FcChar8 *bestfontname, const std::vector< lang_and_element > &lang_and_elements); 
 public: // TODO: cleanup
     FcResult FamilyFromPattern(FcPattern* pPattern, FcChar8 **family);
     std::hash_map< rtl::OString, rtl::OString, rtl::OStringHash > m_aFontNameToLocalized;
@@ -451,32 +461,8 @@ void FontCfgWrapper::addFontSet( FcSetName eSetName )
 		FcResult eOutRes = FcPatternGetBool( pOrigPattern, FC_OUTLINE, 0, &bOutline );
 		if( (eOutRes != FcResultMatch) || (bOutline == FcFalse) )
 			continue;
-		// create a pattern to find eventually better alternatives
-		FcPattern* pBetterPattern = pOrigPattern;
-		if( m_nFcVersion > 20400 ) // #i115204# avoid trouble with old FC versions
-		{
-			FcPattern* pTestPattern = FcPatternDuplicate( pOrigPattern );
-			FcPatternAddBool( pTestPattern, FC_OUTLINE, FcTrue );
-			// TODO: ignore all attributes that are not interesting for finding dupes
-			//       e.g. by using pattern->ImplFontAttr->pattern conversion
-			FcPatternDel( pTestPattern, FC_FONTVERSION );
-			FcPatternDel( pTestPattern, FC_CHARSET );
-			FcPatternDel( pTestPattern, FC_FILE );
-			// find the font face for the dupe-search pattern
-			FcResult eFcResult = FcResultMatch;
-			pBetterPattern = FcFontMatch( FcConfigGetCurrent(), pTestPattern, &eFcResult );
-			FcPatternDestroy( pTestPattern );
-			if( eFcResult != FcResultMatch )
-				continue;
-			// #i115131# double check results and eventually ignore them
-			eOutRes = FcPatternGetBool( pBetterPattern, FC_OUTLINE, 0, &bOutline );
-			if( (eOutRes != FcResultMatch) || (bOutline == FcFalse) )
-				continue;
-		}
-		// insert best found pattern for the dupe-search pattern
-		// TODO: skip inserting patterns that are already known in the target fontset
-		FcPatternReference( pBetterPattern );
-		FcFontSetAdd( m_pOutlineSet, pBetterPattern );
+		FcPatternReference( pOrigPattern );
+		FcFontSetAdd( m_pOutlineSet, pOrigPattern );
 	}
 
     // TODO?: FcFontSetDestroy( pOrig );
@@ -698,6 +684,61 @@ namespace
     }
 }
 
+//Set up maps to quickly map between a fonts best UI name and all the rest of its names, and vice versa
+void FontCfgWrapper::cacheLocalizedFontNames(const FcChar8 *origfontname, const FcChar8 *bestfontname,
+    const std::vector< lang_and_element > &lang_and_elements)
+{
+    std::vector<lang_and_element>::const_iterator aEnd = lang_and_elements.end();
+    for (std::vector<lang_and_element>::const_iterator aIter = lang_and_elements.begin(); aIter != aEnd; ++aIter)
+    {
+        const char *candidate = (const char*)(aIter->second);
+        if (rtl_str_compare(candidate, (const char*)bestfontname) != 0)
+            m_aFontNameToLocalized[OString(candidate)] = OString((const char*)bestfontname);
+    }
+    if (rtl_str_compare((const char*)origfontname, (const char*)bestfontname) != 0)
+        m_aLocalizedToCanonical[OString((const char*)bestfontname)] = OString((const char*)origfontname);
+}
+
+FcResult FontCfgWrapper::LocalizedElementFromPattern(FcPattern* pPattern, FcChar8 **element,
+                                                     const char *elementtype, const char *elementlangtype)
+{                                                /* e. g.:      ^ FC_FAMILY              ^ FC_FAMILYLANG */
+    FcChar8 *origelement;
+    FcResult eElementRes = FcPatternGetString( pPattern, elementtype, 0, &origelement );
+    *element = origelement;
+
+    if( eElementRes == FcResultMatch)
+    {
+        FcChar8* elementlang = NULL;
+        if (FcPatternGetString( pPattern, elementlangtype, 0, &elementlang ) == FcResultMatch)
+        {
+            std::vector< lang_and_element > lang_and_elements;
+            lang_and_elements.push_back(lang_and_element(elementlang, *element));
+            int k = 1;
+            while (1)
+            {
+                if (FcPatternGetString( pPattern, elementlangtype, k, &elementlang ) != FcResultMatch)
+                    break;
+                if (FcPatternGetString( pPattern, elementtype, k, element ) != FcResultMatch)
+                    break;
+                lang_and_elements.push_back(lang_and_element(elementlang, *element));
+                ++k;
+            }
+
+            //possible to-do, sort by UILocale instead of process locale
+            rtl_Locale* pLoc;
+            osl_getProcessLocale(&pLoc);
+            localizedsorter aSorter(pLoc);
+            *element = aSorter.bestname(lang_and_elements);
+
+            //if this element is a fontname, map the other names to this best-name
+            if (rtl_str_compare(elementtype, FC_FAMILY) == 0)
+                cacheLocalizedFontNames(origelement, *element, lang_and_elements);
+        }
+    }
+
+    return eElementRes;
+}
+    
 int PrintFontManager::countFontconfigFonts( std::hash_map<rtl::OString, int, rtl::OStringHash>& o_rVisitedPaths )
 {
     int nFonts = 0;
@@ -724,8 +765,8 @@ int PrintFontManager::countFontconfigFonts( std::hash_map<rtl::OString, int, rtl
             FcBool outline = false;
             
             FcResult eFileRes	      = rWrapper.FcPatternGetString( pFSet->fonts[i], FC_FILE, 0, &file );
-            FcResult eFamilyRes       = rWrapper.FamilyFromPattern( pFSet->fonts[i], &family );
-            FcResult eStyleRes	      = rWrapper.FcPatternGetString( pFSet->fonts[i], FC_STYLE, 0, &style );
+            FcResult eFamilyRes       = rWrapper.LocalizedElementFromPattern( pFSet->fonts[i], &family, FC_FAMILY, FC_FAMILYLANG );
+            FcResult eStyleRes        = rWrapper.LocalizedElementFromPattern( pFSet->fonts[i], &style, FC_STYLE, FC_STYLELANG );
             FcResult eSlantRes	      = rWrapper.FcPatternGetInteger( pFSet->fonts[i], FC_SLANT, 0, &slant );
             FcResult eWeightRes	      = rWrapper.FcPatternGetInteger( pFSet->fonts[i], FC_WEIGHT, 0, &weight );
             FcResult eSpacRes	      = rWrapper.FcPatternGetInteger( pFSet->fonts[i], FC_SPACING, 0, &spacing );
