@@ -687,6 +687,9 @@ void FontCache::updateFontCacheEntry( const PrintFontManager::PrintFont* pFont, 
         case fonttype::TrueType:
             nDirID = static_cast<const PrintFontManager::TrueTypeFontFile*>(pFont)->m_nDirectory;
             aFile = static_cast<const PrintFontManager::TrueTypeFontFile*>(pFont)->m_aFontFile;
+#if OSL_DEBUG_LEVEL > 1
+            fprintf( stderr, " dir: %d added in file %s\n", nDirID, aFile.getStr() );
+#endif
             break;
         case fonttype::Type1:
             nDirID = static_cast<const PrintFontManager::Type1FontFile*>(pFont)->m_nDirectory;
@@ -729,6 +732,9 @@ void FontCache::updateFontCacheEntry( const PrintFontManager::PrintFont* pFont, 
         if( ! equalsPrintFont( pFont, pCacheFont ) )
         {
             copyPrintFont( pFont, pCacheFont );
+#if OSL_DEBUG_LEVEL > 1
+            fprintf( stderr, "copyPrintFont!\n" );
+#endif
             m_bDoFlush = true;
         }
     }
@@ -740,6 +746,9 @@ void FontCache::updateFontCacheEntry( const PrintFontManager::PrintFont* pFont, 
         ByteString aPath = rManager.getDirectory( nDirID );
         aPath.Append( '/' );
         aPath.Append( ByteString( aFile ) );
+#if OSL_DEBUG_LEVEL > 1
+            fprintf( stderr, "clonePrintFont!\n" );
+#endif
         m_bDoFlush = true;
     }
     if( bFlush )
