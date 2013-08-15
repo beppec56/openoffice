@@ -1,0 +1,14 @@
+ <!DOCTYPE Menu PUBLIC "-//freedesktop//DTD Menu 1.0//EN"
+  "http://www.freedesktop.org/standards/menu-spec/1.0/menu.dtd">
+
+<Menu>
+	<Name>Applications</Name>
+        <!-- custom Acca Esse OOo menu -->
+	<Menu>
+		<Name>Office 3.4 (AOOHs Acca Esse)</Name>
+		<Directory>office-it-acca-esse.directory</Directory>
+		<Include>
+			<Category>X-AOOHs-Application</Category>
+		</Include>
+	</Menu>
+</Menu>

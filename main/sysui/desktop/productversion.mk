@@ -42,7 +42,7 @@ PKGDIR=$(BIN)
 # CAUTION! here the parsing result from openoffice.lst is NOT available, so this is hardcoded
 # but should not be.
 # It has to be equal to PRODUCTNAME:l:s/\s/\_/g - see solenv/bin/modules/installer/setupscript.pm
-PRODUCTLIST = openoffice
+PRODUCTLIST = openoffice aoohs
 
 # default values to minimize maintainance effort
 
@@ -63,6 +63,7 @@ ICONVERSION = $(PRODUCTVERSIONSHORT:s/.//g)
 # the default values get replaced by make_installer.pl at (core0x) packaging time;
 # another wrapper name can be forced by --with-unix-wrapper configure option
 # which is need by other distributors, see http://www.openoffice.org/issues/show_bug.cgi?id=75366
+#important:  aoohs needs --with-unix-wrapper (FIXME: check !)
 UNIXWRAPPERNAME *= '$${{UNIXPRODUCTNAME}}$${{BRANDPACKAGEVERSION}}'
 
 # CAUTION! $(UNIXBASISROOTNAME) from openoffice.lst NOT available (!)
@@ -73,4 +74,15 @@ PRODUCTVERSIONSHORT.openoffice = $(PRODUCTVERSIONSHORT)
 PKGVERSION.openoffice = $(PKGVERSION)
 UNIXFILENAME.openoffice = $(PRODUCTNAME.openoffice:l:s/ /_/g)$(PRODUCTVERSIONSHORT.openoffice)
 ICONPREFIX.openoffice = $(UNIXFILENAME.openoffice:s/.//g)
+# BINPOST.openoffice = ""
+
+PRODUCTNAME.aoohs = AOOHs
+
+PRODUCTVERSION.aoohs = $(PRODUCTVERSION)
+PRODUCTVERSIONSHORT.aoohs = $(PRODUCTVERSIONSHORT)
+PKGVERSION.aoohs = $(PKGVERSION)
+UNIXFILENAME.aoohs = $(PRODUCTNAME.aoohs:l:s/ /_/g)$(PRODUCTVERSIONSHORT.aoohs)
+ICONPREFIX.aoohs = $(UNIXFILENAME.aoohs:s/.//g)
+# BINPOST.aoohs = "4-hs"
+# UNIXPRODUCTNAME.aoohs=aoohs
 

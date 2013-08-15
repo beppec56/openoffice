@@ -114,18 +114,25 @@ mkdir -p ${DESTDIR}/usr/bin
 
 office_root=/opt/${PREFIX}
 
-ln -sf ${office_root}/program/soffice ${DESTDIR}/usr/bin/soffice
+ln -sf ${office_root}/program/soffice ${DESTDIR}/usr/bin/soffice-hs
 
 cp openoffice.sh ${DESTDIR}/usr/bin/${PREFIX}
 cp printeradmin.sh ${DESTDIR}/usr/bin/${PREFIX}-printeradmin
 chmod 0755 ${DESTDIR}/usr/bin/${PREFIX} ${DESTDIR}/usr/bin/${PREFIX}-printeradmin
 
 mkdir -p ${DESTDIR}/usr/share/mime/packages
-cp apacheopenoffice.xml ${DESTDIR}/usr/share/mime/packages/
-chmod 0644 ${DESTDIR}/usr/share/mime/packages/apacheopenoffice.xml
+cp apacheopenoffice.xml ${DESTDIR}/usr/share/mime/packages/aoohs.xml
+chmod 0644 ${DESTDIR}/usr/share/mime/packages/aoohs.xml
 
 mkdir -p ${DESTDIR}/usr/share/applications
 for i in `cat launcherlist`; do
   ln -sf ${office_root}/share/xdg/$i ${DESTDIR}/usr/share/applications/${PREFIX}-$i
 done
 
+#menu
+mkdir -p ${DESTDIR}/etc/xdg/menus/applications-merged
+ln -sf ${office_root}/share/xdg/office-it-acca-esse.menu ${DESTDIR}/etc/xdg/menus/applications-merged/office-it-acca-esse.menu
+
+#directory
+mkdir -p ${DESTDIR}/usr/share/desktop-directories
+ln -sf ${office_root}/share/xdg/office-it-acca-esse.directory ${DESTDIR}/usr/share/desktop-directories/office-it-acca-esse.directory

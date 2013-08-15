@@ -1,6 +1,6 @@
 Description: %productname desktop integration
-Maintainer: Apache Software Foundation
+Maintainer: Acca Esse
 Architecture: all
-Provides: openoffice-desktop-integration, openoffice.org-unbundled
-Conflicts: openoffice-desktop-integration, openofficeorg-desktop-integration, openoffice.org-debian-menus
-Replaces: openoffice-desktop-integration, openoffice.org-debian-menus, openoffice.org-bundled, openoffice.org-common
+Provides: aoohs-desktop-integration,aoohs-unbundled
+Conflicts: aoohs-desktop-integration, aoohs-desktop-integration, aoohs-debian-menus
+Replaces: aoohs-desktop-integration, aoohs-debian-menus, aoohs-bundled, aoohs-common

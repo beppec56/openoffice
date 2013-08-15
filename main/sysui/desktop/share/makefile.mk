@@ -49,7 +49,7 @@ ULFFILES= \
     launcher_name.ulf
 
 LAUNCHERLIST = writer calc draw impress math base printeradmin qstart startcenter javafilter
-LAUNCHERDEPN = ../menus/{$(LAUNCHERLIST)}.desktop
+LAUNCHERDEPN = ../menus/{$(LAUNCHERLIST)}.desktop ../menus/office-it-acca-esse.directory ../menus/office-it-acca-esse.menu
 
 LAUNCHERFLAGFILE = $(COMMONMISC)/$(TARGET)/xdg.flag
 
