@@ -79,6 +79,9 @@ Module gid_Module_Root_Brand
              gid_Brand_File_Share_Xdg_Impress,
              gid_Brand_File_Share_Xdg_JavaFilter,
              gid_Brand_File_Share_Xdg_Math,
+             gid_Brand_File_Share_Xdg_Menu1,
+             gid_Brand_File_Share_Xdg_Menu2,
+             gid_Brand_File_Share_Xdg_MenuDirectory,
              gid_Brand_File_Share_Xdg_Printeradmin,
              gid_Brand_File_Share_Xdg_QStart,
              gid_Brand_File_Share_Xdg_StartCenter,
@@ -529,6 +532,21 @@ End
 #endif
 
 #if defined UNX && ! defined MACOSX
+
+File gid_Brand_File_Share_Xdg_Menu2
+    TXT_FILE_BODY;
+    Dir = gid_Brand_Dir_Share_Xdg;
+    Styles = (PACKED,SCPZIP_REPLACE);
+    Name = "office-it-acca-esse.menu";
+End
+
+File gid_Brand_File_Share_Xdg_MenuDirectory
+    TXT_FILE_BODY;
+    Dir = gid_Brand_Dir_Share_Xdg;
+    Styles = (PACKED,SCPZIP_REPLACE);
+    Name = "office-it-acca-esse.directory";
+End
+
 File gid_Brand_File_Share_Xdg_Printeradmin
     TXT_FILE_BODY;
     Dir = gid_Brand_Dir_Share_Xdg;
