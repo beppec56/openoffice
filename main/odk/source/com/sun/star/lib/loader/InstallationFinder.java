@@ -67,7 +67,7 @@ final class InstallationFinder {
     private static final String SYSPROP_NAME =
         "com.sun.star.lib.loader.unopath";
     private static final String ENVVAR_NAME = "UNO_PATH";
-    private static final String SOFFICE = "soffice"; // Unix/Linux only
+    private static final String SOFFICE = "soffice-hs"; // Unix/Linux only
     
     private InstallationFinder() {} // do not instantiate
     
@@ -188,8 +188,8 @@ final class InstallationFinder {
      */    
     private static String getPathFromWindowsRegistry() {
 
-        final String SUBKEYNAME = "Software\\OpenOffice\\UNO\\InstallPath";
-        final String SUBKEYNAME64 = "Software\\Wow6432Node\\OpenOffice\\UNO\\InstallPath";
+        final String SUBKEYNAME = "Software\\AOOHs\\UNO\\InstallPath";
+        final String SUBKEYNAME64 = "Software\\Wow6432Node\\AOOHs\\UNO\\InstallPath";
 
         String path = null;
         
