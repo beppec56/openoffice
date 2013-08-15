@@ -542,10 +542,20 @@ sub create_epm_header
 
 			if ( $installer::globals::debian && $variableshashref->{'UNIXPRODUCTNAME'} eq 'openoffice' )
 			{
+			    if( $variableshashref->{'PRODUCTNAME'} eq "AOOHs" )
+			    {
+				$line = "%provides" . " aoohs-unbundled\n";
+				push(@epmheader, $line);
+				$line = "%incompat" . " aoohs-bundled\n";
+				push(@epmheader, $line);
+			    }
+			    else
+			    {
 				$line = "%provides" . " openoffice.org-unbundled\n";
 				push(@epmheader, $line);
 				$line = "%replaces" . " openoffice.org-bundled\n";
 				push(@epmheader, $line);
+			    }
 			}
 		}
 	}
