@@ -37,6 +37,21 @@
 --with-dmake-url=http://dmake.apache-extras.org.codespot.com/files/dmake-4.12.tar.bz2 \
 --enable-category-b \
 --with-package-format="deb" \
+--without-junit \
+--without-stlport \
+--enable-bundled-dictionaries \
+--with-system-stdlibs \
+--with-lang='en-US' \
+--enable-pdfimport \
+\
+--enable-verbose \
+--with-build-version="$(date +"%Y-%m-%d %H:%M:%S (%a, %d %b %Y)") - Rev. $(git branch |grep "*" | sed 's/* //g') $(echo git_$(git log -n1 --format=%h))" \
+--with-mingwin=i586-mingw32msvc-c++ \
+
+
+exit
+
+
 --with-lang='en-US' \
 --enable-opengl  \
 --enable-dbus  \
