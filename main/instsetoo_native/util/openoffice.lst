@@ -449,3 +449,121 @@ Apache_OpenOffice_Beta
         include			{solarenvpath}/{os}/loader2,.,{localpath}/bin/beta,{localpath}/bin,{solarpath}/bin.{minor}/ooowoure,{solarpath}/bin.{minor}/osl,{solarpath}/bin.{minor}/desktop-integration/{pkgtype},{solarpath}/bin.{minor},{solarpath}/lib.{minor},{solarpath}/pck.{minor}/openoffice,{solarpath}/pck.{minor},{solarpath}/xml.{minor}/office/instance,{solarpath}/xml.{minor},../../external/common,{solarenvpath}/{os}/OOo_external
     }
 }
+
+AOOHs
+{
+    Settings
+    {
+        variables
+        {
+            FULLPRODUCTNAME Apache OpenOffice
+            PRODUCTNAME AOOHs
+            PRODUCTVERSION 4.1.1
+            PREVIOUS_VERSION 4.0.1
+            PRODUCTEXTENSION 
+            LONG_PRODUCTEXTENSION 
+            SHORT_PRODUCTEXTENSION 
+            POSTVERSIONEXTENSION
+            POSTVERSIONEXTENSIONUNIX
+            BRANDPACKAGEVERSION 4
+            USERDIRPRODUCTVERSION 4
+            ABOUTBOXPRODUCTVERSION 4.1.1
+            BASEPRODUCTVERSION 4.1
+            BASISROOTNAME AOOHs
+            UNIXBASISROOTNAME aoohs
+            HIDELICENSEDIALOG 1
+            PACKAGEPREFIX 
+            BASISPACKAGEPREFIX aoohs
+            UREPACKAGEPREFIX aoohs
+            SOLSUREPACKAGEPREFIX openoffice
+            USE_FILEVERSION 1
+            PCPFILENAME openoffice.pcp
+            UPDATEURL http://www.acca-esse.it
+            ADD_INCLUDE_FILES cliureversion.mk,clioootypesversion.mk,userland.txt,version.lst
+            REMOVE_UPGRADE_CODE_FILE upgradecode_remove_ooo.txt
+            ADDSYSTEMINTEGRATION 1
+            EVAL
+            PACKAGEVERSION 4.1.1
+            PACKAGEREVISION {milestone}
+            LICENSENAME ALv2
+            GLOBALFILEGID gid_File_Lib_Vcl
+            GLOBALPATCHFILEGID gid_File_Txt_Patchfiles
+            SPELLCHECKERFILE spellchecker_selection.txt
+            OPENSOURCE 1
+            SETSTATICPATH 1
+            AOODOWNLOADNAME 1
+            AOODOWNLOADNAMEPREFIX AOOHs
+            XPDINSTALLER 0
+            BETAUPGRADECODE
+            STUBUPGRADECODE {0E7B27B8-D658-4BF9-98D6-EC361582EB4A}
+            CHANGETARGETDIR 1
+            USE_FILEVERSION 1
+            LIBRARYVERSION 10.0.0
+            PATCHCODEFILE ooo_patchcodes.txt
+            DOWNLOADBANNER	ooobanner.bmp
+            DOWNLOADBITMAP	ooobitmap.bmp
+            DOWNLOADSETUPICO	ooosetup.ico
+            RELATIVE_PATHES_IN_DDF 1
+            STARTCENTER_ADDFEATURE_URL http://extensions.openoffice.org/
+            STARTCENTER_INFO_URL http://www.openoffice.org
+            STARTCENTER_TEMPLREP_URL http://templates.openoffice.org
+            STARTCENTER_LAYOUT_STYLE 0
+            DICT_REPO_URL http://extensions.openoffice.org/dictionaries
+        }
+        active			1
+        compression		5
+        script			setup_osl
+        downloadname	AOOHs_{productversion}_{os}_install_{languages}
+        langpackdownloadname	AOOHs_{productversion}_languagepack_{os}_install_{languages}
+        include			{solarenvpath}/{os}/loader2,.,{localpath}/bin,{solarpath}/bin.{minor}/ooowoure,{solarpath}/bin.{minor}/osl,{solarpath}/bin.{minor}/desktop-integration/{pkgtype},{solarpath}/bin.{minor},{solarpath}/lib.{minor},{solarpath}/pck.{minor}/openoffice,{solarpath}/pck.{minor},{solarpath}/xml.{minor}/office/instance,{solarpath}/xml.{minor},../../external/common,{solarenvpath}/{os}/OOo_external
+    }
+}
+
+AOOHs_SDK
+{
+    Settings
+    {
+        downloadname AOOHs-SDK_{packageversion}_{os}_install_{languages}
+        variables
+        {
+            FULLPRODUCTNAME Apache OpenOffice
+            PRODUCTNAME AOOHs
+			PRODUCTDIRNAME AOOHs_SDK
+            PRODUCTVERSION 4.1.1
+            PRODUCTEXTENSION
+            LONG_PRODUCTEXTENSION
+            SHORT_PRODUCTEXTENSION
+            POSTVERSIONEXTENSION SDK
+            POSTVERSIONEXTENSIONUNIX sdk
+            BRANDPACKAGEVERSION 4
+            PACKAGEVERSION 4.1.1
+            PACKAGEREVISION {milestone}
+            PACK_INSTALLED 1
+            POOLPRODUCT 0
+            DMG_VOLUMEEXTENSION SDK
+            DATABASENAME openofficeorg40sdk
+            NO_README_IN_ROOTDIR 1
+            LICENSENAME ALv2
+            IGNOREDIRECTORYLAYER 1
+            NOVERSIONINDIRNAME 0
+            NOSPACEINDIRECTORYNAME 1
+            NOLANGUAGESELECTIONPRODUCT 1
+            CHANGETARGETDIR 1
+            DOWNLOADBANNER ooosdkbanner.bmp
+            DOWNLOADBITMAP ooosdkbitmap.bmp
+            DOWNLOADSETUPICO ooosetup.ico
+            DONTUSESTARTMENUFOLDER 1
+            RELATIVE_PATHES_IN_DDF 1
+            AOODOWNLOADNAMEPREFIX AOOHs-SDK
+            STARTCENTER_ADDFEATURE_URL http://extensions.openoffice.org/
+            STARTCENTER_INFO_URL http://www.openoffice.org
+            STARTCENTER_TEMPLREP_URL http://templates.openoffice.org
+            STARTCENTER_LAYOUT_STYLE 0
+            DICT_REPO_URL http://extensions.openoffice.org/dictionaries
+        }
+        active 1
+        compression 5
+        script sdkoo
+        include {solarenvpath}/{os}/loader2,{solarpath}/bin.{minor}/sdkoo,{solarpath}/bin.{minor}/osl,{solarpath}/bin.{minor},{solarpath}/lib.{minor},{solarenvpath}/{os}/MS
+    }
+}

@@ -119,9 +119,9 @@ ALLTAR  : $(LOCALPYFILES)
 .ELSE			# "$(GUI)"!="WNT" && "$(EPM)"=="NO" && "$(USE_PACKAGER)"==""
 .IF "$(UPDATER)"=="" || "$(USE_PACKAGER)"==""
 .IF "$(BUILD_TYPE)"=="$(BUILD_TYPE:s/ODK//)"
-ALLTAR : openoffice
+ALLTAR : openoffice_$(defaultlangiso) aoohs_$(defaultlangiso) aoohslanguagepack
 .ELSE
-ALLTAR : openoffice sdkoo_en-US
+ALLTAR : openoffice_$(defaultlangiso) sdkoo_en-US aoohs_$(defaultlangiso) sdkaoohs_en-US aoohslanguagepack
 .ENDIF
 .ELSE			# "$(UPDATER)"=="" || "$(USE_PACKAGER)"==""
 ALLTAR : updatepack
@@ -194,6 +194,21 @@ sdkoobeta: $(foreach,i,$(alllangiso) sdkoobeta_$i)
 sdkoodev: $(foreach,i,$(alllangiso) sdkoodev_$i)
 patch-create: $(foreach,i,$(alllangiso) patch-create_$i)
 
+##################### Acca Esse targets
+aoohs: $(foreach,i,$(alllangiso) aoohs_$i)
+
+#aoohsdev: $(foreach,i,$(alllangiso) aoohsdev_$i)
+
+#aoohswithjre: $(foreach,i,$(alllangiso) aoohswithjre_$i)
+
+aoohslanguagepack : $(foreach,i,$(alllangiso) aoohslanguagepack_$i)
+
+sdkaoohs: $(foreach,i,$(alllangiso) sdkaoohs_$i)
+
+aoohs_ure: $(foreach,i,$(alllangiso) aoohs_ure_$i)
+
+#####################
+
 MSIOFFICETEMPLATESOURCE=$(PRJ)$/inc_openoffice$/windows$/msi_templates
 MSILANGPACKTEMPLATESOURCE=$(PRJ)$/inc_ooolangpack$/windows$/msi_templates
 MSISDKOOTEMPLATESOURCE=$(PRJ)$/inc_sdkoo$/windows$/msi_templates
@@ -231,6 +246,11 @@ $(foreach,i,$(alllangiso) sdkoo_$i) : adddeps
 $(foreach,i,$(alllangiso) sdkoobeta_$i) : adddeps
 $(foreach,i,$(alllangiso) sdkoodev_$i) : adddeps
 
+##################### Acca Esse targets
+$(foreach,i,$(alllangiso) aoohs_$i) : adddeps
+$(foreach,i,$(alllangiso) aoohslanguagepack_$i) : adddeps
+$(foreach,i,$(alllangiso) sdkaoohs_$i) : adddeps
+
 # Create targets that take the package formats into account.  Together with language dependency we
 # get this transformation: target -> target_$language -> target_$language.$package
 # where $language ranges over all languages in $(alllangiso) 
@@ -247,6 +267,10 @@ $(foreach,i,$(alllangiso) sdkoobeta_$i) : $$@{$(PKGFORMAT:^".")}
 $(foreach,i,$(alllangiso) sdkoodev_$i) : $$@{$(PKGFORMAT:^".")}
 $(foreach,i,$(alllangiso) patch-create_$i) : $$@{$(PKGFORMAT:^".")}
 
+##################### Acca Esse targets
+$(foreach,i,$(alllangiso) aoohs_$i) : $$@{$(PKGFORMAT:^".")}
+$(foreach,i,$(alllangiso) aoohslanguagepack_$i) : $$@{$(PKGFORMAT:^".")}
+$(foreach,i,$(alllangiso) sdkaoohs_$i) : $$@{$(PKGFORMAT:^".")}
 
 # This macro makes calling the make_installer.pl script a bit easier.
 # Just add -p and -msitemplate switches.
@@ -281,6 +305,18 @@ $(foreach,P,$(PACKAGE_FORMATS) $(foreach,L,$(alllangiso) openoffice_$L.$P)) .PHO
 		$(PRJ)$/util$/update.xml	\
 		> $(MISC)/$(@:b)_$(RTL_OS)_$(RTL_ARCH)$(@:e).update.xml
 
+#################################################
+#aoohs_%{$(PKGFORMAT:^".")} :
+$(foreach,P,$(PACKAGE_FORMATS) $(foreach,L,$(alllangiso) aoohs_$L.$P)) .PHONY :
+	$(MAKE_INSTALLER_COMMAND) 			\
+		-p AOOHs			\
+		-msitemplate $(MSIOFFICETEMPLATEDIR)	\
+		$(RELEASE_SWITCH)
+	$(GEN_UPDATE_INFO_COMMAND)		\
+		--product AOOHs	\
+		$(PRJ)$/util$/update.xml	\
+		> $(MISC)/$(@:b)_$(RTL_OS)_$(RTL_ARCH)$(@:e).update.xml
+
 #openofficewithjre_%{$(PKGFORMAT:^".")} :
 $(foreach,P,$(PACKAGE_FORMATS) $(foreach,L,$(alllangiso) openofficewithjre_$L.$P)) .PHONY :
 	$(MAKE_INSTALLER_COMMAND) -p Apache_OpenOffice_wJRE -msitemplate $(MSIOFFICETEMPLATEDIR)
@@ -311,6 +347,15 @@ $(foreach,P,$(PACKAGE_FORMATS) $(foreach,L,$(alllangiso) ooolanguagepack_$L.$P))
 		-msitemplate $(MSILANGPACKTEMPLATEDIR)	\
 		-languagepack
 
+#################################################
+#aoohslanguagepack_%{$(PKGFORMAT:^".")} :
+$(foreach,P,$(PACKAGE_FORMATS) $(foreach,L,$(alllangiso) aoohslanguagepack_$L.$P)) .PHONY :
+	$(MAKE_INSTALLER_COMMAND)			\
+		-p AOOHs			\
+		-msitemplate $(MSILANGPACKTEMPLATEDIR)	\
+		-languagepack
+
+
 #ooobetalanguagepack_%{$(PKGFORMAT:^".")} :
 $(foreach,P,$(PACKAGE_FORMATS) $(foreach,L,$(alllangiso) ooobetalanguagepack_$L.$P)) .PHONY :
 	$(MAKE_INSTALLER_COMMAND)			\
@@ -325,6 +370,11 @@ $(foreach,P,$(PACKAGE_FORMATS) $(foreach,L,$(alllangiso) ooodevlanguagepack_$L.$
 #sdkoo_%{$(PKGFORMAT:^".")} :
 $(foreach,P,$(PACKAGE_FORMATS) $(foreach,L,$(alllangiso) sdkoo_$L.$P)) .PHONY :
 	$(MAKE_INSTALLER_COMMAND) -p Apache_OpenOffice_SDK -msitemplate $(MSISDKOOTEMPLATEDIR) -dontstrip
+
+#################################################
+#sdkaoohs_%{$(PKGFORMAT:^".")} :
+$(foreach,P,$(PACKAGE_FORMATS) $(foreach,L,$(alllangiso) sdkaoohs_$L.$P)) .PHONY :
+	$(MAKE_INSTALLER_COMMAND) -p AOOHs_SDK -msitemplate $(MSISDKOOTEMPLATEDIR) -dontstrip
 
 #sdkoobeta_%{$(PKGFORMAT:^".")} :
 $(foreach,P,$(PACKAGE_FORMATS) $(foreach,L,$(alllangiso) sdkoobeta_$L.$P)) .PHONY :
