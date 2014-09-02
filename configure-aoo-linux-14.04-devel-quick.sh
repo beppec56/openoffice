@@ -40,9 +40,7 @@
 --without-junit \
 --without-stlport \
 --enable-bundled-dictionaries \
---with-system-stdlibs \
 --with-lang='en-US' \
---enable-pdfimport \
 \
 --enable-verbose \
 --with-build-version="$(date +"%Y-%m-%d %H:%M:%S (%a, %d %b %Y)") - Rev. $(git branch |grep "*" | sed 's/* //g') $(echo git_$(git log -n1 --format=%h))" \
