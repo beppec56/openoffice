@@ -39,7 +39,7 @@
 --with-package-format="deb" \
 --without-junit \
 --without-stlport \
---without-system-stdlibs \
+--with-system-stdlibs \
 --enable-bundled-dictionaries \
 --with-lang='en-US' \
 --enable-opengl  \
@@ -57,7 +57,7 @@
 --disable-strip-solver \
 --enable-debug \
 --enable-dbgutil \
-
+--with-system-graphite \
 
 
 
