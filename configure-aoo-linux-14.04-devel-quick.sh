@@ -47,9 +47,6 @@
 --with-build-version="$(date +"%Y-%m-%d %H:%M:%S (%a, %d %b %Y)") - Rev. $(git branch |grep "*" | sed 's/* //g') $(echo git_$(git log -n1 --format=%h))" \
 --with-mingwin=i586-mingw32msvc-c++ \
 \
---enable-symbols \
---disable-strip-solver \
---enable-debug \
 
 
 
