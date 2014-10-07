@@ -1,0 +1,14 @@
+--- misc/silgraphite-2.3.1/engine/configure	2009-01-28 03:37:55.000000000 +0100
++++ misc/build/silgraphite-2.3.1/engine/configure	2014-10-07 11:59:44.751900396 +0200
+@@ -16877,9 +16877,9 @@
+ # (note: the flags here are gcc-specific and may fail with other compilers)
+ build_flags=""
+ if test "$enable_debug" = yes; then
+-  build_flags="$build_flags -O0 -g -Wall -Wno-unknown-pragmas -Wparentheses -Werror"
++  build_flags="$build_flags -O0 -g -Wall -Wno-unknown-pragmas -Wparentheses"
+ elif test "$enable_strict" = yes; then
+-  build_flags="$build_flags -DNDEBUG -Wall -Wno-unknown-pragmas -Wparentheses -Werror"
++  build_flags="$build_flags -DNDEBUG -Wall -Wno-unknown-pragmas -Wparentheses"
+ else
+   build_flags="$build_flags -DNDEBUG"
+ fi
