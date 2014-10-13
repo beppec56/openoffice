@@ -32,5 +32,3 @@
 --enable-debug \
 --disable-strip-solver \
 
-
---without-system-libs \
