@@ -17,12 +17,7 @@
 --without-stlport \
 --without-system-stdlibs \
 --enable-bundled-dictionaries \
---with-lang='en-US it fr de pt-BR' \
---enable-opengl \
---enable-pdfimport \
---enable-wiki-publisher \
---enable-report-builder \
---enable-gstreamer \
+--with-lang='en-US' \
 \
 --enable-verbose \
 --with-build-version="$(date +"%Y-%m-%d %H:%M:%S (%a, %d %b %Y)") - Rev. $(git branch |grep "*" | sed 's/* //g') $(echo git_$(git log -n1 --format=%h))" \
