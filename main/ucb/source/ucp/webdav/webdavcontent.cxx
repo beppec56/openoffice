@@ -3450,7 +3450,7 @@ const Content::ResourceType & Content::getResourceType(
             // this is a DAV resource.
             std::vector< DAVResource > resources;
             std::vector< rtl::OUString > aPropNames;
-            uno::Sequence< beans::Property > aProperties( 5 );
+            uno::Sequence< beans::Property > aProperties( 6 );
             aProperties[ 0 ].Name
                 = rtl::OUString::createFromAscii( "IsFolder" );
             aProperties[ 1 ].Name
@@ -3461,6 +3461,9 @@ const Content::ResourceType & Content::getResourceType(
                 = rtl::OUString::createFromAscii( "MediaType" );
             aProperties[ 4 ].Name
                 = DAVProperties::SUPPORTEDLOCK;
+	    //to check for already active locks
+            aProperties[ 5 ].Name
+                = DAVProperties::LOCKDISCOVERY;
 
             ContentProperties::UCBNamesToDAVNames(
                 aProperties, aPropNames );
