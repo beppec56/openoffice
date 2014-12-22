@@ -1209,6 +1209,8 @@ sal_Bool SfxMedium::LockOrigFileOnDemand( sal_Bool bLoading, sal_Bool bNoUI )
                     }
                     catch( uno::Exception& )
                     {
+		      //print an error, analyze the error returned, should be file cannot lock,
+		      //obtain the names of the current owner
                     }
                 } while( !bResult && bUIStatus == LOCK_UI_TRY );
 
@@ -1217,6 +1219,20 @@ sal_Bool SfxMedium::LockOrigFileOnDemand( sal_Bool bLoading, sal_Bool bNoUI )
             else
             {
                 // this is no file URL, check whether the file is readonly
+
+		//add here a brutal hack to manipulate the lock for the file, in case the normal file locking method does not apply
+
+	        //need to create a dummy DAV environment
+                Reference< ::com::sun::star::ucb::XCommandEnvironment > xDummyEnv;
+                ::ucbhelper::Content aContent( GetURLObject().GetMainURL( INetURLObject::NO_DECODE ), xDummyEnv );
+		try {
+		    aContent.lock();
+		}
+		catch( uno::Exception )
+		{
+		    
+		}
+	      
                 bResult = !bContentReadonly;
             }
         }
