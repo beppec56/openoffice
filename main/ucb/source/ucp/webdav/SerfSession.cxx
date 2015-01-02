@@ -1035,7 +1035,7 @@ namespace
 // LOCK (set new lock)
 // -------------------------------------------------------------------
 void SerfSession::LOCK( const ::rtl::OUString & inPath,
-                        ucb::Lock & /*rLock*/,
+                        ucb::Lock & rLock,
                         const DAVRequestEnvironment & rEnv )
     throw ( DAVException )
 {
@@ -1044,6 +1044,50 @@ void SerfSession::LOCK( const ::rtl::OUString & inPath,
     Init( rEnv );
 
     boost::shared_ptr<SerfRequestProcessor> aReqProc( createReqProc( inPath ) );
+    apr_status_t status = APR_SUCCESS;
+    SerfLock theLock;
+
+    // Set the lock depth
+    switch( rLock.Depth )
+    {
+    case ucb::LockDepth_ZERO:
+      theLock.eDepth = DAVZERO;
+        break;
+    case ucb::LockDepth_ONE:
+        theLock.eDepth = DAVONE;
+        break;
+    case ucb::LockDepth_INFINITY:
+        theLock.eDepth = DAVINFINITY;
+        break;
+    default:
+        throw DAVException( DAVException::DAV_INVALID_ARG );
+    }
+
+    /*    // Set the lock scope
+    switch ( rLock.Scope )
+    {
+    case ucb::LockScope_EXCLUSIVE:
+        theLock->scope = ne_lockscope_exclusive;
+        break;
+    case ucb::LockScope_SHARED:
+        theLock->scope = ne_lockscope_shared;
+        break;
+    default:
+        throw DAVException( DAVException::DAV_INVALID_ARG );
+    }
+
+    // Set the lock timeout
+    theLock->timeout = (long)rLock.Timeout;
+
+    // Set the lock owner
+    rtl::OUString aValue;
+    rLock.Owner >>= aValue;
+    theLock->owner =
+        ne_strdup( rtl::OUStringToOString( aValue,
+                                           RTL_TEXTENCODING_UTF8 ).getStr() );
+    */
+    aReqProc->processLock(inPath, theLock, status);
+
     HandleError( aReqProc );
     /* Create a depth zero, exclusive write lock, with default timeout
      * (allowing a server to pick a default).  token, owner and uri are

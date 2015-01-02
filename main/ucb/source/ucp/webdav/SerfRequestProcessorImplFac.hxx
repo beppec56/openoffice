@@ -27,9 +27,12 @@
 #include "DAVTypes.hxx"
 #include "DAVResource.hxx"
 
+#include "SerfTypes.hxx"
 #include "SerfRequestProcessorImpl.hxx"
 #include "SerfInputStream.hxx"
+
 #include <com/sun/star/io/XOutputStream.hpp>
+
 
 namespace http_dav_ucp
 {
@@ -109,6 +112,10 @@ namespace http_dav_ucp
                                                      const DAVRequestHeaders& inRequestHeaders,
                                                      const char* inDestinationPath,
                                                      const bool inOverwrite );
+
+    SerfRequestProcessorImpl* createLockReqProcImpl( const char* inSourcePath,
+                                                     const DAVRequestHeaders& inRequestHeaders,
+						     const SerfLock & inLock );
 
 } // namespace http_dav_ucp
 

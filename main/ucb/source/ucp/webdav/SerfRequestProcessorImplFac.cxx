@@ -22,6 +22,7 @@
 // MARKER(update_precomp.py): autogen include statement, do not remove
 #include "precompiled_ucb.hxx"
 
+#include "SerfTypes.hxx"
 #include "SerfRequestProcessorImplFac.hxx"
 #include "SerfPropFindReqProcImpl.hxx"
 #include "SerfPropPatchReqProcImpl.hxx"
@@ -33,6 +34,7 @@
 #include "SerfMkColReqProcImpl.hxx"
 #include "SerfCopyReqProcImpl.hxx"
 #include "SerfMoveReqProcImpl.hxx"
+#include "SerfLockReqProcImpl.hxx"
 
 namespace http_dav_ucp
 {
@@ -218,6 +220,16 @@ namespace http_dav_ucp
                                                                           inRequestHeaders,
                                                                           inDestinationPath,
                                                                           inOverwrite );
+        return pReqProcImpl;
+    }
+
+    SerfRequestProcessorImpl* createLockReqProcImpl( const char* inSourcePath,
+                                                     const DAVRequestHeaders& inRequestHeaders,
+                                                     const SerfLock & inLock)
+    {
+        SerfRequestProcessorImpl* pReqProcImpl = new SerfLockReqProcImpl( inSourcePath,
+									  inRequestHeaders,
+                                                                          inLock );
         return pReqProcImpl;
     }
 

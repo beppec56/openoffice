@@ -19,26 +19,38 @@
  * 
  *************************************************************/
 
+#ifndef INCLUDED_SERFLOCKREQPROCIMPL_HXX
+#define INCLUDED_SERFLOCKREQPROCIMPL_HXX
 
-
-#ifndef INCLUDED_SERFTYPES_HXX
-#define INCLUDED_SERFTYPES_HXX
-
-#include <serf/serf.h>
-#include "DAVTypes.hxx"
+#include "SerfTypes.hxx"
+#include "SerfRequestProcessorImpl.hxx"
 
 namespace http_dav_ucp
 {
 
-typedef serf_connection_t SerfConnection;
+class SerfLockReqProcImpl : public SerfRequestProcessorImpl
+{
+public:
+    SerfLockReqProcImpl( const char* inSourcePath,
+			 const DAVRequestHeaders& inRequestHeaders,
+			 const SerfLock & inLock );
 
-// TODO, figure out type of <SerfLock>
-typedef struct    {
-  Depth eDepth;
- } SerfLock;
+    virtual ~SerfLockReqProcImpl();
 
-// TODO, check if we need it later on
-typedef struct { const char *nspace, *name; } SerfPropName;
+    virtual
+    serf_bucket_t * createSerfRequestBucket( serf_request_t * inSerfRequest );
 
+protected:
+    virtual
+    void processChunkOfResponseData( const char* data, apr_size_t len );
+
+    virtual
+    void handleEndOfResponseData( serf_bucket_t * inSerfResponseBucket );
+
+private:
+  const SerfLock mLock;
 };
-#endif // INCLUDED_SERFTYPES_HXX
+
+} // namespace http_dav_ucp
+
+#endif // INCLUDED_SERFLOCkREQPROCIMPL_HXX

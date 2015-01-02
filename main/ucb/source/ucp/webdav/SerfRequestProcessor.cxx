@@ -314,6 +314,22 @@ bool SerfRequestProcessor::processMove( const rtl::OUString & inDestinationPath,
     return outSerfStatus == APR_SUCCESS;
 }
 
+//LOCK
+bool SerfRequestProcessor::processLock( const rtl::OUString & inDestinationPath,
+					const SerfLock & inLock,
+                                        apr_status_t& outSerfStatus )
+{
+    mDestPathStr = apr_pstrdup( mrSerfSession.getAprPool(), 
+                                rtl::OUStringToOString( inDestinationPath, RTL_TEXTENCODING_UTF8 ).getStr() );
+    mpProcImpl = createLockReqProcImpl( mPathStr,
+                                        mrSerfSession.getRequestEnvironment().m_aRequestHeaders,
+                                        inLock );
+    outSerfStatus = runProcessor();
+
+    return outSerfStatus == APR_SUCCESS;
+}
+
+
 apr_status_t SerfRequestProcessor::runProcessor()
 {
     prepareProcessor();

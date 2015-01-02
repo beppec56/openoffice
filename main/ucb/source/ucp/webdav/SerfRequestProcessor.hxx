@@ -32,8 +32,10 @@
 #include "DAVResource.hxx"
 #include "DAVException.hxx"
 
+#include "SerfTypes.hxx"
 #include "SerfInputStream.hxx"
 #include <com/sun/star/io/XOutputStream.hpp>
+
 
 namespace http_dav_ucp
 {
@@ -124,6 +126,11 @@ public:
     // MOVE
     bool processMove( const rtl::OUString & inDestinationPath,
                       const bool inOverwrite,
+                      apr_status_t& outSerfStatus );
+
+    // LOCK
+    bool processLock( const rtl::OUString & inDestinationPath,
+		      const SerfLock & inLock,
                       apr_status_t& outSerfStatus );
 
     apr_status_t provideSerfCredentials( char ** outUsername, 
