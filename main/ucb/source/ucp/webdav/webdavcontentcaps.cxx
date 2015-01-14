@@ -61,10 +61,7 @@ using namespace http_dav_ucp;
 bool ContentProvider::getProperty(
         const rtl::OUString & rPropName, beans::Property & rProp, bool bStrict )
 {
-
-  fprintf( stdout, "==\n=====>>>>> ContentProvider::getProperty  %s \n", OUStringToOString( rPropName , RTL_TEXTENCODING_ISO_8859_1 ).getStr());
-
-  if ( !m_pProps )
+    if ( !m_pProps )
     {
         osl::MutexGuard aGuard( m_aMutex );
         if ( !m_pProps )
@@ -272,8 +269,6 @@ bool ContentProvider::getProperty(
         if ( bStrict )
             return false;
 
-	fprintf( stdout, "=====>>>>> ContentProvider::getProperty  unknown property: %s \n", OUStringToOString( rPropName , RTL_TEXTENCODING_ISO_8859_1 ).getStr());
-  
         // All unknown props are treated as:
         rProp = beans::Property(
                     rPropName,
@@ -356,8 +351,6 @@ uno::Sequence< beans::Property > Content::getProperties(
         std::set< rtl::OUString >::const_iterator end = aPropSet.end();
         while ( it != end )
         {
-	  fprintf( stdout, "==\n=====>>>>> Content::getProperties  %s \n", OUStringToOString( (*it) , RTL_TEXTENCODING_ISO_8859_1 ).getStr());
-
             if ( !bHasCreationDate &&
                  ( (*it) == DAVProperties::CREATIONDATE ) )
             {

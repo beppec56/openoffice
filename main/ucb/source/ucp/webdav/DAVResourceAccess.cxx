@@ -204,19 +204,6 @@ void DAVResourceAccess::PROPFIND(
                                       getRequestURI(),
                                       new DAVAuthListener_Impl( xEnv, m_aURL ),
                                       aHeaders, xEnv ) );
-	    //=======================
-	    fprintf( stderr, "==\n");
-	    for (uint i = 0; i < rPropertyNames.size(); i++) {
-	      fprintf( stderr, "== DAVResourceAccess::PROPFIND ===>>>>> rPropertyNames : %s\n", OUStringToOString( rPropertyNames[i] , RTL_TEXTENCODING_ISO_8859_1 ).getStr());
-	    }
-	    for (uint i = 0; i < rResources.size(); i++) {
-	      fprintf( stderr, "== DAVResourceAccess::PROPFIND ===>>>>> rResources : %s\n", OUStringToOString( rResources[i].uri , RTL_TEXTENCODING_ISO_8859_1 ).getStr());
-	      for(uint y = 0; y < rResources[i].properties.size(); y++) {
-		fprintf( stderr, "                                        prop name:  %s\n", OUStringToOString( rResources[i].properties[y].Name , RTL_TEXTENCODING_ISO_8859_1 ).getStr());
-	      }
-	    }
-
-	    //======================
         }
         catch ( DAVException & e )
         {

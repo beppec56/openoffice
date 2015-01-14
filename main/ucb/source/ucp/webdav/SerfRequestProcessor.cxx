@@ -90,15 +90,6 @@ bool SerfRequestProcessor::processPropFind( const Depth inDepth,
                                             inDepth,
                                             inPropNames,
                                             ioResources );
-    fprintf( stdout, "==\n");
-    for(uint i = 0; i < inPropNames.size();i++) {
-      fprintf( stdout, "=====>>>>> SerfRequestProcessor::processPropFind - inPropNames in input: %s \n", OUStringToOString( inPropNames[i] , RTL_TEXTENCODING_ISO_8859_1 ).getStr());
-    }
-    
-    for(uint i = 0; i < ioResources.size();i++) {
-      fprintf( stdout, "=====>>>>> SerfRequestProcessor::processPropFind - ioResources in input: %s %s\n", OUStringToOString( ioResources[i].uri , RTL_TEXTENCODING_ISO_8859_1 ).getStr());
-    }
-    
     outSerfStatus = runProcessor();
 
     return outSerfStatus == APR_SUCCESS;

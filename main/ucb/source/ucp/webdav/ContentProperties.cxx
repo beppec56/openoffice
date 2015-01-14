@@ -459,10 +459,7 @@ void ContentProperties::addProperty( const rtl::OUString & rName,
                                      const com::sun::star::uno::Any & rValue,
                                      bool bIsCaseSensitive )
 {
-
-  fprintf( stdout, "==\n=====>>>>> ContentProperties::addProperty  %s \n", OUStringToOString( rName , RTL_TEXTENCODING_ISO_8859_1 ).getStr());
-
-  if ( rName.equals( DAVProperties::CREATIONDATE ) )
+    if ( rName.equals( DAVProperties::CREATIONDATE ) )
     {
         // Map DAV:creationdate to UCP:DateCreated
         rtl::OUString aValue;
@@ -545,10 +542,9 @@ void ContentProperties::addProperty( const rtl::OUString & rName,
         (*m_xProps)[ rtl::OUString::createFromAscii( "DateModified" ) ]
             = PropertyValue( uno::makeAny( aDate ), true );
     }
-    else if ( rName.equals( DAVProperties::LOCKDISCOVERY ) )
-    {
-     fprintf( stdout, "=====>>>>> ContentProperties::addProperty  %s UNMAPPED !\n", OUStringToOString( rName , RTL_TEXTENCODING_ISO_8859_1 ).getStr());
-    }
+    //  else if ( rName.equals( DAVProperties::LOCKDISCOVERY ) )
+    //  {
+    //  }
     else if ( rName.equals( DAVProperties::RESOURCETYPE ) )
     {
         rtl::OUString aValue;
@@ -568,10 +564,9 @@ void ContentProperties::addProperty( const rtl::OUString & rName,
                 ? rtl::OUString::createFromAscii( WEBDAV_COLLECTION_TYPE )
                 : rtl::OUString::createFromAscii( WEBDAV_CONTENT_TYPE ) ), true );
     }
-    else if ( rName.equals( DAVProperties::SUPPORTEDLOCK ) )
-    {
-      fprintf( stdout, "=====>>>>> ContentProperties::addProperty  %s UNMAPPED !\n", OUStringToOString( rName , RTL_TEXTENCODING_ISO_8859_1 ).getStr());
-    }
+    //  else if ( rName.equals( DAVProperties::SUPPORTEDLOCK ) )
+    //  {
+    //  }
 
     // Save property.
     (*m_xProps)[ rName ] = PropertyValue( rValue, bIsCaseSensitive );
