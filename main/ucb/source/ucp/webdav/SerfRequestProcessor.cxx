@@ -314,16 +314,20 @@ bool SerfRequestProcessor::processMove( const rtl::OUString & inDestinationPath,
     return outSerfStatus == APR_SUCCESS;
 }
 
-//LOCK
+//LOCK creating a new lock
 bool SerfRequestProcessor::processLock( const rtl::OUString & inDestinationPath,
 					const SerfLock & inLock,
                                         apr_status_t& outSerfStatus )
 {
     mDestPathStr = apr_pstrdup( mrSerfSession.getAprPool(), 
                                 rtl::OUStringToOString( inDestinationPath, RTL_TEXTENCODING_UTF8 ).getStr() );
+    char * Owner = inLock.nOwner;
+    char * Timeout = apr_psprintf( mrSerfSession.getAprPool(), "Second-%ld", inLock.lTimeout );
     mpProcImpl = createLockReqProcImpl( mPathStr,
                                         mrSerfSession.getRequestEnvironment().m_aRequestHeaders,
-                                        inLock );
+                                        inLock,
+					Owner,
+					Timeout);
     outSerfStatus = runProcessor();
 
     return outSerfStatus == APR_SUCCESS;

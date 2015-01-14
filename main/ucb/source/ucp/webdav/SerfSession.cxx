@@ -1063,29 +1063,29 @@ void SerfSession::LOCK( const ::rtl::OUString & inPath,
         throw DAVException( DAVException::DAV_INVALID_ARG );
     }
 
-    /*    // Set the lock scope
+    // Set the lock scope
     switch ( rLock.Scope )
     {
     case ucb::LockScope_EXCLUSIVE:
-        theLock->scope = ne_lockscope_exclusive;
+        theLock.eScope = EXCLUSIVE;
         break;
     case ucb::LockScope_SHARED:
-        theLock->scope = ne_lockscope_shared;
+        theLock.eScope = SHARED;
         break;
     default:
         throw DAVException( DAVException::DAV_INVALID_ARG );
     }
-
+    
     // Set the lock timeout
-    theLock->timeout = (long)rLock.Timeout;
+    theLock.lTimeout = (long)rLock.Timeout;
 
     // Set the lock owner
     rtl::OUString aValue;
     rLock.Owner >>= aValue;
-    theLock->owner =
-        ne_strdup( rtl::OUStringToOString( aValue,
+    theLock.nOwner =
+      apr_pstrdup( getAprPool(), rtl::OUStringToOString( aValue,
                                            RTL_TEXTENCODING_UTF8 ).getStr() );
-    */
+    
     aReqProc->processLock(inPath, theLock, status);
 
     HandleError( aReqProc );

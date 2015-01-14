@@ -25,6 +25,8 @@
 #include "SerfTypes.hxx"
 #include "SerfRequestProcessorImpl.hxx"
 
+#include "SerfInputStream.hxx"
+
 namespace http_dav_ucp
 {
 
@@ -33,7 +35,9 @@ class SerfLockReqProcImpl : public SerfRequestProcessorImpl
 public:
     SerfLockReqProcImpl( const char* inSourcePath,
 			 const DAVRequestHeaders& inRequestHeaders,
-			 const SerfLock & inLock );
+			 const SerfLock & inLock,
+			 const char* inOwner,
+			 const char* inTimeout );
 
     virtual ~SerfLockReqProcImpl();
 
@@ -48,7 +52,12 @@ protected:
     void handleEndOfResponseData( serf_bucket_t * inSerfResponseBucket );
 
 private:
-  const SerfLock mLock;
+    const SerfLock mLock;
+    const char *mDepthStr;
+    const char *mLockScope;
+    const char *mTimeout;
+    const char *mOwner;
+    com::sun::star::uno::Reference< SerfInputStream > xInputStream;
 };
 
 } // namespace http_dav_ucp

@@ -115,7 +115,9 @@ namespace http_dav_ucp
 
     SerfRequestProcessorImpl* createLockReqProcImpl( const char* inSourcePath,
                                                      const DAVRequestHeaders& inRequestHeaders,
-						     const SerfLock & inLock );
+						     const SerfLock & inLock,
+						     const char* inOwner,
+						     const char* inTimeout );
 
 } // namespace http_dav_ucp
 

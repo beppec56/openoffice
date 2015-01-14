@@ -35,6 +35,9 @@ typedef serf_connection_t SerfConnection;
 // TODO, figure out type of <SerfLock>
 typedef struct    {
   Depth eDepth;
+  LockScope eScope;
+  char * nOwner;
+  long    lTimeout;
  } SerfLock;
 
 // TODO, check if we need it later on
