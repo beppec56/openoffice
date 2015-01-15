@@ -1230,7 +1230,8 @@ sal_Bool SfxMedium::LockOrigFileOnDemand( sal_Bool bLoading, sal_Bool bNoUI )
 		}
 		catch( uno::Exception )
 		{
-		    
+		  fprintf(stdout,"Cannot lock !\n");
+		  bContentReadonly = true;
 		}
 	      
                 bResult = !bContentReadonly;
