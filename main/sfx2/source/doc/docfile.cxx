@@ -1230,6 +1230,11 @@ sal_Bool SfxMedium::LockOrigFileOnDemand( sal_Bool bLoading, sal_Bool bNoUI )
 		}
 		catch( uno::Exception )
 		{
+
+/*		  Reference< ::com::sun::star::ucb::XCommandEnvironment > xDummyEnv;
+		  ::ucbhelper::Content aContent( GetURLObject().GetMainURL( INetURLObject::NO_DECODE ), xDummyEnv );
+		  		  aContent.getPropertyValue( ::rtl::OUString( RTL_CONSTASCII_USTRINGPARAM( "DAV:lockdiscovery" ) ) ) >>= bContentReadonly;
+*/
 		  fprintf(stdout,"Cannot lock !\n");
 		  bContentReadonly = true;
 		}
