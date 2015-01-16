@@ -22,9 +22,11 @@
 // MARKER(update_precomp.py): autogen include statement, do not remove
 #include "precompiled_ucb.hxx"
 
-#include "SerfTypes.hxx"
 #include "SerfLockReqProcImpl.hxx"
+#include "SerfTypes.hxx"
+#include "DAVProperties.hxx"
 
+#include "webdavresponseparser.hxx"
 #include <serf/serf.h>
 #include <rtl/ustrbuf.hxx>
 
@@ -37,6 +39,7 @@ SerfLockReqProcImpl::SerfLockReqProcImpl( const char* inSourcePath,
 					  const char* inOwner,
 					  const char* inTimeout )
     : SerfRequestProcessorImpl( inSourcePath, inRequestHeaders )
+    , mpResources( 0 ) //   , mpResources( &ioResources )
     , mLock( inLock )
     , xInputStream( new SerfInputStream() )
 {
@@ -139,9 +142,11 @@ void SerfLockReqProcImpl::processChunkOfResponseData( const char* data,
 
 void SerfLockReqProcImpl::handleEndOfResponseData( serf_bucket_t * /*inSerfResponseBucket*/ )
 {
-  std::vector< DAVResource > resources;	//returned resources
-
+  // we can use the propfind parser, for resource value
+ 
   fprintf( stdout, "==\n=====>>>>> SerfLockReqProcImpl::handleEndOfResponseData  \n");
+    const std::vector< DAVResource > rResources( parseWebDAVPropFindResponse( xInputStream.get() ) );
+    *mpResources = rResources;
 }
 
 } // namespace http_dav_ucp

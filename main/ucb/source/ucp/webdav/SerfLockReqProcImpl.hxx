@@ -27,6 +27,11 @@
 
 #include "SerfInputStream.hxx"
 
+#include <vector>
+#include <rtl/ustring.hxx>
+#include "DAVTypes.hxx"
+#include "DAVResource.hxx"
+
 namespace http_dav_ucp
 {
 
@@ -52,6 +57,7 @@ protected:
     void handleEndOfResponseData( serf_bucket_t * inSerfResponseBucket );
 
 private:
+    std::vector< DAVResource > * mpResources;  
     const SerfLock mLock;
     const char *mDepthStr;
     const char *mLockScope;
