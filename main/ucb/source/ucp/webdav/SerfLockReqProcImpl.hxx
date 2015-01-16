@@ -57,7 +57,7 @@ protected:
     void handleEndOfResponseData( serf_bucket_t * inSerfResponseBucket );
 
 private:
-    std::vector< DAVResource > * mpResources;  
+    std::vector< DAVResource > mpResources;  
     const SerfLock mLock;
     const char *mDepthStr;
     const char *mLockScope;

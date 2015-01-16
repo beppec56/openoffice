@@ -146,7 +146,8 @@ void SerfLockReqProcImpl::handleEndOfResponseData( serf_bucket_t * /*inSerfRespo
  
   fprintf( stdout, "==\n=====>>>>> SerfLockReqProcImpl::handleEndOfResponseData  \n");
     const std::vector< DAVResource > rResources( parseWebDAVPropFindResponse( xInputStream.get() ) );
-    *mpResources = rResources;
+    //    *mpResources = rResources;
+    mpResources = rResources;
 }
 
 } // namespace http_dav_ucp
