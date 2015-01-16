@@ -29,11 +29,14 @@
 #include <com/sun/star/xml/sax/InputSource.hpp>
 #include <comphelper/processfactory.hxx>
 #include <comphelper/seqstream.hxx>
+#include <com/sun/star/ucb/LockDepth.hpp>
 #include <com/sun/star/ucb/LockEntry.hpp>
 #include <com/sun/star/ucb/LockScope.hpp>
 #include <com/sun/star/ucb/LockType.hpp>
 #include <map>
 #include <hash_map>
+
+#include <stdio.h> //only for fprintf, to be REMOVED later
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -94,12 +97,35 @@ namespace
         WebDAVName_locktype,
         WebDAVName_write,
         WebDAVName_shared,
+       	WebDAVName_lockdiscovery,
+	WebDAVName_activelock,
+	WebDAVName_depth,
+	WebDAVName_owner,
+	WebDAVName_timeout,
+	WebDAVName_locktoken,
         WebDAVName_status,
         WebDAVName_getlastmodified,
         WebDAVName_creationdate,
         WebDAVName_getcontentlength,
+	//lock entry names	
+	    /*
+       	<D:lockdiscovery>
+	  <D:activelock>
+	    <D:locktype><D:write/></D:locktype>
+	    <D:lockscope><D:exclusive/></D:lockscope>
+	    <D:depth>0</D:depth>
+	    <ns0:owner xmlns:ns0="DAV:">
+	      <ns0:href>http://ucb.openoffice.org</ns0:href>
+	    </ns0:owner>
+	    <D:timeout>Second-288</D:timeout>
+	    <D:locktoken>
+	      <D:href>opaquelocktoken:8e1e14ed-2d46-48ac-bb79-fa737374963a</D:href>
+	    </D:locktoken>
+	  </D:activelock>
+	</D:lockdiscovery>
+	    */
 
-        WebDAVName_last
+	WebDAVName_last
     };
 
     WebDAVName StrToWebDAVName(const rtl::OUString& rStr)
@@ -125,11 +151,34 @@ namespace
             aWebDAVNameMapperList.insert(WebDAVNameValueType(rtl::OUString::createFromAscii("locktype"), WebDAVName_locktype));
             aWebDAVNameMapperList.insert(WebDAVNameValueType(rtl::OUString::createFromAscii("write"), WebDAVName_write));
             aWebDAVNameMapperList.insert(WebDAVNameValueType(rtl::OUString::createFromAscii("shared"), WebDAVName_shared));
+            aWebDAVNameMapperList.insert(WebDAVNameValueType(rtl::OUString::createFromAscii("lockdiscovery"), WebDAVName_lockdiscovery));
+            aWebDAVNameMapperList.insert(WebDAVNameValueType(rtl::OUString::createFromAscii("activelock"), WebDAVName_activelock));
+            aWebDAVNameMapperList.insert(WebDAVNameValueType(rtl::OUString::createFromAscii("depth"), WebDAVName_depth));
+            aWebDAVNameMapperList.insert(WebDAVNameValueType(rtl::OUString::createFromAscii("owner"), WebDAVName_owner));
+            aWebDAVNameMapperList.insert(WebDAVNameValueType(rtl::OUString::createFromAscii("timeout"), WebDAVName_timeout));
+            aWebDAVNameMapperList.insert(WebDAVNameValueType(rtl::OUString::createFromAscii("locktoken"), WebDAVName_locktoken));
             aWebDAVNameMapperList.insert(WebDAVNameValueType(rtl::OUString::createFromAscii("status"), WebDAVName_status));
             aWebDAVNameMapperList.insert(WebDAVNameValueType(rtl::OUString::createFromAscii("getlastmodified"), WebDAVName_getlastmodified));
             aWebDAVNameMapperList.insert(WebDAVNameValueType(rtl::OUString::createFromAscii("creationdate"), WebDAVName_creationdate));
             aWebDAVNameMapperList.insert(WebDAVNameValueType(rtl::OUString::createFromAscii("getcontentlength"), WebDAVName_getcontentlength));
-        }
+	    /*
+       	<D:lockdiscovery>
+	  <D:activelock>
+	    <D:locktype><D:write/></D:locktype>
+	    <D:lockscope><D:exclusive/></D:lockscope>
+	    <D:depth>0</D:depth>
+	    <ns0:owner xmlns:ns0="DAV:">
+	      <ns0:href>http://ucb.openoffice.org</ns0:href>
+	    </ns0:owner>
+	    <D:timeout>Second-288</D:timeout>
+	    <D:locktoken>
+	      <D:href>opaquelocktoken:8e1e14ed-2d46-48ac-bb79-fa737374963a</D:href>
+	    </D:locktoken>
+	  </D:activelock>
+	</D:lockdiscovery>
+	    */
+
+	}
 
         const WebDAVNameMapper::const_iterator aResult(aWebDAVNameMapperList.find(rStr));
 
@@ -307,7 +356,14 @@ namespace
         uno::Sequence< ucb::LockEntry >             maLockEntries;
         ucb::LockScope                              maLockScope;
         ucb::LockType                               maLockType;
-        WebDAVResponseParserMode                    meWebDAVResponseParserMode;
+
+        ucb::LockDepth                              maLockDepth;
+        ::rtl::OUString                             maLockOwner;
+        long                                        mnLockTimeout;
+        ::rtl::OUString                             maLockToken;
+        
+
+      WebDAVResponseParserMode                    meWebDAVResponseParserMode;
 
         // bitfield
         bool                                        mbResourceTypeCollection : 1;
@@ -384,6 +440,10 @@ namespace
         maLockEntries(),
         maLockScope(ucb::LockScope_EXCLUSIVE),
         maLockType(ucb::LockType_WRITE),
+        maLockDepth(ucb::LockDepth_ZERO),
+        maLockOwner(),
+	mnLockTimeout(0),
+        maLockToken(),
         meWebDAVResponseParserMode(eWebDAVResponseParserMode),
         mbResourceTypeCollection(false),
         mbLockScopeSet(false),
@@ -489,6 +549,12 @@ namespace
                                 // lockentry start, reset maLockEntries
                                 mbLockScopeSet = false;
                                 mbLockTypeSet = false;
+                                break;
+                            }
+                            case WebDAVName_lockdiscovery:
+                            {
+                                // lockdiscovery start
+			      fprintf(stdout,"===---------------> lockdiscovery start\n");
                                 break;
                             }
                         }
@@ -689,7 +755,14 @@ namespace
                                 }
                                 break;
                             }
-                            case WebDAVName_propstat:
+			    
+                            case WebDAVName_lockdiscovery:
+                            {
+                                // lockdiscovery end
+			      fprintf(stdout,"===---------------> lockdiscovery end\n");
+                                break;
+                            }
+			    case WebDAVName_propstat:
                             {
                                 // propstat end, check status
                                 if(maStatus.getLength())
