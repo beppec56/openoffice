@@ -139,8 +139,9 @@ void SerfLockReqProcImpl::processChunkOfResponseData( const char* data,
 
 void SerfLockReqProcImpl::handleEndOfResponseData( serf_bucket_t * /*inSerfResponseBucket*/ )
 {
-      fprintf( stdout, "==\n=====>>>>> SerfLockReqProcImpl::handleEndOfResponseData  \n");
-    // nothing to do;
+  std::vector< DAVResource > resources;	//returned resources
+
+  fprintf( stdout, "==\n=====>>>>> SerfLockReqProcImpl::handleEndOfResponseData  \n");
 }
 
 } // namespace http_dav_ucp

@@ -3037,7 +3037,9 @@ void Content::lock(
             //-1, // infinite lock
             uno::Sequence< ::rtl::OUString >() );
 
-        xResAccess->LOCK( aLock, Environment );
+	std::vector< DAVResource > resources;	//returned resources
+
+	xResAccess->LOCK( aLock,  resources, Environment );
 
         {
             osl::Guard< osl::Mutex > aGuard( m_aMutex );
