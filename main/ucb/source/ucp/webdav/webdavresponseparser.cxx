@@ -554,7 +554,17 @@ namespace
                             case WebDAVName_lockdiscovery:
                             {
                                 // lockdiscovery start
-			      fprintf(stdout,"===---------------> lockdiscovery start\n");
+                                fprintf(stdout,"===---------------> lockdiscovery start\n");
+                                // lockentry start, reset maLockEntries
+                                maLockEntries.realloc(0);
+                                break;
+                            }
+                            case WebDAVName_activelock:
+                            {
+                                fprintf(stdout,"===---------------> activelock start\n");
+                                //  activelockstart, reset maLockEntries
+                                mbLockScopeSet = false;
+                                mbLockTypeSet = false;
                                 break;
                             }
                         }
@@ -727,9 +737,11 @@ namespace
                             }
                             case WebDAVName_exclusive:
                             {
+                                fprintf(stdout,"===---------------> exclusive end\n");
                                 // exclusive lockscope end
-                                if(hasParent(WebDAVName_lockscope))
+                                if(hasParent(WebDAVName_lockscope) || hasParent(WebDAVName_activelock))
                                 {
+                                    fprintf(stdout,"===---------------> exclusive end, with parent\n");
                                     maLockScope = ucb::LockScope_EXCLUSIVE;
                                     mbLockScopeSet = true;
                                 }
@@ -737,9 +749,11 @@ namespace
                             }
                             case WebDAVName_shared:
                             {
+                                fprintf(stdout,"===---------------> shared end\n");
                                 // shared lockscope end
-                                if(hasParent(WebDAVName_lockscope))
+                                if(hasParent(WebDAVName_lockscope) || hasParent(WebDAVName_activelock))
                                 {
+                                    fprintf(stdout,"===---------------> shared end, with parent\n");
                                     maLockScope = ucb::LockScope_SHARED;
                                     mbLockScopeSet = true;
                                 }
@@ -747,9 +761,11 @@ namespace
                             }
                             case WebDAVName_write:
                             {
+                                fprintf(stdout,"===---------------> write end\n");
                                 // write locktype end
-                                if(hasParent(WebDAVName_locktype))
+                                if(hasParent(WebDAVName_locktype) || hasParent(WebDAVName_activelock))
                                 {
+                                    fprintf(stdout,"===---------------> write end, with parent\n");
                                     maLockType = ucb::LockType_WRITE;
                                     mbLockTypeSet = true;
                                 }
@@ -759,10 +775,71 @@ namespace
                             case WebDAVName_lockdiscovery:
                             {
                                 // lockdiscovery end
-			      fprintf(stdout,"===---------------> lockdiscovery end\n");
+                                fprintf(stdout,"===---------------> lockdiscovery end\n");			      
+                                if(hasParent(WebDAVName_prop))
+                                {
+                                    fprintf(stdout,"===---------------> lockdiscovery end, with parent found. SET VARS\n");
+                                    //                                    maLockType = ucb::LockType_WRITE;
+                                    //                                    mbLockTypeSet = true;
+                                }
                                 break;
                             }
-			    case WebDAVName_propstat:
+                            case WebDAVName_activelock:
+                            {
+                                fprintf(stdout,"===---------------> activelock end\n");
+                                if(hasParent(WebDAVName_lockdiscovery))
+                                {
+                                    fprintf(stdout,"===---------------> activelock end, with parent found. SET VARS\n");
+                                    //                                    maLockType = ucb::LockType_WRITE;
+                                    //                                    mbLockTypeSet = true;
+                                }
+                                break;
+                            }
+                            case WebDAVName_locktoken:
+                            {
+                                fprintf(stdout,"===---------------> locktoken end\n");
+                                if(hasParent(WebDAVName_activelock))
+                                {
+                                    fprintf(stdout,"===---------------> locktoken end, with parent found. SET VARS\n");
+                                    //                                    maLockType = ucb::LockType_WRITE;
+                                    //                                    mbLockTypeSet = true;
+                                }
+                                break;
+                            }
+                            case WebDAVName_timeout:
+                            {
+                                fprintf(stdout,"===---------------> timeout end\n");
+                                if(hasParent(WebDAVName_activelock))
+                                {
+                                    fprintf(stdout,"===---------------> timeout end, with parent found. SET VARS\n");
+                                    //                                    maLockType = ucb::LockType_WRITE;
+                                    //                                    mbLockTypeSet = true;
+                                }
+                                break;
+                            }
+                            case WebDAVName_owner:
+                            {
+                                fprintf(stdout,"===---------------> owner end\n");
+                                if(hasParent(WebDAVName_activelock))
+                                {
+                                    fprintf(stdout,"===---------------> owner end, with parent found. SET VARS\n");
+                                    //                                    maLockType = ucb::LockType_WRITE;
+                                    //                                    mbLockTypeSet = true;
+                                }
+                                break;
+                            }
+                            case WebDAVName_depth:
+                            {
+                                fprintf(stdout,"===---------------> depth end\n");
+                                if(hasParent(WebDAVName_activelock))
+                                {
+                                    fprintf(stdout,"===---------------> depth end, with parent found. SET VARS\n");
+                                    //                                    maLockType = ucb::LockType_WRITE;
+                                    //                                    mbLockTypeSet = true;
+                                }
+                                break;
+                            }
+                            case WebDAVName_propstat:
                             {
                                 // propstat end, check status
                                 if(maStatus.getLength())
@@ -794,6 +871,7 @@ namespace
                             case WebDAVName_response:
                             {
                                 // respose end
+                                fprintf(stdout,"===---------------> WebDAVName_response, response end\n");
                                 if(maHref.getLength())
                                 {
                                     if(isCollectingProperties())
