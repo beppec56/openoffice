@@ -39,7 +39,6 @@ SerfLockReqProcImpl::SerfLockReqProcImpl( const char* inSourcePath,
 					  const char* inOwner,
 					  const char* inTimeout )
     : SerfRequestProcessorImpl( inSourcePath, inRequestHeaders )
-    , mpResources( 0 ) //   , mpResources( &ioResources )
     , mLock( inLock )
     , xInputStream( new SerfInputStream() )
 {
@@ -143,11 +142,10 @@ void SerfLockReqProcImpl::processChunkOfResponseData( const char* data,
 void SerfLockReqProcImpl::handleEndOfResponseData( serf_bucket_t * /*inSerfResponseBucket*/ )
 {
   // we can use the propfind parser, for resource value
- 
   fprintf( stdout, "==\n=====>>>>> SerfLockReqProcImpl::handleEndOfResponseData  \n");
     const std::vector< DAVResource > rResources( parseWebDAVPropFindResponse( xInputStream.get() ) );
-    //    *mpResources = rResources;
-    mpResources = rResources;
+// estract from returned resources the lock data and updatade the lock
+    OSL_TRACE("=--> SerfLockReqProcImpl::handleEndOfResponseData - received %d resources\n", rResources.size());
 }
 
 } // namespace http_dav_ucp

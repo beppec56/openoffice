@@ -1085,10 +1085,15 @@ void SerfSession::LOCK( const ::rtl::OUString & inPath,
     theLock.nOwner =
       apr_pstrdup( getAprPool(), rtl::OUStringToOString( aValue,
                                            RTL_TEXTENCODING_UTF8 ).getStr() );
-    
+
+    //before locking, search in the lock store if we already own a lock for this resource
+
+    //lock the resource
     aReqProc->processLock(inPath, theLock, status);
 
     HandleError( aReqProc );
+
+    // add the new lock 
     /* Create a depth zero, exclusive write lock, with default timeout
      * (allowing a server to pick a default).  token, owner and uri are
      * unset. */
