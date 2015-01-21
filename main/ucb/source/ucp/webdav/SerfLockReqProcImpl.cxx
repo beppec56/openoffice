@@ -145,7 +145,7 @@ void SerfLockReqProcImpl::handleEndOfResponseData( serf_bucket_t * /*inSerfRespo
   fprintf( stdout, "==\n=====>>>>> SerfLockReqProcImpl::handleEndOfResponseData  \n");
     const DAVPropertyValue rResources( parseWebDAVLockResponse( xInputStream.get() ) );
 // estract from returned resources the lock data and updatade the lock
-    OSL_TRACE("=--> SerfLockReqProcImpl::handleEndOfResponseData - received %s \n",
+    OSL_TRACE("=--> SerfLockReqProcImpl::handleEndOfResponseData - received '%s'\n",
         OUStringToOString( rResources.Name , RTL_TEXTENCODING_ISO_8859_1 ).getStr());
 }
 

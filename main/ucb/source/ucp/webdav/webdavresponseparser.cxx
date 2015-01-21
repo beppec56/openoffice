@@ -108,23 +108,6 @@ namespace
         WebDAVName_getlastmodified,
         WebDAVName_creationdate,
         WebDAVName_getcontentlength,
-	//lock entry names	
-	    /*
-       	<D:lockdiscovery>
-	  <D:activelock>
-	    <D:locktype><D:write/></D:locktype>
-	    <D:lockscope><D:exclusive/></D:lockscope>
-	    <D:depth>0</D:depth>
-	    <ns0:owner xmlns:ns0="DAV:">
-	      <ns0:href>http://ucb.openoffice.org</ns0:href>
-	    </ns0:owner>
-	    <D:timeout>Second-288</D:timeout>
-	    <D:locktoken>
-	      <D:href>opaquelocktoken:8e1e14ed-2d46-48ac-bb79-fa737374963a</D:href>
-	    </D:locktoken>
-	  </D:activelock>
-	</D:lockdiscovery>
-	    */
 
         WebDAVName_last
     };
@@ -162,24 +145,7 @@ namespace
             aWebDAVNameMapperList.insert(WebDAVNameValueType(rtl::OUString::createFromAscii("getlastmodified"), WebDAVName_getlastmodified));
             aWebDAVNameMapperList.insert(WebDAVNameValueType(rtl::OUString::createFromAscii("creationdate"), WebDAVName_creationdate));
             aWebDAVNameMapperList.insert(WebDAVNameValueType(rtl::OUString::createFromAscii("getcontentlength"), WebDAVName_getcontentlength));
-	    /*
-       	<D:lockdiscovery>
-	  <D:activelock>
-	    <D:locktype><D:write/></D:locktype>
-	    <D:lockscope><D:exclusive/></D:lockscope>
-	    <D:depth>0</D:depth>
-	    <ns0:owner xmlns:ns0="DAV:">
-	      <ns0:href>http://ucb.openoffice.org</ns0:href>
-	    </ns0:owner>
-	    <D:timeout>Second-288</D:timeout>
-	    <D:locktoken>
-	      <D:href>opaquelocktoken:8e1e14ed-2d46-48ac-bb79-fa737374963a</D:href>
-	    </D:locktoken>
-	  </D:activelock>
-	</D:lockdiscovery>
-	    */
-
-	}
+        }
 
         const WebDAVNameMapper::const_iterator aResult(aWebDAVNameMapperList.find(rStr));
 
@@ -519,7 +485,7 @@ namespace
                             case WebDAVName_propstat:
                             {
                                 // propstat start
-                                if(isCollectingProperties() || isWaitingLockResponse())
+                                if(isCollectingProperties())
                                 {
                                     // reset maPropStatProperties
                                     maPropStatProperties.clear();
@@ -794,16 +760,18 @@ namespace
                                 // lockdiscovery end
                                 if(hasParent(WebDAVName_prop))
                                 {
-                                    fprintf(stdout,"===---------------> lockdiscovery end, with parent found. SET VARS\n");
                                     static rtl::OUString aStr(rtl::OUString::createFromAscii("DAV:lockdiscovery"));
                                     if(isWaitingLockResponse())
                                     {
-                                        
+                                        fprintf(stdout,"===---------------> lockdiscovery end, with parent found. VAR for LockResult\n");
+                                        maResult_Lock.Name = aStr;
+                                        maResult_Lock.Value <<= maLocks;
                                     }
                                     else
                                     {
                                         http_dav_ucp::DAVPropertyValue aDAVPropertyValue;
 
+                                        fprintf(stdout,"===---------------> lockdiscovery end, with parent found. VAR for PropStat\n");
                                         aDAVPropertyValue.Name = aStr;
                                         aDAVPropertyValue.Value <<= maLocks;
                                         maPropStatProperties.push_back(aDAVPropertyValue);
@@ -874,26 +842,6 @@ namespace
                                 }
                                 break;
                             }
-//                            case WebDAVName_prop:
-//                            {
-//                                if(isWaitingLockResponse() && !hasParent(WebDAVName_propstat))
-//                                {
-//                                    if(maPropStatProperties.size())
-//                                    {
-//                                        // append to maResponseProperties if okay
-//                                        maResponseProperties.insert(maResponseProperties.end(), maPropStatProperties.begin(), maPropStatProperties.end());
-//                                        http_dav_ucp::DAVResource aDAVResource;
-//
-//                                        aDAVResource.uri = maHref;
-//                                        aDAVResource.properties = maResponseProperties;
-//                                        maResult_PropFind.push_back(aDAVResource);
-//                                        //the only propery returned is inserted: DAV:lockdiscovery
-//                                        maResult_PropFind.insert(maResult_PropFind.end(), maPropStatProperties.begin(), maPropStatProperties.end());
-//                                        
-//                                    }
-//                                }
-//                                break;
-//                            }
                             case WebDAVName_propstat:
                             {
                                 // propstat end, check status
