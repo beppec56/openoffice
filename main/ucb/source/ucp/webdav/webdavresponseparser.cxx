@@ -771,7 +771,7 @@ namespace
                                     {
                                         http_dav_ucp::DAVPropertyValue aDAVPropertyValue;
 
-                                        fprintf(stdout,"===---------------> lockdiscovery end, with parent found. VAR for PropStat\n");
+                                        fprintf(stdout,"WebDAVResponseParser::endElement - lockdiscovery end, with parent found. VAR for PropStat\n");
                                         aDAVPropertyValue.Name = aStr;
                                         aDAVPropertyValue.Value <<= maLocks;
                                         maPropStatProperties.push_back(aDAVPropertyValue);
@@ -856,6 +856,7 @@ namespace
                                             if(maPropStatProperties.size())
                                             {
                                                 // append to maResponseProperties if okay
+                                                OSL_TRACE(">>>> WebDAVResponseParser::endElement - WebDAVName_propstat end, collecting properties\n");
                                                 maResponseProperties.insert(maResponseProperties.end(), maPropStatProperties.begin(), maPropStatProperties.end());
                                             }
                                         }
@@ -874,7 +875,7 @@ namespace
                             case WebDAVName_response:
                             {
                                 // response end
-                                OSL_TRACE("===---------------> WebDAVName_response end, href: '%s'\n",
+                                OSL_TRACE(">>>> WebDAVName_response end, href: '%s'\n",
                                         OUStringToOString( maHref , RTL_TEXTENCODING_ISO_8859_1 ).getStr());
 
                                 if(maHref.getLength())
@@ -889,6 +890,11 @@ namespace
                                             aDAVResource.uri = maHref;
                                             aDAVResource.properties = maResponseProperties;
                                             maResult_PropFind.push_back(aDAVResource);
+//print received properties
+                                            for(int i =0; i < maResponseProperties.size(); i++) {
+                                                OSL_TRACE(">>>> WebDAVResponseParser::endElement - prop: '%s'\n",
+                                                    OUStringToOString( maResponseProperties[i].Name , RTL_TEXTENCODING_ISO_8859_1 ).getStr());
+                                            }
                                         }
                                     }
                                     else

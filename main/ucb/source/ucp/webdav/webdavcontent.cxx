@@ -1471,6 +1471,9 @@ uno::Reference< sdbc::XRow > Content::getPropertyValues(
                     {
                         const rtl::OUString & rName = rProperties[ n ].Name;
 
+                        OSL_TRACE("Content::getPropertyValues - prop name '%s'\n",
+                            rtl::OUStringToOString( rName,
+                                            RTL_TEXTENCODING_UTF8 ).getStr());
                         std::vector< rtl::OUString >::const_iterator it
                             = m_aFailedPropNames.begin();
                         std::vector< rtl::OUString >::const_iterator end
@@ -3018,6 +3021,25 @@ void Content::lock(
 {
     try
     {
+        {
+            OSL_TRACE(">>>> Content::lock check if locks are already present on the DAV resource");
+            //TODO use the getresource function, not the CACHE!
+            if ( m_xCachedProps.get() )
+            {
+                OSL_TRACE(">>>> Content::lock check if locks are already present on the DAV resource 2");
+                uno::Sequence< ucb::Lock > aLocks;
+                if ( m_xCachedProps->getValue( DAVProperties::LOCKDISCOVERY )
+                     >>= aLocks )
+                {
+//                    if(aLocks.getLength() > 0)
+                    OSL_TRACE(">>>> Content::lock locks are already present on the DAV resource (%d)", aLocks.getLength());
+                }
+                else
+                    OSL_TRACE(">>>> Content::lock lockdiscov NOT present");
+                    
+            }
+        }
+        
         std::auto_ptr< DAVResourceAccess > xResAccess;
         {
             osl::Guard< osl::Mutex > aGuard( m_aMutex );
@@ -3479,6 +3501,16 @@ const Content::ResourceType & Content::getResourceType(
             // TODO - is this really only one?
             if ( resources.size() == 1 )
             {
+                //first print resources received ready for cache
+                // there is a single resource
+                //debug:
+                std::vector< http_dav_ucp::DAVPropertyValue > aResponseProperties(resources[0].properties);
+                for(uint i = 0; i < aResponseProperties.size(); i++) {
+                    OSL_TRACE("Content::getResourceType - returned: '%s'",
+                    rtl::OUStringToOString( aResponseProperties[i].Name,
+                                            RTL_TEXTENCODING_UTF8 ).getStr());
+                }
+
                 m_xCachedProps.reset(
                     new CachableContentProperties( resources[ 0 ] ) );
                 m_xCachedProps->containsAllNames(

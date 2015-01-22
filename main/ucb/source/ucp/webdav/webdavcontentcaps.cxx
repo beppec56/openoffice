@@ -62,7 +62,7 @@ bool ContentProvider::getProperty(
         const rtl::OUString & rPropName, beans::Property & rProp, bool bStrict )
 {
 
-  fprintf( stdout, "==\n=====>>>>> ContentProvider::getProperty  %s \n", OUStringToOString( rPropName , RTL_TEXTENCODING_ISO_8859_1 ).getStr());
+    OSL_TRACE( ">>>> ContentProvider::getProperty  %s \n", OUStringToOString( rPropName , RTL_TEXTENCODING_ISO_8859_1 ).getStr());
 
     if ( !m_pProps )
     {
