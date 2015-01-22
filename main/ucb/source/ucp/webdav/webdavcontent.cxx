@@ -1492,16 +1492,6 @@ uno::Reference< sdbc::XRow > Content::getPropertyValues(
 
                             ++it;
                         }
-
-/*                      not sure what this does...
-                        according to the while cicle above, the requested property should be
-                        added to aProperties inside the while loop
-                        if ( it == end )
-                        {
-                            aProperties[ nProps ] = rProperties[ n ];
-                            nProps++;
-                            }
-*/
                     }
 
                     aProperties.realloc( nProps );
