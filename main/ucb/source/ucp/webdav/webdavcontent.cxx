@@ -1457,7 +1457,8 @@ uno::Reference< sdbc::XRow > Content::getPropertyValues(
 
             if ( !bHasAll )
             {
-                // Only DAV resources support PROPFIND
+                // Only DAV resources support PROPFIND,
+                // check already done above in the outer 'if' head
                 std::vector< rtl::OUString > aPropNames;
 
                 uno::Sequence< beans::Property > aProperties(
@@ -1481,17 +1482,26 @@ uno::Reference< sdbc::XRow > Content::getPropertyValues(
 
                         while ( it != end )
                         {
-                            if ( *it == rName )
+                            if ( *it == rName ) {
+                                //the failed property in cache is the same as the requested one
+                                //add to the requested properties list
+                                aProperties[ nProps ] = rProperties[ n ];
+                                nProps++;
                                 break;
+                            }
 
                             ++it;
                         }
 
+/*                      not sure what this does...
+                        according to the while cicle above, the requested property should be
+                        added to aProperties inside the while loop
                         if ( it == end )
                         {
                             aProperties[ nProps ] = rProperties[ n ];
                             nProps++;
-                        }
+                            }
+*/
                     }
 
                     aProperties.realloc( nProps );
