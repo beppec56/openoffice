@@ -922,7 +922,6 @@ void DAVResourceAccess::DESTROY(
 // set new lock.
 void DAVResourceAccess::LOCK(
     ucb::Lock & inLock,
-   std::vector< DAVResource > & rResources,
     const uno::Reference< ucb::XCommandEnvironment > & xEnv )
   throw ( DAVException )
 {
@@ -943,8 +942,7 @@ void DAVResourceAccess::LOCK(
 
             m_xSession->LOCK( getRequestURI(),
                               inLock,
-			      /*			      rResources, */
-			      DAVRequestEnvironment(
+                              DAVRequestEnvironment(
                                   getRequestURI(),
                                   new DAVAuthListener_Impl( xEnv, m_aURL ),
                                   aHeaders, xEnv ) );

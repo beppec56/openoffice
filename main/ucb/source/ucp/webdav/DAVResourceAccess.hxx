@@ -202,7 +202,6 @@ public:
     // set new lock.
     void
     LOCK( com::sun::star::ucb::Lock & inLock,
-	  std::vector< DAVResource > & rResources,
           const com::sun::star::uno::Reference<
               com::sun::star::ucb::XCommandEnvironment > & xEnv )
         throw( DAVException );

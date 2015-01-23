@@ -550,22 +550,9 @@ void ContentProperties::addProperty( const rtl::OUString & rName,
         (*m_xProps)[ rtl::OUString::createFromAscii( "DateModified" ) ]
             = PropertyValue( uno::makeAny( aDate ), true );
     }
-    else if ( rName.equals( DAVProperties::LOCKDISCOVERY ) )
-    {
-        //the property value returned by DAV interface is a resource lock array
-        //meaning all the locks this resource has linked to it
-        //the entire sequence is returned
-//        uno::Sequence< ucb::Lock > aLocks;
-//        rValue >>= aLocks;
-        
-//        rtl::OUString aLockOwner;
-//        aLock.Owner >>= aLockOwner;
-        
-//        OSL_TRACE(">>>>> ContentProperties::addProperty: Locks: '%d'\n",aLocks.getLength());
-//        OSL_TRACE(">>>>> ContentProperties::addProperty: owner: '%s'\n",OUStringToOString( aLockOwner , RTL_TEXTENCODING_ISO_8859_1 ).getStr());
-//        (*m_xProps)[ rtl::OUString::createFromAscii( "DAV:lockdiscovery" ) ]
-//            = PropertyValue( uno::makeAny( aLocks ), true );       
-    }
+    // else if ( rName.equals( DAVProperties::LOCKDISCOVERY ) )
+    // {
+    // }
     else if ( rName.equals( DAVProperties::RESOURCETYPE ) )
     {
         rtl::OUString aValue;

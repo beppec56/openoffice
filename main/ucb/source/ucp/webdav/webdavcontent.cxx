@@ -3059,9 +3059,7 @@ void Content::lock(
             //-1, // infinite lock
             uno::Sequence< ::rtl::OUString >() );
 
-	std::vector< DAVResource > resources;	//returned resources
-
-	xResAccess->LOCK( aLock,  resources, Environment );
+        xResAccess->LOCK( aLock, Environment );
 
         {
             osl::Guard< osl::Mutex > aGuard( m_aMutex );
@@ -3488,7 +3486,7 @@ const Content::ResourceType & Content::getResourceType(
                 = rtl::OUString::createFromAscii( "MediaType" );
             aProperties[ 4 ].Name
                 = DAVProperties::SUPPORTEDLOCK;
-	    //to check for already active locks
+            //we will need this to check for existing locks
             aProperties[ 5 ].Name
                 = DAVProperties::LOCKDISCOVERY;
 
@@ -3499,6 +3497,10 @@ const Content::ResourceType & Content::getResourceType(
                 DAVZERO, aPropNames, resources, xEnv );
 
             // TODO - is this really only one?
+            // only one resource is received, see at:
+            // WebDAVResponseParser::endElement()
+            //   case WebDAVName_response
+            //in file: ucb/source/ucp/webdav/webdavresponseparser.cxx:
             if ( resources.size() == 1 )
             {
                 //first print resources received ready for cache
