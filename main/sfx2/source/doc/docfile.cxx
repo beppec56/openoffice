@@ -1227,30 +1227,35 @@ sal_Bool SfxMedium::LockOrigFileOnDemand( sal_Bool bLoading, sal_Bool bNoUI )
                 Reference< ::com::sun::star::ucb::XCommandEnvironment > xDummyEnv;
                 ::ucbhelper::Content aContent( GetURLObject().GetMainURL( INetURLObject::NO_DECODE ), xDummyEnv );
                 //look for a DAV:supportedlock property, to see if this is really a dav resource
-                uno::Sequence< ::com::sun::star::ucb::Lock >  aLocks;
-                if(aContent.getPropertyValue( ::rtl::OUString( RTL_CONSTASCII_USTRINGPARAM( "DAV:lockdiscovery" ) ) ) >>= aLocks)
-                    OSL_TRACE("SfxMedium::LockOrigFileOnDemand - DAV:lockdiscovery returned %d locks",aLocks.getLength());
-                else
-                    OSL_TRACE("SfxMedium::LockOrigFileOnDemand - DAV:lockdiscovery returned NO locks");
+                uno::Sequence< ::com::sun::star::ucb::LockEntry >  aLockEntries;
+                if(aContent.getPropertyValue( ::rtl::OUString( RTL_CONSTASCII_USTRINGPARAM( "DAV:supportedlock" ) ) ) >>= aLockEntries)
+                {
+                    OSL_TRACE("SfxMedium::LockOrigFileOnDemand - resource is a DAV ",aLockEntries.getLength());
+                    //then look for a DAV:lockdiscovery named property, to check for dav already locked, if not try to lock it
+                    uno::Sequence< ::com::sun::star::ucb::Lock >  aLocks;
+                    if(aContent.getPropertyValue( ::rtl::OUString( RTL_CONSTASCII_USTRINGPARAM( "DAV:lockdiscovery" ) ) ) >>= aLocks)
+                        OSL_TRACE("SfxMedium::LockOrigFileOnDemand - DAV:lockdiscovery returned %d locks",aLocks.getLength());
+                    else
+                        OSL_TRACE("SfxMedium::LockOrigFileOnDemand - DAV:lockdiscovery returned NO locks");
+                    // the lock returns an exception if cannot lock, do again a lockdiscovery prop search to see if
+                    // someone else has locked the file in the interim.
+                    try {
+                        aContent.lock();
+                        //check to see if
+                    }
+                    catch( uno::Exception )
+                    {
+                        fprintf(stdout,"Cannot lock GENERAL ERROR!\n");
+                        bContentReadonly = true;
+                    }
                 
+                
+                }
+                else
+                    OSL_TRACE("SfxMedium::LockOrigFileOnDemand - resource is NOT a DAV ",aLockEntries.getLength());
+                    
                 
                 //
-                //then look for a DAV:lockdiscovery named property, to check for dav already locked, if not try to lock it
-                // the lock returns n exception if cannot lock, do again a lockdiscovery prop search to see if
-                // someone else has locked the file in the interim.
-		try {
-		    aContent.lock();
-		}
-		catch( uno::Exception )
-		{
-
-/*		  Reference< ::com::sun::star::ucb::XCommandEnvironment > xDummyEnv;
-		  ::ucbhelper::Content aContent( GetURLObject().GetMainURL( INetURLObject::NO_DECODE ), xDummyEnv );
-		  		  aContent.getPropertyValue( ::rtl::OUString( RTL_CONSTASCII_USTRINGPARAM( "DAV:lockdiscovery" ) ) ) >>= bContentReadonly;
-*/
-		  fprintf(stdout,"Cannot lock !\n");
-		  bContentReadonly = true;
-		}
 	      
                 bResult = !bContentReadonly;
             }
