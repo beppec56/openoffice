@@ -411,6 +411,11 @@ void SerfRequestProcessor::postprocessProcessor( const apr_status_t inStatus )
                 mpDAVException = new DAVException( DAVException::DAV_HTTP_REDIRECT, 
                                                    mRedirectLocation );
                 break;
+            case SC_LOCKED:
+                mpDAVException = new DAVException( DAVException::DAV_LOCKED,
+                                                   mHTTPStatusCodeText,
+                                                   mnHTTPStatusCode );
+                break;
             default:
                 mpDAVException = new DAVException( DAVException::DAV_HTTP_ERROR, 
                                                    mHTTPStatusCodeText, 

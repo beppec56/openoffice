@@ -51,6 +51,7 @@
 #include <com/sun/star/ucb/XProgressHandler.hpp>
 #include <com/sun/star/ucb/XCommandInfo.hpp>
 #include <com/sun/star/ucb/Lock.hpp>
+#include <com/sun/star/ucb/InteractiveLockingLockedException.hpp>
 #include <com/sun/star/util/XArchiver.hpp>
 #include <com/sun/star/io/XOutputStream.hpp>
 #include <com/sun/star/io/XInputStream.hpp>
@@ -1241,15 +1242,24 @@ sal_Bool SfxMedium::LockOrigFileOnDemand( sal_Bool bLoading, sal_Bool bNoUI )
                     // someone else has locked the file in the interim.
                     try {
                         aContent.lock();
-                        //check to see if
+                        //check to see if it can be locked
                     }
-                    catch( uno::Exception )
+                    catch( ucb::InteractiveLockingLockedException& e )
                     {
-                        fprintf(stdout,"Cannot lock GENERAL ERROR!\n");
+                        fprintf(stdout,"uno::InteractiveLockingLockedException: %s!\n",
+                            rtl::OUStringToOString( e.Message,
+                                            RTL_TEXTENCODING_UTF8 ).getStr());
+                        //in e.XInterface should be:  uno::Reference< ucb::XCommandEnvironment >, e.g. the one given above
                         bContentReadonly = true;
                     }
-                
-                
+                    catch( uno::Exception & e )
+                    {
+                        fprintf(stdout,"uno::Exception: %s!\n",
+                            rtl::OUStringToOString( e.Message,
+                                            RTL_TEXTENCODING_UTF8 ).getStr());
+                        //in e.XInterface should be:  uno::Reference< ucb::XCommandEnvironment >, e.g. the one given above
+                        bContentReadonly = true;
+                    }
                 }
                 else
                     OSL_TRACE("SfxMedium::LockOrigFileOnDemand - resource is NOT a DAV ",aLockEntries.getLength());
