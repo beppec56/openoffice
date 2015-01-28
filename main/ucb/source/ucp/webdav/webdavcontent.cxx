@@ -3021,24 +3021,24 @@ void Content::lock(
 {
     try
     {
-        {
-            OSL_TRACE(">>>> Content::lock check if locks are already present on the DAV resource");
-            //TODO use the getresource function, not the CACHE!
-            if ( m_xCachedProps.get() )
-            {
-                OSL_TRACE(">>>> Content::lock check if locks are already present on the DAV resource 2");
-                uno::Sequence< ucb::Lock > aLocks;
-                if ( m_xCachedProps->getValue( DAVProperties::LOCKDISCOVERY )
-                     >>= aLocks )
-                {
+//        {
+//            OSL_TRACE(">>>> Content::lock check if locks are already present on the DAV resource");
+//            //TODO use the getresource function, not the CACHE!
+//            if ( m_xCachedProps.get() )
+//            {
+//                OSL_TRACE(">>>> Content::lock check if locks are already present on the DAV resource 2");
+//                uno::Sequence< ucb::Lock > aLocks;
+//                if ( m_xCachedProps->getValue( DAVProperties::LOCKDISCOVERY )
+//                     >>= aLocks )
+//                {
 //                    if(aLocks.getLength() > 0)
-                    OSL_TRACE(">>>> Content::lock locks are already present on the DAV resource (%d)", aLocks.getLength());
-                }
-                else
-                    OSL_TRACE(">>>> Content::lock lockdiscov NOT present");
-                    
-            }
-        }
+//                    OSL_TRACE(">>>> Content::lock locks are already present on the DAV resource (%d)", aLocks.getLength());
+//                }
+//                else
+//                    OSL_TRACE(">>>> Content::lock lockdiscov NOT present");
+//                    
+//            }
+//        }
         
         std::auto_ptr< DAVResourceAccess > xResAccess;
         {
@@ -3068,6 +3068,13 @@ void Content::lock(
     }
     catch ( DAVException const & e )
     {
+        OSL_TRACE("Exception received from lock: data: '%s' status: %d\n",
+                  rtl::OUStringToOString( e.getData(),
+                                            RTL_TEXTENCODING_UTF8 ).getStr() ,e.getStatus() );
+        if(e.getStatus() == SC_LOCKED)
+        {
+            OSL_TRACE(">>>> Content::lock - Already locked");
+        }
         cancelCommandExecution( e, Environment, sal_False );
         // Unreachable
     }

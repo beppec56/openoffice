@@ -1075,7 +1075,7 @@ void SerfSession::LOCK( const ::rtl::OUString & inPath,
     default:
         throw DAVException( DAVException::DAV_INVALID_ARG );
     }
-    
+
     // Set the lock timeout
     theLock.lTimeout = (long)rLock.Timeout;
 
@@ -1086,10 +1086,24 @@ void SerfSession::LOCK( const ::rtl::OUString & inPath,
       apr_pstrdup( getAprPool(), rtl::OUStringToOString( aValue,
                                            RTL_TEXTENCODING_UTF8 ).getStr() );
 
-    //before locking, search in the lock store if we already own a lock for this resource
-
     //lock the resource
     aReqProc->processLock(inPath, theLock, status);
+
+    if ( aReqProc->mpDAVException )
+    {
+        DAVException* mpDAVExp( aReqProc->mpDAVException );
+        //check the status
+        //TODO beppec56: moving to another position ?
+        if ( mpDAVExp->getStatus() == SC_LOCKED )
+        {
+            OSL_TRACE(">>>> SerfSession::LOCK - Resource already locked");
+            //TODO beppec56: before locking, search in the lock store if we already own a lock for this resource
+            //if present, return with exception DAV_LOCKED_SELF
+            //if not present, get the owner and return it in the string (excpetion.getData())
+            
+        }
+    }
+
 
     HandleError( aReqProc );
 
