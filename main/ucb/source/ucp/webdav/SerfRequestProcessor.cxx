@@ -307,7 +307,8 @@ bool SerfRequestProcessor::processMove( const rtl::OUString & inDestinationPath,
 
 //LOCK creating a new lock
 bool SerfRequestProcessor::processLock( const rtl::OUString & inDestinationPath,
-					const SerfLock & inLock,
+                                        const SerfLock & inLock,
+                                        DAVPropertyValue & outLock,
                                         apr_status_t& outSerfStatus )
 {
     mDestPathStr = apr_pstrdup( mrSerfSession.getAprPool(), 
@@ -317,8 +318,9 @@ bool SerfRequestProcessor::processLock( const rtl::OUString & inDestinationPath,
     mpProcImpl = createLockReqProcImpl( mPathStr,
                                         mrSerfSession.getRequestEnvironment().m_aRequestHeaders,
                                         inLock,
-					Owner,
-					Timeout);
+                                        Owner,
+                                        Timeout,
+                                        outLock);
     outSerfStatus = runProcessor();
 
     return outSerfStatus == APR_SUCCESS;

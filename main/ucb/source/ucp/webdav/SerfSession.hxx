@@ -27,6 +27,7 @@
 #include <vector>
 #include <boost/shared_ptr.hpp>
 #include <osl/mutex.hxx>
+#include "DAVResource.hxx"
 #include "DAVSession.hxx"
 #include "SerfTypes.hxx"
 //#include "SerfLockStore.hxx"

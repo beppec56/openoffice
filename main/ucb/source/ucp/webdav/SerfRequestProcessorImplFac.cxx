@@ -226,14 +226,16 @@ namespace http_dav_ucp
     SerfRequestProcessorImpl* createLockReqProcImpl( const char* inSourcePath,
                                                      const DAVRequestHeaders& inRequestHeaders,
                                                      const SerfLock & inLock,
-						     const char* inOwner,
-						     const char* inTimeout)
+                                                     const char* inOwner,
+                                                     const char* inTimeout,
+                                                     DAVPropertyValue & outLock)
     {
         SerfRequestProcessorImpl* pReqProcImpl = new SerfLockReqProcImpl( inSourcePath,
-									  inRequestHeaders,
+                                                                          inRequestHeaders,
                                                                           inLock,
-									  inOwner,
-									  inTimeout );
+                                                                          inOwner,
+                                                                          inTimeout,
+                                                                          outLock);
         return pReqProcImpl;
     }
 

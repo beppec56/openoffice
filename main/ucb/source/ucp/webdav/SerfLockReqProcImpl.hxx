@@ -39,10 +39,11 @@ class SerfLockReqProcImpl : public SerfRequestProcessorImpl
 {
 public:
     SerfLockReqProcImpl( const char* inSourcePath,
-			 const DAVRequestHeaders& inRequestHeaders,
-			 const SerfLock & inLock,
-			 const char* inOwner,
-			 const char* inTimeout );
+                         const DAVRequestHeaders& inRequestHeaders,
+                         const SerfLock & inLock,
+                         const char* inOwner,
+                         const char* inTimeout,
+                         DAVPropertyValue & outLock);
 
     virtual ~SerfLockReqProcImpl();
 
@@ -63,6 +64,7 @@ private:
     const char *mLockScope;
     const char *mTimeout;
     const char *mOwner;
+    DAVPropertyValue*  mLockObtained;
     com::sun::star::uno::Reference< SerfInputStream > xInputStream;
 };
 

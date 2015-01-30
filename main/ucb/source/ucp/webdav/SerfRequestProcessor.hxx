@@ -130,7 +130,8 @@ public:
 
     // LOCK
     bool processLock( const rtl::OUString & inDestinationPath,
-		      const SerfLock & inLock,
+                      const SerfLock & inLock,
+                      DAVPropertyValue & outLock,
                       apr_status_t& outSerfStatus );
 
     apr_status_t provideSerfCredentials( char ** outUsername, 

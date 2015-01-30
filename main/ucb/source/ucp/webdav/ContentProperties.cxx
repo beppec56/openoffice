@@ -466,7 +466,7 @@ void ContentProperties::addProperty( const rtl::OUString & rName,
                                      const com::sun::star::uno::Any & rValue,
                                      bool bIsCaseSensitive )
 {
-    OSL_TRACE(">>>> ContentProperties::addProperty: %s\n", OUStringToOString( rName , RTL_TEXTENCODING_ISO_8859_1 ).getStr());
+//    OSL_TRACE(">>>> ContentProperties::addProperty: %s\n", OUStringToOString( rName , RTL_TEXTENCODING_ISO_8859_1 ).getStr());
     if ( rName.equals( DAVProperties::CREATIONDATE ) )
     {
         // Map DAV:creationdate to UCP:DateCreated

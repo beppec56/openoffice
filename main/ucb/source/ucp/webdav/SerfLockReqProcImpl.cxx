@@ -34,12 +34,14 @@ namespace http_dav_ucp
 {
 
 SerfLockReqProcImpl::SerfLockReqProcImpl( const char* inSourcePath,
-					  const DAVRequestHeaders& inRequestHeaders, // on debug the header look empty
+                                          const DAVRequestHeaders& inRequestHeaders, // on debug the header look empty
                                           const SerfLock & inLock ,
-					  const char* inOwner,
-					  const char* inTimeout )
+                                          const char* inOwner,
+                                          const char* inTimeout,
+                                          DAVPropertyValue & outLock)
     : SerfRequestProcessorImpl( inSourcePath, inRequestHeaders )
     , mLock( inLock )
+    , mLockObtained( &outLock )
     , xInputStream( new SerfInputStream() )
 {
     switch ( inLock.eDepth )
@@ -143,10 +145,10 @@ void SerfLockReqProcImpl::handleEndOfResponseData( serf_bucket_t * /*inSerfRespo
 {
   // we can use the propfind parser, for resource value
   fprintf( stdout, "==\n=====>>>>> SerfLockReqProcImpl::handleEndOfResponseData  \n");
-    const DAVPropertyValue rResources( parseWebDAVLockResponse( xInputStream.get() ) );
-// estract from returned resources the lock data and updatade the lock
+    const DAVPropertyValue rLocksValue( parseWebDAVLockResponse( xInputStream.get() ) );
+    *mLockObtained = rLocksValue;
     OSL_TRACE("=--> SerfLockReqProcImpl::handleEndOfResponseData - received '%s'\n",
-        OUStringToOString( rResources.Name , RTL_TEXTENCODING_ISO_8859_1 ).getStr());
+              OUStringToOString( rLocksValue.Name , RTL_TEXTENCODING_ISO_8859_1 ).getStr());
 }
 
 } // namespace http_dav_ucp

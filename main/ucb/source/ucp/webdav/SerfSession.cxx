@@ -1087,7 +1087,8 @@ void SerfSession::LOCK( const ::rtl::OUString & inPath,
                                            RTL_TEXTENCODING_UTF8 ).getStr() );
 
     //lock the resource
-    aReqProc->processLock(inPath, theLock, status);
+    DAVPropertyValue outLock;
+    aReqProc->processLock(inPath, theLock, outLock, status);
 
     if ( aReqProc->mpDAVException )
     {
