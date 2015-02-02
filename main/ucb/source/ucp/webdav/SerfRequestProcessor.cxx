@@ -314,7 +314,13 @@ bool SerfRequestProcessor::processLock( const rtl::OUString & inDestinationPath,
     mDestPathStr = apr_pstrdup( mrSerfSession.getAprPool(), 
                                 rtl::OUStringToOString( inDestinationPath, RTL_TEXTENCODING_UTF8 ).getStr() );
     char * Owner = inLock.nOwner;
-    char * Timeout = apr_psprintf( mrSerfSession.getAprPool(), "Second-%ld", inLock.lTimeout );
+
+    char * Timeout;
+    if(inLock.lTimeout == -1)
+        Timeout = apr_psprintf( mrSerfSession.getAprPool(), "Infinite" );
+    else
+        Timeout = apr_psprintf( mrSerfSession.getAprPool(), "Second-%ld", inLock.lTimeout );
+
     mpProcImpl = createLockReqProcImpl( mPathStr,
                                         mrSerfSession.getRequestEnvironment().m_aRequestHeaders,
                                         inLock,
@@ -325,7 +331,6 @@ bool SerfRequestProcessor::processLock( const rtl::OUString & inDestinationPath,
 
     return outSerfStatus == APR_SUCCESS;
 }
-
 
 apr_status_t SerfRequestProcessor::runProcessor()
 {
