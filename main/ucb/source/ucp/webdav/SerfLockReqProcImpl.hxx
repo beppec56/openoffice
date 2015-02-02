@@ -41,7 +41,6 @@ public:
     SerfLockReqProcImpl( const char* inSourcePath,
                          const DAVRequestHeaders& inRequestHeaders,
                          const SerfLock & inLock,
-                         const char* inOwner,
                          const char* inTimeout,
                          DAVPropertyValue & outLock);
 

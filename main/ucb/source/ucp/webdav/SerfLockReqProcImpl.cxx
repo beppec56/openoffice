@@ -29,6 +29,7 @@
 #include "webdavresponseparser.hxx"
 #include <serf/serf.h>
 #include <rtl/ustrbuf.hxx>
+#include <apr/apr_strings.h>
 
 namespace http_dav_ucp
 {
@@ -36,13 +37,14 @@ namespace http_dav_ucp
 SerfLockReqProcImpl::SerfLockReqProcImpl( const char* inSourcePath,
                                           const DAVRequestHeaders& inRequestHeaders, // on debug the header look empty
                                           const SerfLock & inLock ,
-                                          const char* inOwner,
                                           const char* inTimeout,
                                           DAVPropertyValue & outLock)
     : SerfRequestProcessorImpl( inSourcePath, inRequestHeaders )
     , mLock( inLock )
     , mLockObtained( &outLock )
     , xInputStream( new SerfInputStream() )
+    , mOwner(inLock.nOwner)
+    , mTimeout(inTimeout)
 {
     switch ( inLock.eDepth )
     {
@@ -60,15 +62,12 @@ SerfLockReqProcImpl::SerfLockReqProcImpl( const char* inSourcePath,
     switch ( inLock.eScope )
     {
         case EXCLUSIVE:
-	  mLockScope = "<lockscope><exclusive/></lockscope>";
+            mLockScope = "<lockscope><exclusive/></lockscope>";
             break;
         case SHARED:
             mLockScope = "<lockscope><shared/></lockscope>";
             break;
     }
-
-    mOwner = inOwner;
-    mTimeout = inTimeout;
 }
 
 SerfLockReqProcImpl::~SerfLockReqProcImpl()
@@ -93,7 +92,7 @@ serf_bucket_t * SerfLockReqProcImpl::createSerfRequestBucket( serf_request_t * i
         aBuffer.appendAscii( RTL_CONSTASCII_STRINGPARAM( "<owner><href>" ));
         aBuffer.appendAscii( mOwner );
         aBuffer.appendAscii( RTL_CONSTASCII_STRINGPARAM( "</href></owner>" ));
-	aBuffer.appendAscii( RTL_CONSTASCII_STRINGPARAM( LOCK_TRAILER ));
+        aBuffer.appendAscii( RTL_CONSTASCII_STRINGPARAM( LOCK_TRAILER ));
         aBodyText = rtl::OUStringToOString( aBuffer.makeStringAndClear(), RTL_TEXTENCODING_UTF8 );
         body_bkt = serf_bucket_simple_copy_create( aBodyText.getStr(),
                                                    aBodyText.getLength(),
