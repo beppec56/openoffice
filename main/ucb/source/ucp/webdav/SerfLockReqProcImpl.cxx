@@ -142,12 +142,8 @@ void SerfLockReqProcImpl::processChunkOfResponseData( const char* data,
 
 void SerfLockReqProcImpl::handleEndOfResponseData( serf_bucket_t * /*inSerfResponseBucket*/ )
 {
-  // we can use the propfind parser, for resource value
-  fprintf( stdout, "==\n=====>>>>> SerfLockReqProcImpl::handleEndOfResponseData  \n");
     const DAVPropertyValue rLocksValue( parseWebDAVLockResponse( xInputStream.get() ) );
     *mLockObtained = rLocksValue;
-    OSL_TRACE("=--> SerfLockReqProcImpl::handleEndOfResponseData - received '%s'\n",
-              OUStringToOString( rLocksValue.Name , RTL_TEXTENCODING_ISO_8859_1 ).getStr());
 }
 
 } // namespace http_dav_ucp
