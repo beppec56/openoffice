@@ -1232,12 +1232,6 @@ sal_Bool SfxMedium::LockOrigFileOnDemand( sal_Bool bLoading, sal_Bool bNoUI )
                 if(aContent.getPropertyValue( ::rtl::OUString( RTL_CONSTASCII_USTRINGPARAM( "DAV:supportedlock" ) ) ) >>= aLockEntries)
                 {
                     OSL_TRACE("SfxMedium::LockOrigFileOnDemand - resource is a DAV ",aLockEntries.getLength());
-                    //then look for a DAV:lockdiscovery named property, to check for dav already locked, if not try to lock it
-                    uno::Sequence< ::com::sun::star::ucb::Lock >  aLocks;
-                    if(aContent.getPropertyValue( ::rtl::OUString( RTL_CONSTASCII_USTRINGPARAM( "DAV:lockdiscovery" ) ) ) >>= aLocks)
-                        OSL_TRACE("SfxMedium::LockOrigFileOnDemand - DAV:lockdiscovery returned %d locks",aLocks.getLength());
-                    else
-                        OSL_TRACE("SfxMedium::LockOrigFileOnDemand - DAV:lockdiscovery returned NO locks");
                     // the lock returns an exception if cannot lock, do again a lockdiscovery prop search to see if
                     // someone else has locked the file in the interim.
                     try {
@@ -1246,11 +1240,50 @@ sal_Bool SfxMedium::LockOrigFileOnDemand( sal_Bool bLoading, sal_Bool bNoUI )
                     }
                     catch( ucb::InteractiveLockingLockedException& e )
                     {
-                        fprintf(stdout,"uno::InteractiveLockingLockedException: %s!\n",
+                        fprintf(stdout,">>>> SfxMedium::LockOrigFileOnDemand - uno::InteractiveLockingLockedException signalled, reason: %s!\n",
                             rtl::OUStringToOString( e.Message,
                                             RTL_TEXTENCODING_UTF8 ).getStr());
                         //in e.XInterface should be:  uno::Reference< ucb::XCommandEnvironment >, e.g. the one given above
                         bContentReadonly = true;
+                        //here get the lock presente, via lockdiscovery
+                    //then look for a DAV:lockdiscovery named property, to check for dav already locked, if not try to lock it
+                        uno::Sequence< ::com::sun::star::ucb::Lock >  aLocks;
+                        if(aContent.getPropertyValue( ::rtl::OUString( RTL_CONSTASCII_USTRINGPARAM( "DAV:lockdiscovery" ) ) ) >>= aLocks)
+                        {
+                            ucb::Lock aLock = aLocks[0];
+                            OSL_TRACE(">>>> SfxMedium::LockOrigFileOnDemand - DAV:lockdiscovery returned %d locks",aLocks.getLength());
+                            //for debug, prinmt first received lock
+                            { //============================
+//            block of code for print/debug only, remove when done
+                                rtl::OUString   aOwner;
+                                rtl::OUString   aToken;
+                                aLock.Owner >>= aOwner;
+                                long    aTimeout = aLock.Timeout;
+            
+                                aToken = aLock.LockTokens[0];
+                                const char *depth;
+                                switch(aLock.Depth) {
+                                default:
+                                case ucb::LockDepth_ZERO:
+                                    depth =  "0";
+                                    break;
+                                case ucb::LockDepth_ONE:
+                                    depth =  "1";
+                                    break;
+                                case ucb::LockDepth_INFINITY:
+                                    depth = "infinity";
+                                    break;
+                                }
+
+                                fprintf(stdout,">>>> SfxMedium::LockOrigFileOnDemand - Owner: %s, token: %s, depth: %s, timeout = %li\n",
+                                        rtl::OUStringToOString( aOwner,RTL_TEXTENCODING_UTF8 ).getStr(),
+                                        rtl::OUStringToOString( aToken,RTL_TEXTENCODING_UTF8 ).getStr(),
+                                        depth, aTimeout );
+                            }
+                            
+                        }
+                        else
+                            OSL_TRACE("SfxMedium::LockOrigFileOnDemand - DAV:lockdiscovery returned NO locks");
                     }
                     catch( uno::Exception & e )
                     {
@@ -1263,9 +1296,6 @@ sal_Bool SfxMedium::LockOrigFileOnDemand( sal_Bool bLoading, sal_Bool bNoUI )
                 }
                 else
                     OSL_TRACE("SfxMedium::LockOrigFileOnDemand - resource is NOT a DAV ",aLockEntries.getLength());
-                    
-                
-                //
 	      
                 bResult = !bContentReadonly;
             }
