@@ -1105,10 +1105,47 @@ void SerfSession::LOCK( const ::rtl::OUString & inPath,
         }
     }
 
-
+    //HandleError will handle the error and throw an exception, if needed
     HandleError( aReqProc );
 
-    // add the new lock 
+    OSL_TRACE(">>>> SerfSession::LOCK - Store received lock");
+    if(outLock.Name.compareToAscii(RTL_CONSTASCII_STRINGPARAM( "DAV:lockdiscovery" )) == 0 )
+    {
+        //got a lock, use the first returned
+        uno::Sequence< ucb::Lock >      aLocks;
+        outLock.Value >>= aLocks;
+        ucb::Lock aLock = aLocks[0];
+
+        {
+//            block of code for print/debug only, remove when done
+            rtl::OUString   aOwner;
+            rtl::OUString   aToken;
+            aLock.Owner >>= aOwner;
+            long    aTimeout = aLock.Timeout;
+            
+            aToken = aLock.LockTokens[0];
+            char *depth = apr_pstrdup( getAprPool(), "unknown");
+            switch(aLock.Depth) {
+            default:
+            case ucb::LockDepth_ZERO:
+                depth = apr_pstrdup( getAprPool(), "0");
+                break;
+            case ucb::LockDepth_ONE:
+                depth = apr_pstrdup( getAprPool(), "1");
+                break;
+            case ucb::LockDepth_INFINITY:
+                depth = apr_pstrdup( getAprPool(), "infinity");
+                break;
+            }
+
+            fprintf(stdout,">>>> SerfSession::LOCK - Owner: %s, token: %s, depth: %s, timeout = %li\n",
+                    rtl::OUStringToOString( aOwner,RTL_TEXTENCODING_UTF8 ).getStr(),
+                    rtl::OUStringToOString( aToken,RTL_TEXTENCODING_UTF8 ).getStr(),
+                    depth, aTimeout );
+        }
+    }
+
+    // add the new lock
     /* Create a depth zero, exclusive write lock, with default timeout
      * (allowing a server to pick a default).  token, owner and uri are
      * unset. */
