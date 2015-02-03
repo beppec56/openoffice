@@ -425,7 +425,7 @@ namespace
         maLockType(ucb::LockType_WRITE),
         maLockDepth(ucb::LockDepth_ZERO),
         maLockOwner(),
-        maLockTimeout(180), //set 3 minutes as default, for DEBUGGING
+        maLockTimeout(0),
         meWebDAVResponseParserMode(eWebDAVResponseParserMode),
         mbResourceTypeCollection(false),
         mbLockScopeSet(false),
@@ -766,18 +766,16 @@ namespace
                                 // lockdiscovery end
                                 if(hasParent(WebDAVName_prop))
                                 {
-                                    static rtl::OUString aStr(rtl::OUString::createFromAscii("DAV:lockdiscovery"));
+                                    static ::rtl::OUString aStr(rtl::OUString::createFromAscii("DAV:lockdiscovery"));
                                     if(isWaitingLockResponse())
                                     {
-                                        fprintf(stdout,"===---------------> lockdiscovery end, with parent found. VAR for LockResult\n");
                                         maResult_Lock.Name = aStr;
                                         maResult_Lock.Value <<= maLocks;
                                     }
                                     else
                                     {
-                                        http_dav_ucp::DAVPropertyValue aDAVPropertyValue;
+                                        ::http_dav_ucp::DAVPropertyValue aDAVPropertyValue;
 
-                                        fprintf(stdout,"WebDAVResponseParser::endElement - lockdiscovery end, with parent found. VAR for PropStat\n");
                                         aDAVPropertyValue.Name = aStr;
                                         aDAVPropertyValue.Value <<= maLocks;
                                         maPropStatProperties.push_back(aDAVPropertyValue);
@@ -791,7 +789,6 @@ namespace
                                 if(hasParent(WebDAVName_lockdiscovery) &&
                                    mbLockScopeSet && mbLockTypeSet && mbLockTokenSet)
                                 {
-                                    fprintf(stdout,"===---------------> activelock end, with parent found. SET ALL VARS\n");
                                     const sal_Int32 nLength(maLocks.getLength());
                                     ucb::Lock aLock;
 
@@ -815,19 +812,34 @@ namespace
                                     const sal_Int32 nLength(maLockTokens.getLength());
                                     maLockTokens.realloc(nLength + 1);
                                     maLockTokens[nLength] = maHrefLocks;
-                                    fprintf(stdout,"===---------------> locktoken end, token: '%s'\n",
-                                            OUStringToOString( maHrefLocks , RTL_TEXTENCODING_ISO_8859_1 ).getStr());
                                     mbLockTokenSet = true;
                                 }
                                 break;
                             }
                             case WebDAVName_timeout:
                             {
-                                fprintf(stdout,"===---------------> timeout end\n");
                                 if(hasParent(WebDAVName_activelock))
                                 {
-                                    fprintf(stdout,"===---------------> timeout end, with parent found. SET VARS\n");
-                                    //insert in timeout (a hyper)
+                                    ::rtl::OUString aStr( mpContext->getWhiteSpace().toAsciiLowerCase());
+                                    static ::rtl::OUString aInfinite( ::rtl::OUString::createFromAscii( "infinite" ) );
+                                    static ::rtl::OUString aSecond( ::rtl::OUString::createFromAscii( "second-" ) );
+                                    
+                                    fprintf(stdout,">>>> WebDAVResponseParser::endElement - timeout end, with parent found. timeout: %s\n",
+                                            OUStringToOString( aStr , RTL_TEXTENCODING_ISO_8859_1 ).getStr());
+                                    //look for infinity
+                                    sal_Int32 secondIndex;
+                                    if(aStr.indexOf(aInfinite) != -1)
+                                    {
+                                        fprintf(stdout,">>>> WebDAVResponseParser::endElement - timeout is infinite\n");
+                                        maLockTimeout = -1;
+                                    }
+                                    else if((secondIndex = aStr.indexOf(aSecond)) != -1)
+                                    {
+                                        secondIndex += aSecond.getLength();
+                                        maLockTimeout = aStr.copy(secondIndex).toInt64();
+                                        fprintf(stdout,">>>> WebDAVResponseParser::endElement - timeout is second: '%s', %li\n",
+                                                OUStringToOString( aStr.copy(secondIndex) , RTL_TEXTENCODING_ISO_8859_1 ).getStr(),maLockTimeout);
+                                    }
                                 }
                                 break;
                             }
@@ -836,8 +848,6 @@ namespace
                                 if(hasParent(WebDAVName_activelock))
                                 {
                                     maLockOwner = maHrefLocks;
-                                    fprintf(stdout,"===---------------> owner end, with parent: '%s'\n",
-                                            OUStringToOString( maLockOwner , RTL_TEXTENCODING_ISO_8859_1 ).getStr());
                                 }
                                 break;
                             }
@@ -846,9 +856,9 @@ namespace
                                 if(hasParent(WebDAVName_activelock))
                                 {
                                     //set depth, one of three values
-                                    rtl::OUString aStr( mpContext->getWhiteSpace() );
-                                    fprintf(stdout,"===---------------> depth end, value: %s\n",
-                                        OUStringToOString( aStr , RTL_TEXTENCODING_ISO_8859_1 ).getStr());
+                                    ::rtl::OUString aStr( mpContext->getWhiteSpace() );
+                                    //default to zero, if not found
+                                    maLockDepth = ucb::LockDepth_ZERO;
                                     if(aStr.equalsIgnoreAsciiCase(::rtl::OUString::createFromAscii("0")))
                                        maLockDepth = ucb::LockDepth_ZERO;
                                     else if(aStr.equalsIgnoreAsciiCase(::rtl::OUString::createFromAscii("1")))
@@ -901,7 +911,7 @@ namespace
                                         // create DAVResource when we have content
                                         if(maResponseProperties.size())
                                         {
-                                            http_dav_ucp::DAVResource aDAVResource;
+                                            ::http_dav_ucp::DAVResource aDAVResource;
 
                                             aDAVResource.uri = maHref;
                                             aDAVResource.properties = maResponseProperties;
