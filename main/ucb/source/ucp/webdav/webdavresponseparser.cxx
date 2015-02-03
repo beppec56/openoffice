@@ -37,8 +37,6 @@
 #include <map>
 #include <hash_map>
 
-#include <stdio.h> //only for fprintf, to be REMOVED later
-
 //////////////////////////////////////////////////////////////////////////////
 
 using namespace com::sun::star;
@@ -822,23 +820,17 @@ namespace
                                 {
                                     ::rtl::OUString aStr( mpContext->getWhiteSpace().toAsciiLowerCase());
                                     static ::rtl::OUString aInfinite( ::rtl::OUString::createFromAscii( "infinite" ) );
-                                    static ::rtl::OUString aSecond( ::rtl::OUString::createFromAscii( "second-" ) );
-                                    
-                                    fprintf(stdout,">>>> WebDAVResponseParser::endElement - timeout end, with parent found. timeout: %s\n",
-                                            OUStringToOString( aStr , RTL_TEXTENCODING_ISO_8859_1 ).getStr());
+                                    static ::rtl::OUString aSecond( ::rtl::OUString::createFromAscii( "second-" ) );                                    
                                     //look for infinity
                                     sal_Int32 secondIndex;
                                     if(aStr.indexOf(aInfinite) != -1)
                                     {
-                                        fprintf(stdout,">>>> WebDAVResponseParser::endElement - timeout is infinite\n");
                                         maLockTimeout = -1;
                                     }
                                     else if((secondIndex = aStr.indexOf(aSecond)) != -1)
                                     {
                                         secondIndex += aSecond.getLength();
                                         maLockTimeout = aStr.copy(secondIndex).toInt64();
-                                        fprintf(stdout,">>>> WebDAVResponseParser::endElement - timeout is second: '%s', %li\n",
-                                                OUStringToOString( aStr.copy(secondIndex) , RTL_TEXTENCODING_ISO_8859_1 ).getStr(),maLockTimeout);
                                     }
                                 }
                                 break;
@@ -882,7 +874,6 @@ namespace
                                             if(maPropStatProperties.size())
                                             {
                                                 // append to maResponseProperties if okay
-                                                OSL_TRACE(">>>> WebDAVResponseParser::endElement - WebDAVName_propstat end, collecting properties\n");
                                                 maResponseProperties.insert(maResponseProperties.end(), maPropStatProperties.begin(), maPropStatProperties.end());
                                             }
                                         }
@@ -901,9 +892,6 @@ namespace
                             case WebDAVName_response:
                             {
                                 // response end
-                                OSL_TRACE(">>>> WebDAVName_response end, href: '%s'\n",
-                                        OUStringToOString( maHref , RTL_TEXTENCODING_ISO_8859_1 ).getStr());
-
                                 if(maHref.getLength())
                                 {
                                     if(isCollectingProperties())
@@ -916,11 +904,6 @@ namespace
                                             aDAVResource.uri = maHref;
                                             aDAVResource.properties = maResponseProperties;
                                             maResult_PropFind.push_back(aDAVResource);
-//print received properties
-                                            for(uint i =0; i < maResponseProperties.size(); i++) {
-                                                OSL_TRACE(">>>> WebDAVResponseParser::endElement - prop: '%s'\n",
-                                                    OUStringToOString( maResponseProperties[i].Name , RTL_TEXTENCODING_ISO_8859_1 ).getStr());
-                                            }
                                         }
                                     }
                                     else
