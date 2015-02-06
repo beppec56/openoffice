@@ -25,7 +25,10 @@
 #define INCLUDED_SERFTYPES_HXX
 
 #include <serf/serf.h>
+#include <com/sun/star/ucb/Lock.hpp>
 #include "DAVTypes.hxx"
+
+using namespace com::sun::star;
 
 namespace http_dav_ucp
 {
@@ -34,10 +37,7 @@ typedef serf_connection_t SerfConnection;
 
 // TODO, figure out type of <SerfLock>
 typedef struct    {
-  Depth eDepth;
-  LockScope eScope;
-  char * nOwner;
-  long    lTimeout;
+    ucb::Lock   aLock;
  } SerfLock;
 
 // TODO, check if we need it later on

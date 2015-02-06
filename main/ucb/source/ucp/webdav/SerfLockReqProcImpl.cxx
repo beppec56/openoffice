@@ -22,8 +22,8 @@
 // MARKER(update_precomp.py): autogen include statement, do not remove
 #include "precompiled_ucb.hxx"
 
-#include "SerfLockReqProcImpl.hxx"
 #include "SerfTypes.hxx"
+#include "SerfLockReqProcImpl.hxx"
 #include "DAVProperties.hxx"
 
 #include "webdavresponseparser.hxx"
@@ -36,37 +36,42 @@ namespace http_dav_ucp
 
 SerfLockReqProcImpl::SerfLockReqProcImpl( const char* inSourcePath,
                                           const DAVRequestHeaders& inRequestHeaders, // on debug the header look empty
-                                          const SerfLock & inLock ,
+                                          const ucb::Lock& inLock ,
                                           const char* inTimeout,
                                           DAVPropertyValue & outLock)
     : SerfRequestProcessorImpl( inSourcePath, inRequestHeaders )
     , mLock( inLock )
+    , mTimeout(inTimeout)
     , mLockObtained( &outLock )
     , xInputStream( new SerfInputStream() )
-    , mOwner(inLock.nOwner)
-    , mTimeout(inTimeout)
 {
-    switch ( inLock.eDepth )
+    switch ( inLock.Depth )
     {
-        case DAVZERO:
-            mDepthStr = "0";
-            break;
-        case DAVONE:
+        //TODO beppec56 investigate on this case...
+    case ucb::LockDepth_MAKE_FIXED_SIZE:
+        
+    case ucb::LockDepth_ZERO:
+        mDepthStr = "0";
+        break;
+    case ucb::LockDepth_ONE:
             mDepthStr = "1";
             break;
-        case DAVINFINITY:
+    case ucb::LockDepth_INFINITY:
             mDepthStr = "infinity";
             break;
     }
 
-    switch ( inLock.eScope )
+    switch ( inLock.Scope )
     {
-        case EXCLUSIVE:
-            mLockScope = "<lockscope><exclusive/></lockscope>";
-            break;
-        case SHARED:
-            mLockScope = "<lockscope><shared/></lockscope>";
-            break;
+        //TODO beppec56 investigate on this case...
+    case ucb::LockScope_MAKE_FIXED_SIZE:
+
+    case ucb::LockScope_EXCLUSIVE:
+        mLockScope = "<lockscope><exclusive/></lockscope>";
+        break;
+    case ucb::LockScope_SHARED:
+        mLockScope = "<lockscope><shared/></lockscope>";
+        break;
     }
 }
 
@@ -90,7 +95,9 @@ serf_bucket_t * SerfLockReqProcImpl::createSerfRequestBucket( serf_request_t * i
         aBuffer.appendAscii( mLockScope );
         aBuffer.appendAscii( RTL_CONSTASCII_STRINGPARAM( LOCK_TYPE ));
         aBuffer.appendAscii( RTL_CONSTASCII_STRINGPARAM( "<owner><href>" ));
-        aBuffer.appendAscii( mOwner );
+        rtl::OUString aStr;
+        mLock.Owner >>= aStr;
+        aBuffer.appendAscii( rtl::OUStringToOString( aStr, RTL_TEXTENCODING_UTF8 ).getStr() );
         aBuffer.appendAscii( RTL_CONSTASCII_STRINGPARAM( "</href></owner>" ));
         aBuffer.appendAscii( RTL_CONSTASCII_STRINGPARAM( LOCK_TRAILER ));
         aBodyText = rtl::OUStringToOString( aBuffer.makeStringAndClear(), RTL_TEXTENCODING_UTF8 );

@@ -1045,50 +1045,9 @@ void SerfSession::LOCK( const ::rtl::OUString & inPath,
 
     boost::shared_ptr<SerfRequestProcessor> aReqProc( createReqProc( inPath ) );
     apr_status_t status = APR_SUCCESS;
-    SerfLock theLock;
-
-    // Set the lock depth
-    switch( rLock.Depth )
-    {
-    case ucb::LockDepth_ZERO:
-      theLock.eDepth = DAVZERO;
-        break;
-    case ucb::LockDepth_ONE:
-        theLock.eDepth = DAVONE;
-        break;
-    case ucb::LockDepth_INFINITY:
-        theLock.eDepth = DAVINFINITY;
-        break;
-    default:
-        throw DAVException( DAVException::DAV_INVALID_ARG );
-    }
-
-    // Set the lock scope
-    switch ( rLock.Scope )
-    {
-    case ucb::LockScope_EXCLUSIVE:
-        theLock.eScope = EXCLUSIVE;
-        break;
-    case ucb::LockScope_SHARED:
-        theLock.eScope = SHARED;
-        break;
-    default:
-        throw DAVException( DAVException::DAV_INVALID_ARG );
-    }
-
-    // Set the lock timeout
-    theLock.lTimeout = (long)rLock.Timeout;
-
-    // Set the lock owner
-    rtl::OUString aValue;
-    rLock.Owner >>= aValue;
-    theLock.nOwner =
-      apr_pstrdup( getAprPool(), rtl::OUStringToOString( aValue,
-                                           RTL_TEXTENCODING_UTF8 ).getStr() );
-
     //lock the resource
     DAVPropertyValue outLock;
-    aReqProc->processLock(inPath, theLock, outLock, status);
+    aReqProc->processLock(inPath, rLock, outLock, status);
 
     if ( aReqProc->mpDAVException )
     {
@@ -1115,15 +1074,15 @@ void SerfSession::LOCK( const ::rtl::OUString & inPath,
         uno::Sequence< ucb::Lock >      aLocks;
         outLock.Value >>= aLocks;
         ucb::Lock aLock = aLocks[0];
+        rtl::OUString   aOwner;
+        rtl::OUString   aToken;
+        aLock.Owner >>= aOwner;
+        long    aTimeout = aLock.Timeout;
+            
+        aToken = aLock.LockTokens[0];
 
         {
 //            block of code for print/debug only, remove when done
-            rtl::OUString   aOwner;
-            rtl::OUString   aToken;
-            aLock.Owner >>= aOwner;
-            long    aTimeout = aLock.Timeout;
-            
-            aToken = aLock.LockTokens[0];
             char *depth = apr_pstrdup( getAprPool(), "unknown");
             switch(aLock.Depth) {
             default:

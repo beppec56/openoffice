@@ -307,17 +307,17 @@ bool SerfRequestProcessor::processMove( const rtl::OUString & inDestinationPath,
 
 //LOCK creating a new lock
 bool SerfRequestProcessor::processLock( const rtl::OUString & inDestinationPath,
-                                        const SerfLock & inLock,
+                                        const com::sun::star::ucb::Lock& inLock,
                                         DAVPropertyValue & outLock,
                                         apr_status_t& outSerfStatus )
 {
     mDestPathStr = apr_pstrdup( mrSerfSession.getAprPool(), 
                                 rtl::OUStringToOString( inDestinationPath, RTL_TEXTENCODING_UTF8 ).getStr() );
     char * Timeout;
-    if(inLock.lTimeout == -1)
+    if(inLock.Timeout == -1)
         Timeout = apr_psprintf( mrSerfSession.getAprPool(), "Infinite" );
     else
-        Timeout = apr_psprintf( mrSerfSession.getAprPool(), "Second-%ld", inLock.lTimeout );
+        Timeout = apr_psprintf( mrSerfSession.getAprPool(), "Second-%ld", inLock.Timeout );
 
     mpProcImpl = createLockReqProcImpl( mPathStr,
                                         mrSerfSession.getRequestEnvironment().m_aRequestHeaders,

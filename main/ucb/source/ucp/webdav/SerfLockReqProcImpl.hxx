@@ -29,6 +29,7 @@
 
 #include <vector>
 #include <rtl/ustring.hxx>
+#include "SerfTypes.hxx"
 #include "DAVTypes.hxx"
 #include "DAVResource.hxx"
 
@@ -40,7 +41,7 @@ class SerfLockReqProcImpl : public SerfRequestProcessorImpl
 public:
     SerfLockReqProcImpl( const char* inSourcePath,
                          const DAVRequestHeaders& inRequestHeaders,
-                         const SerfLock & inLock,
+                         const ucb::Lock& inLock,
                          const char* inTimeout,
                          DAVPropertyValue & outLock);
 
@@ -58,12 +59,11 @@ protected:
 
 private:
     std::vector< DAVResource > mpResources;  
-    const SerfLock mLock;
-    const char *mDepthStr;
-    const char *mLockScope;
-    const char *mTimeout;
-    const char *mOwner;
-    DAVPropertyValue*  mLockObtained;
+    const ucb::Lock     mLock;
+    const char*         mDepthStr;
+    const char*         mLockScope;
+    const char*         mTimeout;
+    DAVPropertyValue*   mLockObtained;
     com::sun::star::uno::Reference< SerfInputStream > xInputStream;
 };
 

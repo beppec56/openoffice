@@ -130,7 +130,7 @@ public:
 
     // LOCK
     bool processLock( const rtl::OUString & inDestinationPath,
-                      const SerfLock & inLock,
+                      const com::sun::star::ucb::Lock& inLock,
                       DAVPropertyValue & outLock,
                       apr_status_t& outSerfStatus );
 
