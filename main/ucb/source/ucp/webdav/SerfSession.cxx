@@ -26,6 +26,7 @@
 #include <vector>
 #include <string.h>
 #include <rtl/string.h>
+#include <osl/time.h>
 #include "comphelper/sequence.hxx"
 #include "ucbhelper/simplecertificatevalidationrequest.hxx"
 
@@ -60,7 +61,7 @@ using namespace http_dav_ucp;
 
 // -------------------------------------------------------------------
 // static members!
-//SerfLockStore SerfSession::m_aSerfLockStore;
+SerfLockStore SerfSession::m_aSerfLockStore;
 
 // -------------------------------------------------------------------
 // Constructor
@@ -86,6 +87,8 @@ SerfSession::SerfSession(
     m_pSerfContext = serf_context_create( getAprPool() );
 
     m_pSerfBucket_Alloc = serf_bucket_allocator_create( getAprPool(), NULL, NULL );
+    OSL_TRACE(">>>> SerfSession::SerfSession - Session created inUri: %s",
+              rtl::OUStringToOString( m_aUri.GetURI(), RTL_TEXTENCODING_UTF8 ).getStr());
 }
 
 // -------------------------------------------------------------------
@@ -98,6 +101,8 @@ SerfSession::~SerfSession( )
         serf_connection_close( m_pSerfConnection );
         m_pSerfConnection = 0;
     }
+    OSL_TRACE(">>>> SerfSession::~SerfSession - Session destroyed inUri: %s",
+        rtl::OUStringToOString( m_aUri.GetURI(), RTL_TEXTENCODING_UTF8 ).getStr());
 }
 
 // -------------------------------------------------------------------
@@ -1045,6 +1050,14 @@ void SerfSession::LOCK( const ::rtl::OUString & inPath,
 
     boost::shared_ptr<SerfRequestProcessor> aReqProc( createReqProc( inPath ) );
     apr_status_t status = APR_SUCCESS;
+
+    TimeValue startCall;
+    osl_getSystemTime( &startCall );
+
+    OSL_TRACE(">>>> SerfSession::LOCK - inPath: %s, session URI: %s\n",
+              rtl::OUStringToOString( inPath,RTL_TEXTENCODING_UTF8 ).getStr(),
+              rtl::OUStringToOString( m_aUri.GetURI(),RTL_TEXTENCODING_UTF8 ).getStr());
+
     //lock the resource
     DAVPropertyValue outLock;
     aReqProc->processLock(inPath, rLock, outLock, status);

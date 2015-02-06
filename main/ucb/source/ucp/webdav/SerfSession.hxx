@@ -30,7 +30,7 @@
 #include "DAVResource.hxx"
 #include "DAVSession.hxx"
 #include "SerfTypes.hxx"
-//#include "SerfLockStore.hxx"
+#include "SerfLockStore.hxx"
 #include "SerfUri.hxx"
 #include <com/sun/star/lang/XMultiServiceFactory.hpp>
 
@@ -67,7 +67,7 @@ private:
 
     DAVRequestEnvironment m_aEnv;
 
-//    static SerfLockStore m_aSerfLockStore;
+    static SerfLockStore m_aSerfLockStore;
 
     char* getHostinfo();
     bool isSSLNeeded();

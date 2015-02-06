@@ -24,11 +24,12 @@
 // MARKER(update_precomp.py): autogen include statement, do not remove
 #include "precompiled_ucb.hxx"
 
-#include <ne_locks.h>
-#include <ne_uri.h>
+//#include <ne_locks.h>
+//#include <ne_uri.h>
 #include <rtl/ustring.hxx>
 #include <osl/time.h>
 #include <osl/thread.hxx>
+#include "SerfTypes.hxx"
 #include "SerfSession.hxx"
 #include "SerfLockStore.hxx"
 
@@ -83,10 +84,9 @@ void TickerThread::run()
 
 // -------------------------------------------------------------------
 SerfLockStore::SerfLockStore()
-    : m_pSerfLockStore( ne_lockstore_create() ),
-      m_pTickerThread( 0 )
+    : m_pTickerThread( 0 )
 {
-    OSL_ENSURE( m_pSerfLockStore, "Unable to create neon lock store!" );
+//    OSL_ENSURE( m_pSerfLockStore, "Unable to create neon lock store!" );
 }
 
 // -------------------------------------------------------------------
@@ -105,13 +105,14 @@ SerfLockStore::~SerfLockStore()
         SerfLock * pLock = (*it).first;
         (*it).second.xSession->UNLOCK( pLock );
 
-        ne_lockstore_remove( m_pSerfLockStore, pLock );
-        ne_lock_destroy( pLock );
+        //FIXME beppec56
+        // ne_lockstore_remove( m_pSerfLockStore, pLock );
+        // ne_lock_destroy( pLock );
 
         ++it;
     }
 
-    ne_lockstore_destroy( m_pSerfLockStore );
+//    ne_lockstore_destroy( m_pSerfLockStore );
 }
 
 // -------------------------------------------------------------------
@@ -141,11 +142,12 @@ void SerfLockStore::stopTicker()
 }
 
 // -------------------------------------------------------------------
-void SerfLockStore::registerSession( HttpSession * pHttpSession )
+void SerfLockStore::registerSession( SerfSession aSession )
 {
     osl::MutexGuard aGuard( m_aMutex );
 
-    ne_lockstore_register( m_pSerfLockStore, pHttpSession );
+    //FIXME beppec56
+//    ne_lockstore_register( m_pSerfLockStore, pHttpSession );
 }
 
 // -------------------------------------------------------------------
@@ -153,10 +155,12 @@ SerfLock * SerfLockStore::findByUri( rtl::OUString const & rUri )
 {
     osl::MutexGuard aGuard( m_aMutex );
 
-    ne_uri aUri;
-    ne_uri_parse( rtl::OUStringToOString(
-        rUri, RTL_TEXTENCODING_UTF8 ).getStr(), &aUri );
-    return ne_lockstore_findbyuri( m_pSerfLockStore, &aUri );
+    //FIXME beppec56
+    // ne_uri aUri;
+    // ne_uri_parse( rtl::OUStringToOString(
+    //     rUri, RTL_TEXTENCODING_UTF8 ).getStr(), &aUri );
+    // return ne_lockstore_findbyuri( m_pSerfLockStore, &aUri );
+    return static_cast<SerfLock*>(0);
 }
 
 // -------------------------------------------------------------------
@@ -166,7 +170,8 @@ void SerfLockStore::addLock( SerfLock * pLock,
 {
     osl::MutexGuard aGuard( m_aMutex );
 
-    ne_lockstore_add( m_pSerfLockStore, pLock );
+    //FIXME beppec56
+    // ne_lockstore_add( m_pSerfLockStore, pLock );
     m_aLockInfoMap[ pLock ]
         = LockInfo( xSession, nLastChanceToSendRefreshRequest );
 
@@ -196,7 +201,9 @@ void SerfLockStore::removeLock( SerfLock * pLock )
     osl::MutexGuard aGuard( m_aMutex );
 
     m_aLockInfoMap.erase( pLock );
-    ne_lockstore_remove( m_pSerfLockStore, pLock );
+    //FIXME beppec56
+//    ne_lockstore_remove( m_pSerfLockStore, pLock );
+    //deallocate SerfLock class !
 
     if ( m_aLockInfoMap.size() == 0 )
         stopTicker();

@@ -27,6 +27,7 @@
 #include <osl/mutex.hxx>
 #include <rtl/ref.hxx>
 #include "SerfTypes.hxx"
+#include "SerfSession.hxx"
 
 namespace http_dav_ucp
 {
@@ -70,7 +71,7 @@ public:
     SerfLockStore();
     ~SerfLockStore();
 
-    void registerSession( HttpSession * pHttpSession );
+    void registerSession( SerfSession aSession );
 
     SerfLock * findByUri( rtl::OUString const & rUri );
 
