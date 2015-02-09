@@ -1000,7 +1000,7 @@ namespace
                     comphelper::getProcessServiceFactory()->createInstance(
                         rtl::OUString::createFromAscii("com.sun.star.xml.sax.Parser") ),
                     uno::UNO_QUERY_THROW );
-                
+
                 // create parser; connect parser and filter
                 WebDAVResponseParser* pWebDAVResponseParser = new WebDAVResponseParser(eWebDAVResponseParserMode);
                 uno::Reference< xml::sax::XDocumentHandler > xWebDAVHdl(pWebDAVResponseParser);

@@ -1006,7 +1006,7 @@ void SerfSession::DESTROY( const rtl::OUString & inPath,
 }
 
 // -------------------------------------------------------------------
-/*
+
 namespace
 {
     sal_Int32 lastChanceToSendRefreshRequest( TimeValue const & rStart,
@@ -1017,8 +1017,8 @@ namespace
 
         // Try to estimate a safe absolute time for sending the
         // lock refresh request.
-        sal_Int32 lastChanceToSendRefreshRequest = -1;
-        if ( timeout != NE_TIMEOUT_INFINITE )
+        sal_Int32 lastChanceToSendRefreshRequest = DAVINFINITY;
+        if ( timeout != DAVINFINITY )
         {
             sal_Int32 calltime = aEnd.Seconds - rStart.Seconds;
             if ( calltime <= timeout )
@@ -1035,7 +1035,7 @@ namespace
     }
 
 } // namespace
-*/
+
 // -------------------------------------------------------------------
 // LOCK (set new lock)
 // -------------------------------------------------------------------
@@ -1051,15 +1051,16 @@ void SerfSession::LOCK( const ::rtl::OUString & inPath,
     boost::shared_ptr<SerfRequestProcessor> aReqProc( createReqProc( inPath ) );
     apr_status_t status = APR_SUCCESS;
 
-    TimeValue startCall;
-    osl_getSystemTime( &startCall );
-
     OSL_TRACE(">>>> SerfSession::LOCK - inPath: %s, session URI: %s\n",
               rtl::OUStringToOString( inPath,RTL_TEXTENCODING_UTF8 ).getStr(),
               rtl::OUStringToOString( m_aUri.GetURI(),RTL_TEXTENCODING_UTF8 ).getStr());
 
     //lock the resource
     DAVPropertyValue outLock;
+
+    TimeValue startCall;
+    osl_getSystemTime( &startCall );
+
     aReqProc->processLock(inPath, rLock, outLock, status);
 
     if ( aReqProc->mpDAVException )
@@ -1083,19 +1084,25 @@ void SerfSession::LOCK( const ::rtl::OUString & inPath,
     OSL_TRACE(">>>> SerfSession::LOCK - Store received lock");
     if(outLock.Name.compareToAscii(RTL_CONSTASCII_STRINGPARAM( "DAV:lockdiscovery" )) == 0 )
     {
-        //got a lock, use the first returned
+        //got a lock, use only the first returned
         uno::Sequence< ucb::Lock >      aLocks;
         outLock.Value >>= aLocks;
         ucb::Lock aLock = aLocks[0];
-        rtl::OUString   aOwner;
-        rtl::OUString   aToken;
-        aLock.Owner >>= aOwner;
-        long    aTimeout = aLock.Timeout;
-            
-        aToken = aLock.LockTokens[0];
 
+        SerfLock* aNewLock = new SerfLock( aLock, m_aUri.GetURI() );
+        // add the store the new lock
+        m_aSerfLockStore.addLock(aNewLock,this,
+                                 lastChanceToSendRefreshRequest(
+                                     startCall, static_cast< int >(aLock.Timeout) ) );
         {
-//            block of code for print/debug only, remove when done
+//FIXME remove when debug done            block of code for print/debug only, remove when done
+            rtl::OUString   aOwner;
+            aLock.Owner >>= aOwner;
+            long    aTimeout = aLock.Timeout;
+
+            rtl::OUString   aToken;
+            aToken = aLock.LockTokens[0];
+
             char *depth = apr_pstrdup( getAprPool(), "unknown");
             switch(aLock.Depth) {
             default:
@@ -1115,9 +1122,9 @@ void SerfSession::LOCK( const ::rtl::OUString & inPath,
                     rtl::OUStringToOString( aToken,RTL_TEXTENCODING_UTF8 ).getStr(),
                     depth, aTimeout );
         }
+
     }
 
-    // add the new lock
     /* Create a depth zero, exclusive write lock, with default timeout
      * (allowing a server to pick a default).  token, owner and uri are
      * unset. */
@@ -1247,10 +1254,28 @@ sal_Int64 SerfSession::LOCK( const ::rtl::OUString & /*inPath*/,
 // -------------------------------------------------------------------
 // LOCK (refresh existing lock)
 // -------------------------------------------------------------------
-bool SerfSession::LOCK( SerfLock * /*pLock*/,
-                        sal_Int32 & /*rlastChanceToSendRefreshRequest*/ )
+bool SerfSession::LOCK( SerfLock * pLock,
+                        sal_Int32 & rlastChanceToSendRefreshRequest )
 {
     osl::Guard< osl::Mutex > theGuard( m_aMutex );
+
+
+    // refresh existing lock.
+
+    TimeValue startCall;
+    osl_getSystemTime( &startCall );
+
+    //call the refresh procedure, via SerfRequestProcessor
+
+    //if ok, udate the lastchance refresh time in lock
+
+    rtl::OUString   aToken;
+    aToken = pLock->getLock().LockTokens[0];
+
+    fprintf(stdout,">>>> SerfSession::LOCK (refreshing) - URI: %s, token: %s, timeout %d\n",
+            rtl::OUStringToOString( pLock->getSessionURI(), RTL_TEXTENCODING_UTF8 ).getStr(),
+            rtl::OUStringToOString( pLock->getLock().LockTokens[0], RTL_TEXTENCODING_UTF8 ).getStr(),
+            rlastChanceToSendRefreshRequest);
 
     return true;
     /*
@@ -1278,11 +1303,16 @@ bool SerfSession::LOCK( SerfLock * /*pLock*/,
 // -------------------------------------------------------------------
 // UNLOCK
 // -------------------------------------------------------------------
-void SerfSession::UNLOCK( const ::rtl::OUString & /*inPath*/,
+void SerfSession::UNLOCK( const ::rtl::OUString & inPath,
                           const DAVRequestEnvironment & /*rEnv*/ )
     throw ( DAVException )
 {
     osl::Guard< osl::Mutex > theGuard( m_aMutex );
+
+    OSL_TRACE(">>>> SerfSession::UNLOCK - unlocking: %s\n",
+        rtl::OUStringToOString( inPath, RTL_TEXTENCODING_UTF8 ).getStr());
+
+    //TODO bepppec56: delete SerfLock when removed from SerfLockStore
 
     /*
     // get the neon lock from lock store
@@ -1314,9 +1344,16 @@ void SerfSession::UNLOCK( const ::rtl::OUString & /*inPath*/,
 // -------------------------------------------------------------------
 // UNLOCK
 // -------------------------------------------------------------------
-bool SerfSession::UNLOCK( SerfLock * /*pLock*/ )
+bool SerfSession::UNLOCK( SerfLock * pLock )
 {
     osl::Guard< osl::Mutex > theGuard( m_aMutex );
+
+    rtl::OUString   aToken;
+    aToken = pLock->getLock().LockTokens[0];
+
+    fprintf(stdout,">>>> SerfSession::UNLOCK - URI: %s, token: %s\n",
+              rtl::OUStringToOString( pLock->getSessionURI(), RTL_TEXTENCODING_UTF8 ).getStr(),
+              rtl::OUStringToOString( pLock->getLock().LockTokens[0], RTL_TEXTENCODING_UTF8 ).getStr());
 
     return true;
     /*

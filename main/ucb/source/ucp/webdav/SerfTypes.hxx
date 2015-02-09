@@ -38,10 +38,24 @@ typedef serf_connection_t SerfConnection;
 // TODO, figure out type of <SerfLock>
 class SerfLock
 {
-    rtl::OUString   sessionURI;
-    ucb::Lock   aLock;
+public:
     SerfLock() {};
- };
+    SerfLock(const ucb::Lock inLock)
+        : mLock( inLock ) { };
+    SerfLock(const ucb::Lock inLock, rtl::OUString inURI)
+        : mLock( inLock )
+        , mSessionURI( inURI ) {};
+
+    void setLock(const ucb::Lock inLock)  { mLock = inLock; };
+    const ucb::Lock getLock() { return mLock; };
+
+    void setSessionURI(const rtl::OUString inURI) { mSessionURI = inURI; };
+    const rtl::OUString   getSessionURI() { return mSessionURI; };
+
+private:
+    ucb::Lock   mLock;
+    rtl::OUString mSessionURI;
+};
 
 // TODO, check if we need it later on
 typedef struct { const char *nspace, *name; } SerfPropName;

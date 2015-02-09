@@ -104,15 +104,9 @@ SerfLockStore::~SerfLockStore()
     {
         SerfLock * pLock = (*it).first;
         (*it).second.xSession->UNLOCK( pLock );
-
-        //FIXME beppec56
-        // ne_lockstore_remove( m_pSerfLockStore, pLock );
-        // ne_lock_destroy( pLock );
-
+        delete pLock;
         ++it;
     }
-
-//    ne_lockstore_destroy( m_pSerfLockStore );
 }
 
 // -------------------------------------------------------------------
@@ -142,7 +136,7 @@ void SerfLockStore::stopTicker()
 }
 
 // -------------------------------------------------------------------
-void SerfLockStore::registerSession( SerfSession aSession )
+void SerfLockStore::registerSession( SerfSession /* aSession */ )
 {
     osl::MutexGuard aGuard( m_aMutex );
 
@@ -172,9 +166,23 @@ void SerfLockStore::addLock( SerfLock * pLock,
 
     //FIXME beppec56
     // ne_lockstore_add( m_pSerfLockStore, pLock );
+
     m_aLockInfoMap[ pLock ]
         = LockInfo( xSession, nLastChanceToSendRefreshRequest );
 
+    {
+        rtl::OUString   aOwner;
+        pLock->getLock().Owner >>= aOwner;
+
+        rtl::OUString   aToken;
+        aToken = pLock->getLock().LockTokens[0];        
+
+        OSL_TRACE(">>>> SerfLockStore::addLock - a new lock was added: URI: %s, Owner: %s, token: %s, nLastChanceToSendRefreshRequest %d\n",
+                  rtl::OUStringToOString( pLock->getSessionURI() ,RTL_TEXTENCODING_UTF8 ).getStr(),
+                  rtl::OUStringToOString( aOwner,RTL_TEXTENCODING_UTF8 ).getStr(),
+                  rtl::OUStringToOString( aToken,RTL_TEXTENCODING_UTF8 ).getStr(),
+                      nLastChanceToSendRefreshRequest );
+    }
     startTicker();
 }
 
