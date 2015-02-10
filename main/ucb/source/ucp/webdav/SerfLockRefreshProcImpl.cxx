@@ -84,9 +84,9 @@ SerfLockRefreshProcImpl::~SerfLockRefreshProcImpl()
 serf_bucket_t * SerfLockRefreshProcImpl::createSerfRequestBucket( serf_request_t * inSerfRequest )
 {
   //prepare body of request:
-    serf_bucket_alloc_t* pSerfBucketAlloc = serf_request_get_alloc( inSerfRequest );
-    serf_bucket_t* body_bkt = 0;
-    rtl::OString aBodyText;
+    // serf_bucket_alloc_t* pSerfBucketAlloc = serf_request_get_alloc( inSerfRequest );
+    // serf_bucket_t* body_bkt = 0;
+    // rtl::OString aBodyText;
     // {
     //    rtl::OUStringBuffer aBuffer;
     //     aBuffer.appendAscii( RTL_CONSTASCII_STRINGPARAM( LOCK_HEADER ));
@@ -108,10 +108,8 @@ serf_bucket_t * SerfLockRefreshProcImpl::createSerfRequestBucket( serf_request_t
     serf_bucket_t *req_bkt = serf_request_bucket_request_create( inSerfRequest,
                                                                  "LOCK",
                                                                  getPathStr(),
-                                                                 body_bkt,
-                                                                 pSerfBucketAlloc );
-    handleChunkedEncoding(req_bkt, aBodyText.getLength());
-
+                                                                 0,
+                                                                 serf_request_get_alloc( inSerfRequest ) );
     // set request header fields
     serf_bucket_t* hdrs_bkt = serf_bucket_request_get_headers( req_bkt );
     if (hdrs_bkt != NULL)
@@ -122,10 +120,10 @@ serf_bucket_t * SerfLockRefreshProcImpl::createSerfRequestBucket( serf_request_t
         // request specific header fields
         serf_bucket_headers_set( hdrs_bkt, "Timeout", mTimeout );
         serf_bucket_headers_set( hdrs_bkt, "if", mTokenStr );
-        if (hdrs_bkt!=NULL && body_bkt != 0 && aBodyText.getLength() > 0 )
-        {
-            serf_bucket_headers_set( hdrs_bkt, "Content-Type", "application/xml" );
-        }
+        // if (hdrs_bkt!=NULL && body_bkt != 0 && aBodyText.getLength() > 0 )
+        // {
+        //     serf_bucket_headers_set( hdrs_bkt, "Content-Type", "application/xml" );
+        // }
     }
     else
     {

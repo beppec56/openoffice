@@ -343,7 +343,7 @@ bool SerfRequestProcessor::processLockRefresh( const rtl::OUString & inDestinati
     else
         Timeout = apr_psprintf( mrSerfSession.getAprPool(), "Second-%ld", inLock.Timeout );
 
-    char * aToken = apr_pstrdup( mrSerfSession.getAprPool(),
+    char * aToken = apr_psprintf( mrSerfSession.getAprPool(), "(<%s>)",
                                  rtl::OUStringToOString(inLock.LockTokens[0], RTL_TEXTENCODING_UTF8 ).getStr() );
 
     mpProcImpl = createLockRefreshProcImpl( mPathStr,
