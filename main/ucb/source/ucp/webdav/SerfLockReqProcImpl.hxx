@@ -57,7 +57,7 @@ protected:
     virtual
     void handleEndOfResponseData( serf_bucket_t * inSerfResponseBucket );
 
-private:
+protected:
     std::vector< DAVResource > mpResources;  
     const ucb::Lock     mLock;
     const char*         mDepthStr;
@@ -69,4 +69,4 @@ private:
 
 } // namespace http_dav_ucp
 
-#endif // INCLUDED_SERFLOCkREQPROCIMPL_HXX
+#endif // INCLUDED_SERFLOCKREQPROCIMPL_HXX

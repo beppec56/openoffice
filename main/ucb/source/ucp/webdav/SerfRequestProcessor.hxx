@@ -134,6 +134,12 @@ public:
                       DAVPropertyValue & outLock,
                       apr_status_t& outSerfStatus );
 
+    // LOCK refresh
+    bool processLockRefresh( const rtl::OUString & inDestinationPath,
+                      const com::sun::star::ucb::Lock& inLock,
+                      DAVPropertyValue & outLock,
+                      apr_status_t& outSerfStatus );
+
     apr_status_t provideSerfCredentials( char ** outUsername, 
                                          char ** outPassword,
                                          serf_request_t * inRequest, 

@@ -35,6 +35,7 @@
 #include "SerfCopyReqProcImpl.hxx"
 #include "SerfMoveReqProcImpl.hxx"
 #include "SerfLockReqProcImpl.hxx"
+#include "SerfLockRefreshProcImpl.hxx"
 
 namespace http_dav_ucp
 {
@@ -234,6 +235,22 @@ namespace http_dav_ucp
                                                                           inLock,
                                                                           inTimeout,
                                                                           outLock);
+        return pReqProcImpl;
+    }
+
+    SerfRequestProcessorImpl* createLockRefreshProcImpl( const char* inSourcePath,
+                                                         const DAVRequestHeaders& inRequestHeaders,
+                                                         const ucb::Lock& inLock,                                                         
+                                                         const char* inToken,
+                                                         const char* inTimeout,
+                                                         DAVPropertyValue & outLock)
+    {
+        SerfRequestProcessorImpl* pReqProcImpl = new SerfLockRefreshProcImpl( inSourcePath,
+                                                                              inRequestHeaders,
+                                                                              inLock,
+                                                                              inToken,
+                                                                              inTimeout,
+                                                                              outLock);
         return pReqProcImpl;
     }
 

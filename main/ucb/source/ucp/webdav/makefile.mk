@@ -132,6 +132,7 @@ SLOFILES=\
     $(SLO)$/SerfCopyReqProcImpl.obj \
     $(SLO)$/SerfMoveReqProcImpl.obj \
     $(SLO)$/SerfLockReqProcImpl.obj \
+    $(SLO)$/SerfLockRefreshProcImpl.obj \
     $(SLO)$/SerfLockStore.obj \
     $(SLO)$/SerfSession.obj \
     $(SLO)$/SerfCallbacks.obj \

@@ -175,7 +175,7 @@ void SerfLockStore::addLock( SerfLock * pLock,
         pLock->getLock().Owner >>= aOwner;
 
         rtl::OUString   aToken;
-        aToken = pLock->getLock().LockTokens[0];        
+        aToken = pLock->getLock().LockTokens[0];
 
         OSL_TRACE(">>>> SerfLockStore::addLock - a new lock was added: URI: %s, Owner: %s, token: %s, nLastChanceToSendRefreshRequest %d\n",
                   rtl::OUStringToOString( pLock->getSessionURI() ,RTL_TEXTENCODING_UTF8 ).getStr(),

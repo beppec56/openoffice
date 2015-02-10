@@ -36,7 +36,7 @@ namespace http_dav_ucp
 
 SerfLockReqProcImpl::SerfLockReqProcImpl( const char* inSourcePath,
                                           const DAVRequestHeaders& inRequestHeaders, // on debug the header look empty
-                                          const ucb::Lock& inLock ,
+                                          const ucb::Lock& inLock,
                                           const char* inTimeout,
                                           DAVPropertyValue & outLock)
     : SerfRequestProcessorImpl( inSourcePath, inRequestHeaders )
@@ -140,7 +140,9 @@ serf_bucket_t * SerfLockReqProcImpl::createSerfRequestBucket( serf_request_t * i
 void SerfLockReqProcImpl::processChunkOfResponseData( const char* data, 
                                                       apr_size_t len )
 {
-  fprintf( stdout, "==\n=====>>>>> SerfLockReqProcImpl::processChunkOfResponseData %s %lu \n", data, len);
+    {//debug only, remove when done
+        fprintf( stdout, "==\n=====>>>>> SerfLockReqProcImpl::processChunkOfResponseData %s %lu \n", data, len);
+    }
     if ( xInputStream.is() )
     {
         xInputStream->AddToStream( data, len );

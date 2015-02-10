@@ -27,6 +27,7 @@
 #include <serf/serf.h>
 #include <com/sun/star/ucb/Lock.hpp>
 #include "DAVTypes.hxx"
+#include "DAVRequestEnvironment.hxx"
 
 using namespace com::sun::star;
 
@@ -38,23 +39,25 @@ typedef serf_connection_t SerfConnection;
 // TODO, figure out type of <SerfLock>
 class SerfLock
 {
+private:
+    ucb::Lock               mLock;
+    const rtl::OUString     mSessionURI;
+    const rtl::OUString     mPathStr;
+    // const DAVRequestEnvironment& mrRequestEnvironment;
 public:
-    SerfLock() {};
-    SerfLock(const ucb::Lock inLock)
-        : mLock( inLock ) { };
-    SerfLock(const ucb::Lock inLock, rtl::OUString inURI)
+
+    SerfLock(const ucb::Lock inLock, rtl::OUString inURI, rtl::OUString inPath)
         : mLock( inLock )
-        , mSessionURI( inURI ) {};
+        , mSessionURI( inURI )
+        , mPathStr( inPath ) 
+        // , mrRequestEnvironment( rEnv )
+        {};
 
     void setLock(const ucb::Lock inLock)  { mLock = inLock; };
-    const ucb::Lock getLock() { return mLock; };
-
-    void setSessionURI(const rtl::OUString inURI) { mSessionURI = inURI; };
-    const rtl::OUString   getSessionURI() { return mSessionURI; };
-
-private:
-    ucb::Lock   mLock;
-    rtl::OUString mSessionURI;
+    const ucb::Lock                 getLock() { return mLock; };
+    const rtl::OUString             getSessionURI() { return mSessionURI; };
+    const rtl::OUString             getResourcePath() { return mPathStr; };
+    // const DAVRequestEnvironment&    getRequestEnvironment() { return mrRequestEnvironment; };
 };
 
 // TODO, check if we need it later on

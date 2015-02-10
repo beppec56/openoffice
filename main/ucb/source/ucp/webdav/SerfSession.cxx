@@ -1089,7 +1089,7 @@ void SerfSession::LOCK( const ::rtl::OUString & inPath,
         outLock.Value >>= aLocks;
         ucb::Lock aLock = aLocks[0];
 
-        SerfLock* aNewLock = new SerfLock( aLock, m_aUri.GetURI() );
+        SerfLock* aNewLock = new SerfLock( aLock, m_aUri.GetURI(), inPath );
         // add the store the new lock
         m_aSerfLockStore.addLock(aNewLock,this,
                                  lastChanceToSendRefreshRequest(
@@ -1258,16 +1258,41 @@ bool SerfSession::LOCK( SerfLock * pLock,
                         sal_Int32 & rlastChanceToSendRefreshRequest )
 {
     osl::Guard< osl::Mutex > theGuard( m_aMutex );
+    rtl::OUString inPath = pLock->getResourcePath();
 
+    boost::shared_ptr<SerfRequestProcessor> aReqProc( createReqProc( inPath ) );
+    apr_status_t status = APR_SUCCESS;
 
-    // refresh existing lock.
+    OSL_TRACE(">>>> SerfSession::LOCK (refresh) - inPath: %s, session URI: %s\n",
+              rtl::OUStringToOString( inPath,RTL_TEXTENCODING_UTF8 ).getStr(),
+              rtl::OUStringToOString( m_aUri.GetURI(),RTL_TEXTENCODING_UTF8 ).getStr());
 
+    //lock the resource
+    DAVPropertyValue outLock;
+    
     TimeValue startCall;
     osl_getSystemTime( &startCall );
 
     //call the refresh procedure, via SerfRequestProcessor
+    aReqProc->processLockRefresh( inPath, pLock->getLock(), outLock, status);
 
+    if ( aReqProc->mpDAVException )
+    {
+        DAVException* mpDAVExp( aReqProc->mpDAVException );
+        //check the status
+        if ( mpDAVExp->getStatus() == SC_LOCKED )
+        {
+            OSL_TRACE(">>>> SerfSession::LOCK - Resource already locked");            
+        }
+    }
+
+    //HandleError will handle the error and throw an exception, if needed
+    HandleError( aReqProc );
+    
+    //FIXME, TODO beppec56
     //if ok, udate the lastchance refresh time in lock
+//    rlastChanceToSendRefreshRequest
+//        = lastChanceToSendRefreshRequest( startCall, pLock->timeout );
 
     rtl::OUString   aToken;
     aToken = pLock->getLock().LockTokens[0];

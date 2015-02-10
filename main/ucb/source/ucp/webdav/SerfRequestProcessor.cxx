@@ -311,7 +311,7 @@ bool SerfRequestProcessor::processLock( const rtl::OUString & inDestinationPath,
                                         DAVPropertyValue & outLock,
                                         apr_status_t& outSerfStatus )
 {
-    mDestPathStr = apr_pstrdup( mrSerfSession.getAprPool(), 
+    mDestPathStr = apr_pstrdup( mrSerfSession.getAprPool(),
                                 rtl::OUStringToOString( inDestinationPath, RTL_TEXTENCODING_UTF8 ).getStr() );
     char * Timeout;
     if(inLock.Timeout == -1)
@@ -329,6 +329,34 @@ bool SerfRequestProcessor::processLock( const rtl::OUString & inDestinationPath,
     return outSerfStatus == APR_SUCCESS;
 }
 
+//LOCK refresh an existing lock
+bool SerfRequestProcessor::processLockRefresh( const rtl::OUString & inDestinationPath,
+                                        const com::sun::star::ucb::Lock& inLock,
+                                        DAVPropertyValue & outLock,
+                                        apr_status_t& outSerfStatus )
+{
+    mDestPathStr = apr_pstrdup( mrSerfSession.getAprPool(),
+                                rtl::OUStringToOString( inDestinationPath, RTL_TEXTENCODING_UTF8 ).getStr() );
+    char * Timeout;
+    if(inLock.Timeout == -1)
+        Timeout = apr_psprintf( mrSerfSession.getAprPool(), "Infinite" );
+    else
+        Timeout = apr_psprintf( mrSerfSession.getAprPool(), "Second-%ld", inLock.Timeout );
+
+    char * aToken = apr_pstrdup( mrSerfSession.getAprPool(),
+                                 rtl::OUStringToOString(inLock.LockTokens[0], RTL_TEXTENCODING_UTF8 ).getStr() );
+
+    mpProcImpl = createLockRefreshProcImpl( mPathStr,
+                                            mrSerfSession.getRequestEnvironment().m_aRequestHeaders,
+                                            inLock,
+                                            aToken,
+                                            Timeout,
+                                            outLock);
+    outSerfStatus = runProcessor();
+
+    return outSerfStatus == APR_SUCCESS;
+}
+
 apr_status_t SerfRequestProcessor::runProcessor()
 {
     prepareProcessor();
@@ -340,7 +368,7 @@ apr_status_t SerfRequestProcessor::runProcessor()
     }
 
     // create serf request
-    serf_connection_request_create( mrSerfSession.getSerfConnection(), 
+    serf_connection_request_create( mrSerfSession.getSerfConnection(),
                                     Serf_SetupRequest,
                                     this );
 
@@ -351,14 +379,14 @@ apr_status_t SerfRequestProcessor::runProcessor()
     apr_pool_t* pAprPool = mrSerfSession.getAprPool();
     while ( true )
     {
-        status = serf_context_run( pSerfContext, 
-                                   SERF_DURATION_FOREVER, 
+        status = serf_context_run( pSerfContext,
+                                   SERF_DURATION_FOREVER,
                                    pAprPool );
         if ( APR_STATUS_IS_TIMEUP( status ) )
         {
             continue;
         }
-        if ( status != APR_SUCCESS ) 
+        if ( status != APR_SUCCESS )
         {
             break;
         }
@@ -404,7 +432,7 @@ void SerfRequestProcessor::postprocessProcessor( const apr_status_t inStatus )
                 else
                 {
                     mpDAVException = new DAVException( DAVException::DAV_HTTP_ERROR, 
-                                                       mHTTPStatusCodeText, 
+                                                       mHTTPStatusCodeText,
                                                        mnHTTPStatusCode );
                 }
                 break;
