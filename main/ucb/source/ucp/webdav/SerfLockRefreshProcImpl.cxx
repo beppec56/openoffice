@@ -43,67 +43,14 @@ SerfLockRefreshProcImpl::SerfLockRefreshProcImpl( const char* inSourcePath,
     : SerfLockReqProcImpl( inSourcePath, inRequestHeaders, inLock, inTimeout, outLock )
     , mTokenStr( inToken )
 {
-    // switch ( inLock.Depth )
-    // {
-    //     //TODO beppec56 investigate on this case...
-    // case ucb::LockDepth_MAKE_FIXED_SIZE:
-
-    // case ucb::LockDepth_ZERO:
-    //     mDepthStr = "0";
-    //     break;
-    // case ucb::LockDepth_ONE:
-    //         mDepthStr = "1";
-    //         break;
-    // case ucb::LockDepth_INFINITY:
-    //         mDepthStr = "infinity";
-    //         break;
-    // }
-
-    // switch ( inLock.Scope )
-    // {
-    //     //TODO beppec56 investigate on this case...
-    // case ucb::LockScope_MAKE_FIXED_SIZE:
-
-    // case ucb::LockScope_EXCLUSIVE:
-    //     mLockScope = "<lockscope><exclusive/></lockscope>";
-    //     break;
-    // case ucb::LockScope_SHARED:
-    //     mLockScope = "<lockscope><shared/></lockscope>";
-    //     break;
-    // }
 }
 
 SerfLockRefreshProcImpl::~SerfLockRefreshProcImpl()
 {
 }
 
-#define LOCK_HEADER "<?xml version=\"1.0\" encoding=\"utf-8\"?><lockinfo xmlns=\"DAV:\">"
-#define LOCK_TYPE "<locktype><write/></locktype>"
-#define LOCK_TRAILER "</lockinfo>"
-
 serf_bucket_t * SerfLockRefreshProcImpl::createSerfRequestBucket( serf_request_t * inSerfRequest )
 {
-  //prepare body of request:
-    // serf_bucket_alloc_t* pSerfBucketAlloc = serf_request_get_alloc( inSerfRequest );
-    // serf_bucket_t* body_bkt = 0;
-    // rtl::OString aBodyText;
-    // {
-    //    rtl::OUStringBuffer aBuffer;
-    //     aBuffer.appendAscii( RTL_CONSTASCII_STRINGPARAM( LOCK_HEADER ));
-    //     aBuffer.appendAscii( mLockScope );
-    //     aBuffer.appendAscii( RTL_CONSTASCII_STRINGPARAM( LOCK_TYPE ));
-    //     aBuffer.appendAscii( RTL_CONSTASCII_STRINGPARAM( "<owner><href>" ));
-    //     rtl::OUString aStr;
-    //     mLock.Owner >>= aStr;
-    //     aBuffer.appendAscii( rtl::OUStringToOString( aStr, RTL_TEXTENCODING_UTF8 ).getStr() );
-    //     aBuffer.appendAscii( RTL_CONSTASCII_STRINGPARAM( "</href></owner>" ));
-    //     aBuffer.appendAscii( RTL_CONSTASCII_STRINGPARAM( LOCK_TRAILER ));
-    //     aBodyText = rtl::OUStringToOString( aBuffer.makeStringAndClear(), RTL_TEXTENCODING_UTF8 );
-    //     body_bkt = serf_bucket_simple_copy_create( aBodyText.getStr(),
-    //                                                aBodyText.getLength(),
-    //                                                pSerfBucketAlloc );
-    // }
-
     // create serf request
     serf_bucket_t *req_bkt = serf_request_bucket_request_create( inSerfRequest,
                                                                  "LOCK",
@@ -120,10 +67,6 @@ serf_bucket_t * SerfLockRefreshProcImpl::createSerfRequestBucket( serf_request_t
         // request specific header fields
         serf_bucket_headers_set( hdrs_bkt, "Timeout", mTimeout );
         serf_bucket_headers_set( hdrs_bkt, "if", mTokenStr );
-        // if (hdrs_bkt!=NULL && body_bkt != 0 && aBodyText.getLength() > 0 )
-        // {
-        //     serf_bucket_headers_set( hdrs_bkt, "Content-Type", "application/xml" );
-        // }
     }
     else
     {
