@@ -96,7 +96,7 @@ namespace
         WebDAVName_locktype,
         WebDAVName_write,
         WebDAVName_shared,
-       	WebDAVName_lockdiscovery,
+        WebDAVName_lockdiscovery,
         WebDAVName_activelock,
         WebDAVName_depth,
         WebDAVName_owner,
@@ -315,8 +315,8 @@ namespace
 
         WebDAVContext*                              mpContext;
         ::rtl::OUString                             maHref;
-        ::rtl::OUString                             maHrefLocks; //this is used for locks, when lockdiscovery active
-        
+        ::rtl::OUString                             maHrefLocks; //this is used for locks, when lockdiscoveryactive
+
         ::rtl::OUString                             maStatus;
         std::vector< http_dav_ucp::DAVPropertyValue > maResponseProperties;
         std::vector< http_dav_ucp::DAVPropertyValue > maPropStatProperties;
@@ -351,8 +351,8 @@ namespace
         {
             return mpContext && mpContext->getParent() && aWebDAVName == mpContext->getParent()->getWebDAVName();
         }
-        bool propertyIsReady() const 
-        { 
+        bool propertyIsReady() const
+        {
             return hasParent(WebDAVName_prop) && whitespaceIsAvailable();
         }
         bool isCollectingProperties() const
@@ -459,7 +459,7 @@ namespace
         {
             // create new context (push)
             mpContext = new WebDAVContext(mpContext, aName, xAttribs);
-            
+
             if(collectThisPropertyAsName())
             {
                 // When collecting property names and parent is prop there is no need
@@ -820,7 +820,7 @@ namespace
                                 {
                                     ::rtl::OUString aStr( mpContext->getWhiteSpace().toAsciiLowerCase());
                                     static ::rtl::OUString aInfinite( ::rtl::OUString::createFromAscii( "infinite" ) );
-                                    static ::rtl::OUString aSecond( ::rtl::OUString::createFromAscii( "second-" ) );                                    
+                                    static ::rtl::OUString aSecond( ::rtl::OUString::createFromAscii( "second-" ) );
                                     //look for infinity
                                     sal_Int32 secondIndex;
                                     if(aStr.indexOf(aInfinite) != -1)
@@ -994,7 +994,7 @@ namespace
                 // prepare ParserInputSrouce
                 xml::sax::InputSource myInputSource;
                 myInputSource.aInputStream = xInputStream;
-                
+
                 // get parser
                 uno::Reference< xml::sax::XParser > xParser(
                     comphelper::getProcessServiceFactory()->createInstance(
@@ -1005,7 +1005,7 @@ namespace
                 WebDAVResponseParser* pWebDAVResponseParser = new WebDAVResponseParser(eWebDAVResponseParserMode);
                 uno::Reference< xml::sax::XDocumentHandler > xWebDAVHdl(pWebDAVResponseParser);
                 xParser->setDocumentHandler(xWebDAVHdl);
-                
+
                 // finally, parse the stream
                 xParser->parseStream(myInputSource);
 
@@ -1051,7 +1051,7 @@ namespace http_dav_ucp
         parseWebDAVPropNameResponse(xInputStream, aRetval, aFoo, aFoo2, WebDAVResponseParserMode_PropFind);
         return aRetval;
     }
-    
+
     std::vector< DAVResourceInfo > parseWebDAVPropNameResponse(const uno::Reference< io::XInputStream >& xInputStream)
     {
         std::vector< DAVResource > aFoo;
@@ -1072,7 +1072,7 @@ namespace http_dav_ucp
         parseWebDAVPropNameResponse(xInputStream, aFoo2, aFoo, aRetval, WebDAVResponseParserMode_LockResponse);
         return aRetval;
     }
-    
+
 } // namespace http_dav_ucp
 
 //////////////////////////////////////////////////////////////////////////////

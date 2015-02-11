@@ -3055,7 +3055,7 @@ void Content::lock(
             ucb::LockType_WRITE,
             ucb::LockDepth_ZERO,
             aOwnerAny,
-            60, //180, // lock timeout in secs
+            180, // lock timeout in secs
             //-1, // infinite lock
             uno::Sequence< ::rtl::OUString >() );
 

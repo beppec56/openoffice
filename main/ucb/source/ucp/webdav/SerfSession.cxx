@@ -1010,7 +1010,7 @@ void SerfSession::DESTROY( const rtl::OUString & inPath,
 namespace
 {
     sal_Int32 lastChanceToSendRefreshRequest( TimeValue const & rStart,
-                                              int timeout )
+                                              sal_Int32 timeout )
     {
         TimeValue aEnd;
         osl_getSystemTime( &aEnd );
@@ -1055,7 +1055,8 @@ void SerfSession::LOCK( const ::rtl::OUString & inPath,
               rtl::OUStringToOString( inPath,RTL_TEXTENCODING_UTF8 ).getStr(),
               rtl::OUStringToOString( m_aUri.GetURI(),RTL_TEXTENCODING_UTF8 ).getStr());
 
-    //lock the resource
+    //the returned property, a sequence of locks
+    //only the first is used
     DAVPropertyValue outLock;
 
     TimeValue startCall;
@@ -1074,14 +1075,13 @@ void SerfSession::LOCK( const ::rtl::OUString & inPath,
             //TODO beppec56: before locking, search in the lock store if we already own a lock for this resource
             //if present, return with exception DAV_LOCKED_SELF
             //if not present, get the owner and return it in the string (excpetion.getData())
-            
+
         }
     }
 
     //HandleError will handle the error and throw an exception, if needed
     HandleError( aReqProc );
 
-    OSL_TRACE(">>>> SerfSession::LOCK - Store received lock");
     if(outLock.Name.compareToAscii(RTL_CONSTASCII_STRINGPARAM( "DAV:lockdiscovery" )) == 0 )
     {
         //got a lock, use only the first returned
@@ -1093,7 +1093,7 @@ void SerfSession::LOCK( const ::rtl::OUString & inPath,
         // add the store the new lock
         m_aSerfLockStore.addLock(aNewLock,this,
                                  lastChanceToSendRefreshRequest(
-                                     startCall, static_cast< int >(aLock.Timeout) ) );
+                                     startCall, static_cast< sal_Int32 >(aLock.Timeout) ) );
         {
 //FIXME remove when debug done            block of code for print/debug only, remove when done
             rtl::OUString   aOwner;
@@ -1263,66 +1263,37 @@ bool SerfSession::LOCK( SerfLock * pLock,
     boost::shared_ptr<SerfRequestProcessor> aReqProc( createReqProc( inPath ) );
     apr_status_t status = APR_SUCCESS;
 
-    OSL_TRACE(">>>> SerfSession::LOCK (refresh) - inPath: %s, session URI: %s\n",
-              rtl::OUStringToOString( inPath,RTL_TEXTENCODING_UTF8 ).getStr(),
-              rtl::OUStringToOString( m_aUri.GetURI(),RTL_TEXTENCODING_UTF8 ).getStr());
-
-    //lock the resource
+    //the returned property, a sequence of locks
+    //only the first is used
     DAVPropertyValue outLock;
-    
+
     TimeValue startCall;
     osl_getSystemTime( &startCall );
 
-    //call the refresh procedure, via SerfRequestProcessor
+    // refresh existing lock.
     aReqProc->processLockRefresh( inPath, pLock->getLock(), outLock, status);
 
     if ( aReqProc->mpDAVException )
     {
         DAVException* mpDAVExp( aReqProc->mpDAVException );
         //check the status
-        if ( mpDAVExp->getStatus() == SC_LOCKED )
-        {
-            OSL_TRACE(">>>> SerfSession::LOCK - Resource already locked");            
-        }
+        OSL_TRACE( ">>>> SerfSession::LOCK - Lock not refreshed!" );
     }
 
     //HandleError will handle the error and throw an exception, if needed
     HandleError( aReqProc );
-    
-    //FIXME, TODO beppec56
+
+    uno::Sequence< ucb::Lock >      aLocks;
+    outLock.Value >>= aLocks;
+    ucb::Lock aLock = aLocks[0];
+
     //if ok, udate the lastchance refresh time in lock
-//    rlastChanceToSendRefreshRequest
-//        = lastChanceToSendRefreshRequest( startCall, pLock->timeout );
+    rlastChanceToSendRefreshRequest
+        = lastChanceToSendRefreshRequest( startCall, static_cast< sal_Int32 >(aLock.Timeout) );
 
-    rtl::OUString   aToken;
-    aToken = pLock->getLock().LockTokens[0];
-
-    fprintf(stdout,">>>> SerfSession::LOCK (refreshing) - URI: %s, token: %s, timeout %d\n",
-            rtl::OUStringToOString( pLock->getSessionURI(), RTL_TEXTENCODING_UTF8 ).getStr(),
-            rtl::OUStringToOString( pLock->getLock().LockTokens[0], RTL_TEXTENCODING_UTF8 ).getStr(),
-            rlastChanceToSendRefreshRequest);
+    OSL_TRACE( ">>>> SerfSession::LOCK - Lock successfully refreshed." );
 
     return true;
-    /*
-    // refresh existing lock.
-
-    TimeValue startCall;
-    osl_getSystemTime( &startCall );
-
-    if ( ne_lock_refresh( m_pHttpSession, pLock ) == NE_OK )
-    {
-        rlastChanceToSendRefreshRequest
-            = lastChanceToSendRefreshRequest( startCall, pLock->timeout );
-
-        OSL_TRACE( "Lock successfully refreshed." );
-        return true;
-    }
-    else
-    {
-        OSL_TRACE( "Lock not refreshed!" );
-        return false;
-    }
-    */
 }
 
 // -------------------------------------------------------------------
