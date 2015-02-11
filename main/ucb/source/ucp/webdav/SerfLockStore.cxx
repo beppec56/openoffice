@@ -211,7 +211,7 @@ void SerfLockStore::removeLock( SerfLock * pLock )
     m_aLockInfoMap.erase( pLock );
     //FIXME beppec56
 //    ne_lockstore_remove( m_pSerfLockStore, pLock );
-    //deallocate SerfLock class !
+    //the caller shoult deallocate SerfLock class after the call!
 
     if ( m_aLockInfoMap.size() == 0 )
         stopTicker();

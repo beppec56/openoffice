@@ -1634,12 +1634,6 @@ void Content::lock()
     if ( !isDocument() )
       return; //perhaps throw exception?
 
-    //    OpenCommandArgument2 aArg;
-    //aArg.Mode       = OpenMode::DOCUMENT_SHARE_DENY_NONE;
-    //aArg.Priority   = 0; // unused
-    //aArg.Sink       = xSink;
-    //aArg.Properties = Sequence< Property >( 0 ); // unused
-
     Command aCommand;
     aCommand.Name     = rtl::OUString::createFromAscii( "lock" );
     aCommand.Handle   = -1; // n/a
@@ -1650,6 +1644,27 @@ void Content::lock()
     //    return xSink->getInputStream();
 }
 
+//=========================================================================
+void Content::unlock()
+    throw( CommandAbortedException, RuntimeException, Exception )
+{
+    if ( !isDocument() )
+      return; //perhaps throw exception?
+
+    //    OpenCommandArgument2 aArg;
+    //aArg.Mode       = OpenMode::DOCUMENT_SHARE_DENY_NONE;
+    //aArg.Priority   = 0; // unused
+    //aArg.Sink       = xSink;
+    //aArg.Properties = Sequence< Property >( 0 ); // unused
+
+    Command aCommand;
+    aCommand.Name     = rtl::OUString::createFromAscii( "unlock" );
+    aCommand.Handle   = -1; // n/a
+    //    aCommand.Argument <<= aArg;
+
+    m_xImpl->executeCommand( aCommand );
+
+}
 
 //=========================================================================
 //=========================================================================

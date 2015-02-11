@@ -1211,8 +1211,8 @@ sal_Bool SfxMedium::LockOrigFileOnDemand( sal_Bool bLoading, sal_Bool bNoUI )
                     }
                     catch( uno::Exception& )
                     {
-		      //print an error, analyze the error returned, should be file cannot lock,
-		      //obtain the names of the current owner
+//print an error, analyze the error returned, should be file cannot lock,
+//obtain the names of the current owner
                     }
                 } while( !bResult && bUIStatus == LOCK_UI_TRY );
 
@@ -1222,9 +1222,9 @@ sal_Bool SfxMedium::LockOrigFileOnDemand( sal_Bool bLoading, sal_Bool bNoUI )
             {
                 // this is no file URL, check whether the file is readonly
 
-		//add here a brutal hack to manipulate the lock for the file, in case the normal file locking method does not apply
+//add here a brutal hack to manipulate the lock for the file, in case the normal file locking method does not apply
 
-	        //need to create a dummy DAV environment
+        //need to create a dummy DAV environment
                 Reference< ::com::sun::star::ucb::XCommandEnvironment > xDummyEnv;
                 ::ucbhelper::Content aContent( GetURLObject().GetMainURL( INetURLObject::NO_DECODE ), xDummyEnv );
                 //look for a DAV:supportedlock property, to see if this is really a dav resource
@@ -1259,7 +1259,7 @@ sal_Bool SfxMedium::LockOrigFileOnDemand( sal_Bool bLoading, sal_Bool bNoUI )
                                 rtl::OUString   aToken;
                                 aLock.Owner >>= aOwner;
                                 long    aTimeout = aLock.Timeout;
-            
+
                                 aToken = aLock.LockTokens[0];
                                 const char *depth;
                                 switch(aLock.Depth) {
@@ -1280,7 +1280,7 @@ sal_Bool SfxMedium::LockOrigFileOnDemand( sal_Bool bLoading, sal_Bool bNoUI )
                                         rtl::OUStringToOString( aToken,RTL_TEXTENCODING_UTF8 ).getStr(),
                                         depth, aTimeout );
                             }
-                            
+
                         }
                         else
                             OSL_TRACE("SfxMedium::LockOrigFileOnDemand - DAV:lockdiscovery returned NO locks");
@@ -1296,8 +1296,9 @@ sal_Bool SfxMedium::LockOrigFileOnDemand( sal_Bool bLoading, sal_Bool bNoUI )
                 }
                 else
                     OSL_TRACE("SfxMedium::LockOrigFileOnDemand - resource is NOT a DAV ",aLockEntries.getLength());
-	      
+
                 bResult = !bContentReadonly;
+                pImp->m_bLocked = bResult;
             }
         }
     }
@@ -2810,15 +2811,46 @@ void SfxMedium::UnlockFile( sal_Bool bReleaseLockStream )
 
     if ( pImp->m_bLocked )
     {
-        try
+        if ( ::utl::LocalFileHelper::IsLocalFile( aLogicName ) )
         {
-            pImp->m_bLocked = sal_False;
-            ::svt::DocumentLockFile aLockFile( aLogicName );
-            // TODO/LATER: A warning could be shown in case the file is not the own one
-            aLockFile.RemoveFile();
+            try
+            {
+                pImp->m_bLocked = sal_False;
+                ::svt::DocumentLockFile aLockFile( aLogicName );
+                // TODO/LATER: A warning could be shown in case the file is not the own one
+                aLockFile.RemoveFile();
+            }
+            catch( uno::Exception& )
+            {}
         }
-        catch( uno::Exception& )
-        {}
+        else
+        {
+            fprintf(stdout,">>>>> SfxMedium::UnlockFile - file is not local \n");
+            Reference< ::com::sun::star::ucb::XCommandEnvironment > xDummyEnv;
+            ::ucbhelper::Content aContent( GetURLObject().GetMainURL( INetURLObject::NO_DECODE ), xDummyEnv );
+            //look for a DAV:supportedlock property, to see if this is really a dav resource
+            uno::Sequence< ::com::sun::star::ucb::LockEntry >  aLockEntries;
+            if(aContent.getPropertyValue( ::rtl::OUString( RTL_CONSTASCII_USTRINGPARAM( "DAV:supportedlock" ) ) ) >>= aLockEntries)
+            {
+                OSL_TRACE("SfxMedium::UnlockFile - resource is DAV ",aLockEntries.getLength());
+                try {
+                    aContent.unlock();
+                }
+                catch( ucb::InteractiveLockingLockedException& e )
+                {
+                    fprintf(stdout,">>>> SfxMedium::UnlockFile - uno::InteractiveLockingLockedException signalled, reason: %s!\n",
+                            rtl::OUStringToOString( e.Message,
+                                                    RTL_TEXTENCODING_UTF8 ).getStr());                            
+                }
+                catch( uno::Exception & e )
+                {
+                    fprintf(stdout,"uno::Exception: %s!\n",
+                            rtl::OUStringToOString( e.Message,
+                                                    RTL_TEXTENCODING_UTF8 ).getStr());
+                    //in e.XInterface should be:  uno::Reference< ucb::XCommandEnvironment >, e.g. the one given above
+                }
+            }
+        }
     }
 }
 

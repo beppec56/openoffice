@@ -1275,8 +1275,8 @@ bool SerfSession::LOCK( SerfLock * pLock,
 
     if ( aReqProc->mpDAVException )
     {
-        DAVException* mpDAVExp( aReqProc->mpDAVException );
-        //check the status
+//        DAVException* mpDAVExp( aReqProc->mpDAVException );
+        //check the status returned
         OSL_TRACE( ">>>> SerfSession::LOCK - Lock not refreshed!" );
     }
 
@@ -1297,7 +1297,7 @@ bool SerfSession::LOCK( SerfLock * pLock,
 }
 
 // -------------------------------------------------------------------
-// UNLOCK
+// UNLOCK called from external (DAVResourceAccess)
 // -------------------------------------------------------------------
 void SerfSession::UNLOCK( const ::rtl::OUString & inPath,
                           const DAVRequestEnvironment & /*rEnv*/ )
@@ -1305,12 +1305,35 @@ void SerfSession::UNLOCK( const ::rtl::OUString & inPath,
 {
     osl::Guard< osl::Mutex > theGuard( m_aMutex );
 
+    // get the neon lock from lock store
+    SerfLock * theLock
+        = m_aSerfLockStore.findByUri( makeAbsoluteURL( inPath ) );
+    if ( !theLock )
+        throw DAVException( DAVException::DAV_NOT_LOCKED );
+
+    Init( rEnv );
+
+    boost::shared_ptr<SerfRequestProcessor> aReqProc( createReqProc( inPath ) );
+    apr_status_t status = APR_SUCCESS;
+
     OSL_TRACE(">>>> SerfSession::UNLOCK - unlocking: %s\n",
         rtl::OUStringToOString( inPath, RTL_TEXTENCODING_UTF8 ).getStr());
 
     //TODO bepppec56: delete SerfLock when removed from SerfLockStore
+// must release the SerfLock after removing it from the SerfLockStore
 
-    /*
+
+    if ( aReqProc->mpDAVException )
+    {
+//        DAVException* mpDAVExp( aReqProc->mpDAVException );
+        //check the status returned
+        OSL_TRACE( ">>>> SerfSession::LOCK - Lock not refreshed!" );
+    }
+
+    //HandleError will handle the error and throw an exception, if needed
+    HandleError( aReqProc );
+
+/*
     // get the neon lock from lock store
     SerfLock * theLock
         = m_aSerfLockStore.findByUri( makeAbsoluteURL( inPath ) );
@@ -1338,11 +1361,15 @@ void SerfSession::UNLOCK( const ::rtl::OUString & inPath,
 }
 
 // -------------------------------------------------------------------
-// UNLOCK
+// UNLOCK (called from SerfLockStore
 // -------------------------------------------------------------------
 bool SerfSession::UNLOCK( SerfLock * pLock )
 {
     osl::Guard< osl::Mutex > theGuard( m_aMutex );
+    rtl::OUString inPath = pLock->getResourcePath();
+
+    boost::shared_ptr<SerfRequestProcessor> aReqProc( createReqProc( inPath ) );
+    apr_status_t status = APR_SUCCESS;
 
     rtl::OUString   aToken;
     aToken = pLock->getLock().LockTokens[0];
@@ -1350,6 +1377,16 @@ bool SerfSession::UNLOCK( SerfLock * pLock )
     fprintf(stdout,">>>> SerfSession::UNLOCK - URI: %s, token: %s\n",
               rtl::OUStringToOString( pLock->getSessionURI(), RTL_TEXTENCODING_UTF8 ).getStr(),
               rtl::OUStringToOString( pLock->getLock().LockTokens[0], RTL_TEXTENCODING_UTF8 ).getStr());
+
+    if ( aReqProc->mpDAVException )
+    {
+//        DAVException* mpDAVExp( aReqProc->mpDAVException );
+        //check the status returned
+        OSL_TRACE( ">>>> SerfSession::UNLOCK - Lock not released!" );
+    }
+
+    //HandleError will handle the error and throw an exception, if needed
+    HandleError( aReqProc );
 
     return true;
     /*
