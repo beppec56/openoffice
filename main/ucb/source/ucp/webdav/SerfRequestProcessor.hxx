@@ -140,6 +140,11 @@ public:
                       DAVPropertyValue & outLock,
                       apr_status_t& outSerfStatus );
 
+    //UNLOCK
+    bool processUnlock( const rtl::OUString & inDestinationPath,
+                                        const com::sun::star::ucb::Lock& inLock,
+                        apr_status_t& outSerfStatus );
+
     apr_status_t provideSerfCredentials( char ** outUsername, 
                                          char ** outPassword,
                                          serf_request_t * inRequest, 

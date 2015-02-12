@@ -140,7 +140,6 @@ void SerfLockStore::registerSession( SerfSession /* aSession */ )
 {
     osl::MutexGuard aGuard( m_aMutex );
 
-    //FIXME beppec56
 //    ne_lockstore_register( m_pSerfLockStore, pHttpSession );
 }
 
@@ -149,11 +148,19 @@ SerfLock * SerfLockStore::findByUri( rtl::OUString const & rUri )
 {
     osl::MutexGuard aGuard( m_aMutex );
 
-    //FIXME beppec56
-    // ne_uri aUri;
-    // ne_uri_parse( rtl::OUStringToOString(
-    //     rUri, RTL_TEXTENCODING_UTF8 ).getStr(), &aUri );
-    // return ne_lockstore_findbyuri( m_pSerfLockStore, &aUri );
+    LockInfoMap::const_iterator it( m_aLockInfoMap.begin() );
+    const LockInfoMap::const_iterator end( m_aLockInfoMap.end() );
+
+    while ( it != end )
+    {
+        SerfLock * pLock = (*it).first;
+        if( (*it).second.xSession->m_aUri.GetURI().equals( rUri ) )
+        {
+            return pLock;
+        }
+        ++it;
+    }
+
     return static_cast<SerfLock*>(0);
 }
 
@@ -209,10 +216,7 @@ void SerfLockStore::removeLock( SerfLock * pLock )
     osl::MutexGuard aGuard( m_aMutex );
 
     m_aLockInfoMap.erase( pLock );
-    //FIXME beppec56
-//    ne_lockstore_remove( m_pSerfLockStore, pLock );
-    //the caller shoult deallocate SerfLock class after the call!
-
+    //the caller should deallocate SerfLock class after the call!
     if ( m_aLockInfoMap.size() == 0 )
         stopTicker();
 }

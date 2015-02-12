@@ -36,36 +36,38 @@
 namespace http_dav_ucp
 {
 
-class SerfLockReqProcImpl : public SerfRequestProcessorImpl
-{
-public:
-    SerfLockReqProcImpl( const char* inSourcePath,
-                         const DAVRequestHeaders& inRequestHeaders,
-                         const ucb::Lock& inLock,
-                         const char* inTimeout,
-                         DAVPropertyValue & outLock);
+    class SerfLockReqProcImpl : public SerfRequestProcessorImpl
+    {
 
-    virtual ~SerfLockReqProcImpl();
+    protected:
+        std::vector< DAVResource > mpResources;  
+        const ucb::Lock     mLock;
+        const char*         mDepthStr;
+        const char*         mLockScope;
+        const char*         mTimeout;
+        DAVPropertyValue*   mLockObtained;
+        com::sun::star::uno::Reference< SerfInputStream > xInputStream;
 
-    virtual
-    serf_bucket_t * createSerfRequestBucket( serf_request_t * inSerfRequest );
+    public:
+        SerfLockReqProcImpl( const char* inSourcePath,
+                             const DAVRequestHeaders& inRequestHeaders,
+                             const ucb::Lock& inLock,
+                             const char* inTimeout,
+                             DAVPropertyValue & outLock);
 
-protected:
-    virtual
-    void processChunkOfResponseData( const char* data, apr_size_t len );
+        virtual ~SerfLockReqProcImpl();
 
-    virtual
-    void handleEndOfResponseData( serf_bucket_t * inSerfResponseBucket );
+        virtual
+        serf_bucket_t * createSerfRequestBucket( serf_request_t * inSerfRequest );
 
-protected:
-    std::vector< DAVResource > mpResources;  
-    const ucb::Lock     mLock;
-    const char*         mDepthStr;
-    const char*         mLockScope;
-    const char*         mTimeout;
-    DAVPropertyValue*   mLockObtained;
-    com::sun::star::uno::Reference< SerfInputStream > xInputStream;
-};
+    protected:
+        virtual
+        void processChunkOfResponseData( const char* data, apr_size_t len );
+
+        virtual
+        void handleEndOfResponseData( serf_bucket_t * inSerfResponseBucket );
+
+    };
 
 } // namespace http_dav_ucp
 

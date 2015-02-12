@@ -36,6 +36,7 @@
 #include "SerfMoveReqProcImpl.hxx"
 #include "SerfLockReqProcImpl.hxx"
 #include "SerfLockRefreshProcImpl.hxx"
+#include "SerfUnlockProcImpl.hxx"
 
 namespace http_dav_ucp
 {
@@ -251,6 +252,18 @@ namespace http_dav_ucp
                                                                               inToken,
                                                                               inTimeout,
                                                                               outLock);
+        return pReqProcImpl;
+    }
+
+    SerfRequestProcessorImpl* createUnlockProcImpl( const char* inSourcePath,
+                                                         const DAVRequestHeaders& inRequestHeaders,
+                                                         const ucb::Lock& inLock,                                                         
+                                                         const char* inToken )
+    {
+        SerfRequestProcessorImpl* pReqProcImpl = new SerfUnlockProcImpl( inSourcePath,
+                                                                         inRequestHeaders,
+                                                                         inLock,
+                                                                         inToken );
         return pReqProcImpl;
     }
 

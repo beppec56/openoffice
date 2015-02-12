@@ -126,6 +126,11 @@ namespace http_dav_ucp
                                                      const char* inTimeout,
                                                      DAVPropertyValue & outLock );
 
+    SerfRequestProcessorImpl* createUnlockProcImpl( const char* inSourcePath,
+                                                     const DAVRequestHeaders& inRequestHeaders,
+                                                     const ucb::Lock& inLock,
+                                                     const char* inToken );
+
 } // namespace http_dav_ucp
 
 #endif // INCLUDED_SERFREQUESTPROCESSORIMPLFAC_HXX

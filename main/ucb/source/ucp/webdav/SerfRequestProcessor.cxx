@@ -357,6 +357,27 @@ bool SerfRequestProcessor::processLockRefresh( const rtl::OUString & inDestinati
     return outSerfStatus == APR_SUCCESS;
 }
 
+//ULOCK unlock an existing lock
+bool SerfRequestProcessor::processUnlock( const rtl::OUString & inDestinationPath,
+                                        const com::sun::star::ucb::Lock& inLock,
+                                        apr_status_t& outSerfStatus )
+{
+    mDestPathStr = apr_pstrdup( mrSerfSession.getAprPool(),
+                                rtl::OUStringToOString( inDestinationPath, RTL_TEXTENCODING_UTF8 ).getStr() );
+
+    char * aToken = apr_psprintf( mrSerfSession.getAprPool(), "<%s>",
+                                 rtl::OUStringToOString(inLock.LockTokens[0], RTL_TEXTENCODING_UTF8 ).getStr() );
+
+    mpProcImpl = createUnlockProcImpl( mPathStr,
+                                       mrSerfSession.getRequestEnvironment().m_aRequestHeaders,
+                                       inLock,
+                                       aToken );
+
+    outSerfStatus = runProcessor();
+
+    return outSerfStatus == APR_SUCCESS;
+}
+
 apr_status_t SerfRequestProcessor::runProcessor()
 {
     prepareProcessor();
