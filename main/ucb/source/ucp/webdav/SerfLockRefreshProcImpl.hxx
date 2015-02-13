@@ -35,7 +35,7 @@ namespace http_dav_ucp
     public:
         SerfLockRefreshProcImpl( const char* inSourcePath,
                                  const DAVRequestHeaders& inRequestHeaders,
-                                 const ucb::Lock& inLock,                             
+                                 const ucb::Lock& inLock,
                                  const char* inToken,
                                  const char* inTimeout,
                                  DAVPropertyValue & outLock);

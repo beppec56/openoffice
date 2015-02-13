@@ -49,7 +49,7 @@ SerfLockReqProcImpl::SerfLockReqProcImpl( const char* inSourcePath,
     {
         //TODO beppec56 investigate on this case...
     case ucb::LockDepth_MAKE_FIXED_SIZE:
-        
+
     case ucb::LockDepth_ZERO:
         mDepthStr = "0";
         break;

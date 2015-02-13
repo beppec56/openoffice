@@ -241,7 +241,7 @@ namespace http_dav_ucp
 
     SerfRequestProcessorImpl* createLockRefreshProcImpl( const char* inSourcePath,
                                                          const DAVRequestHeaders& inRequestHeaders,
-                                                         const ucb::Lock& inLock,                                                         
+                                                         const ucb::Lock& inLock,
                                                          const char* inToken,
                                                          const char* inTimeout,
                                                          DAVPropertyValue & outLock)
@@ -257,7 +257,7 @@ namespace http_dav_ucp
 
     SerfRequestProcessorImpl* createUnlockProcImpl( const char* inSourcePath,
                                                          const DAVRequestHeaders& inRequestHeaders,
-                                                         const ucb::Lock& inLock,                                                         
+                                                         const ucb::Lock& inLock,
                                                          const char* inToken )
     {
         SerfRequestProcessorImpl* pReqProcImpl = new SerfUnlockProcImpl( inSourcePath,
