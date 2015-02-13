@@ -142,7 +142,7 @@ void SerfLockReqProcImpl::processChunkOfResponseData( const char* data,
 {
     {//debug only, remove when done
         rtl::OUString aStr(data,len,RTL_TEXTENCODING_ASCII_US);
-        fprintf( stdout, ">>>> SerfLockReqProcImpl::processChunkOfResponseData: \n'\n%s\n'\n",
+        fprintf( stdout, ">>>> SerfLockReqProcImpl::processChunkOfResponseData - \n'\n%s\n'\n",
             rtl::OUStringToOString( aStr, RTL_TEXTENCODING_UTF8 ).getStr());
     }
     if ( xInputStream.is() )

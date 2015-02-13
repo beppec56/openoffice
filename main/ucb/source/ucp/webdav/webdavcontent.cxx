@@ -1319,7 +1319,7 @@ uno::Reference< sdbc::XRow > Content::getPropertyValues(
             const beans::Property& rProp = pProps[ n ];
 
 
-  fprintf( stdout, "==\n=====>>>>> Content::getPropertyValues prop:  %s \n", OUStringToOString( rProp.Name , RTL_TEXTENCODING_ISO_8859_1 ).getStr());
+            fprintf( stdout, ">>>> Content::getPropertyValues - prop:  %s \n", OUStringToOString( rProp.Name , RTL_TEXTENCODING_ISO_8859_1 ).getStr());
 
             // Process standard UCB, DAV and HTTP properties.
             const uno::Any & rValue = rData.getValue( rProp.Name );
