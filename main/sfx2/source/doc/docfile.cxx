@@ -2832,19 +2832,26 @@ void SfxMedium::UnlockFile( sal_Bool bReleaseLockStream )
             uno::Sequence< ::com::sun::star::ucb::LockEntry >  aLockEntries;
             if(aContent.getPropertyValue( ::rtl::OUString( RTL_CONSTASCII_USTRINGPARAM( "DAV:supportedlock" ) ) ) >>= aLockEntries)
             {
-                OSL_TRACE("SfxMedium::UnlockFile - resource is DAV ",aLockEntries.getLength());
+                OSL_TRACE("SfxMedium::UnlockFile - resource is DAV (%d)\n",aLockEntries.getLength());
                 try {
                     aContent.unlock();
+                    fprintf(stdout,"SfxMedium::UnlockFile - successful, resource %s\n",
+                        rtl::OUStringToOString( GetURLObject().GetMainURL( INetURLObject::NO_DECODE ),
+                                                    RTL_TEXTENCODING_UTF8 ).getStr());
                 }
                 catch( ucb::InteractiveLockingLockedException& e )
                 {
-                    fprintf(stdout,">>>> SfxMedium::UnlockFile - uno::InteractiveLockingLockedException signalled, reason: %s!\n",
+                    fprintf(stdout,">>>> SfxMedium::UnlockFile - uno::InteractiveLockingLockedException signalled resource: %s, reason: %s!\n",
+                            rtl::OUStringToOString( GetURLObject().GetMainURL( INetURLObject::NO_DECODE ),
+                                                    RTL_TEXTENCODING_UTF8 ).getStr(),
                             rtl::OUStringToOString( e.Message,
-                                                    RTL_TEXTENCODING_UTF8 ).getStr());                            
+                                                    RTL_TEXTENCODING_UTF8 ).getStr() );
                 }
                 catch( uno::Exception & e )
                 {
-                    fprintf(stdout,"uno::Exception: %s!\n",
+                    fprintf(stdout,"uno::Exception: cannot unlock resource: %s, reason: %s!\n",
+                            rtl::OUStringToOString( GetURLObject().GetMainURL( INetURLObject::NO_DECODE ),
+                                                    RTL_TEXTENCODING_UTF8 ).getStr(),
                             rtl::OUStringToOString( e.Message,
                                                     RTL_TEXTENCODING_UTF8 ).getStr());
                     //in e.XInterface should be:  uno::Reference< ucb::XCommandEnvironment >, e.g. the one given above

@@ -1339,7 +1339,7 @@ void SerfSession::UNLOCK( const ::rtl::OUString & inPath,
     {
         DAVException* mpDAVExp( aReqProc->mpDAVException );
         //check the status returned
-        fprintf(stdout, ">>>> SerfSession::UNLOCK - unlocking %s (token: %s) failed Status: %d.",
+        fprintf(stdout, ">>>> SerfSession::UNLOCK - unlocking %s (token: %s) failed Status: %d\n",
                    rtl::OUStringToOString( m_aUri.GetURI(), RTL_TEXTENCODING_UTF8 ).getStr(),
                    rtl::OUStringToOString( pLock->getLock().LockTokens[0], RTL_TEXTENCODING_UTF8 ).getStr(),
                    mpDAVExp->getStatus() );
@@ -1375,7 +1375,7 @@ bool SerfSession::UNLOCK( SerfLock * pLock )
     {
         DAVException* mpDAVExp( aReqProc->mpDAVException );
         //check the status returned
-        OSL_TRACE( ">>>> SerfSession::UNLOCK - unlocking %s (token: %s) failed Status: %d.",
+        OSL_TRACE( ">>>> SerfSession::UNLOCK - unlocking %s (token: %s) failed. Status: %d.",
                    rtl::OUStringToOString( m_aUri.GetURI(), RTL_TEXTENCODING_UTF8 ).getStr(),
                    rtl::OUStringToOString( pLock->getLock().LockTokens[0], RTL_TEXTENCODING_UTF8 ).getStr(),
                    mpDAVExp->getStatus() );
