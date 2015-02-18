@@ -3513,19 +3513,22 @@ const Content::ResourceType & Content::getResourceType(
                 //first print resources received ready for cache
                 // there is a single resource
                 //debug:
-                std::vector< http_dav_ucp::DAVPropertyValue > aResponseProperties(resources[0].properties);
-                for(uint i = 0; i < aResponseProperties.size(); i++) {
-                    OSL_TRACE("Content::getResourceType - returned: '%s'",
-                    rtl::OUStringToOString( aResponseProperties[i].Name,
-                                            RTL_TEXTENCODING_UTF8 ).getStr());
+#if OSL_DEBUG_LEVEL > 0
+                {
+                    std::vector< http_dav_ucp::DAVPropertyValue > aResponseProperties(resources[0].properties);
+                    for(unsigned int i = 0; i < aResponseProperties.size(); i++) {
+                        OSL_TRACE("Content::getResourceType - returned: '%s'",
+                                  rtl::OUStringToOString( aResponseProperties[i].Name,
+                                                          RTL_TEXTENCODING_UTF8 ).getStr());
+                    }
                 }
+#endif
 
                 m_xCachedProps.reset(
                     new CachableContentProperties( resources[ 0 ] ) );
                 m_xCachedProps->containsAllNames(
                     aProperties, m_aFailedPropNames );
             }
-
             eResourceType = DAV;
         }
         catch ( DAVException const & e )
