@@ -1074,7 +1074,10 @@ void SerfSession::LOCK( const ::rtl::OUString & inPath,
     {
         fprintf(stdout,">>>> SerfSession::LOCK - lock for path: %s already in local store (SerfLockStore)\n",
                   rtl::OUStringToOString( m_aUri.GetURI(), RTL_TEXTENCODING_UTF8 ).getStr());
-        throw DAVException( DAVException::DAV_LOCKED_SELF );
+//already present, meaning already locked by the same AOO session and already in the lockstore
+//just return, nothing to do
+        fprintf(stdout,">>>> SerfSession::LOCK - Resource already locked by us, nothing to lock\n");
+        return;
     }
 
     Init( rEnv );
@@ -1094,10 +1097,10 @@ void SerfSession::LOCK( const ::rtl::OUString & inPath,
     if ( aReqProc->mpDAVException )
     {
         DAVException* mpDAVExp( aReqProc->mpDAVException );
-        if ( mpDAVExp->getStatus() == SC_LOCKED )
-        {
-            fprintf(stdout,">>>> SerfSession::LOCK - Resource already locked");
-        }
+        fprintf(stdout,">>>> SerfSession::LOCK - DAVException raised while locking: mExceptionCode: %d, mData '%s', mStatusCode %d\n",
+                mpDAVExp->getError(),
+                rtl::OUStringToOString( mpDAVExp->getData(),RTL_TEXTENCODING_UTF8 ).getStr(),
+                mpDAVExp->getStatus());
     }
 //#endif
 
@@ -1116,7 +1119,6 @@ void SerfSession::LOCK( const ::rtl::OUString & inPath,
         m_aSerfLockStore.addLock(aNewLock,this,
                                  lastChanceToSendRefreshRequest(
                                      startCall, static_cast< sal_Int32 >(aLock.Timeout) ) );
-
 //#if OSL_DEBUG_LEVEL > 0
         {
             rtl::OUString   aOwner;
@@ -1138,7 +1140,7 @@ void SerfSession::LOCK( const ::rtl::OUString & inPath,
                 break;
             }
 
-            fprintf(stdout,">>>> SerfSession::LOCK - Owner: %s, token: %s, depth: %s, timeout = %li\n",
+            fprintf(stdout,">>>> SerfSession::LOCK - successful: Owner: %s, token: %s, depth: %s, timeout = %li\n",
                     rtl::OUStringToOString( aOwner,RTL_TEXTENCODING_UTF8 ).getStr(),
                     rtl::OUStringToOString( aToken,RTL_TEXTENCODING_UTF8 ).getStr(),
                     depth, aTimeout );
