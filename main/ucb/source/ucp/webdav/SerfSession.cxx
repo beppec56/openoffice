@@ -96,13 +96,29 @@ SerfSession::SerfSession(
 // -------------------------------------------------------------------
 SerfSession::~SerfSession( )
 {
+    OSL_TRACE(">>>> SerfSession::~SerfSession - Session destroyed inUri: %s\n",
+        rtl::OUStringToOString( m_aUri.GetURI(), RTL_TEXTENCODING_UTF8 ).getStr());
+//remove from lock store all this session owned locks
+    SerfLock *aLock;
+    while ( ( aLock = m_aSerfLockStore.findByUri( m_aUri.GetURI() ) ) != static_cast< SerfLock*>(0) )
+    {
+        try
+        {
+            m_aSerfLockStore.removeLock(aLock);
+            UNLOCK(aLock);
+            OSL_TRACE(">>>> SerfSession::~SerfSession - lock removed !\n");
+        }
+        catch (DAVException&)
+        {
+            OSL_TRACE(">>>> SerfSession::~SerfSession - cannot unlock !\n");
+        }
+    }
+    
     if ( m_pSerfConnection )
     {
         serf_connection_close( m_pSerfConnection );
         m_pSerfConnection = 0;
     }
-    OSL_TRACE(">>>> SerfSession::~SerfSession - Session destroyed inUri: %s",
-        rtl::OUStringToOString( m_aUri.GetURI(), RTL_TEXTENCODING_UTF8 ).getStr());
 }
 
 // -------------------------------------------------------------------
@@ -1375,9 +1391,11 @@ bool SerfSession::UNLOCK( SerfLock * pLock )
     {
         DAVException* mpDAVExp( aReqProc->mpDAVException );
         //check the status returned
-        OSL_TRACE( ">>>> SerfSession::UNLOCK - unlocking %s (token: %s) failed. Status: %d.",
+        OSL_TRACE( ">>>> SerfSession::UNLOCK - unlocking %s (token: %s) failed. Code: %d, data '%s', status: %d\n",
                    rtl::OUStringToOString( m_aUri.GetURI(), RTL_TEXTENCODING_UTF8 ).getStr(),
                    rtl::OUStringToOString( pLock->getLock().LockTokens[0], RTL_TEXTENCODING_UTF8 ).getStr(),
+                   mpDAVExp->getError(),
+                   rtl::OUStringToOString( mpDAVExp->getData(), RTL_TEXTENCODING_UTF8 ).getStr(),
                    mpDAVExp->getStatus() );
     }
 

@@ -103,7 +103,14 @@ SerfLockStore::~SerfLockStore()
     while ( it != end )
     {
         SerfLock * pLock = (*it).first;
-        (*it).second.xSession->UNLOCK( pLock );
+        try
+        {
+//FIXME beppec56: there is a problem with the apr_pool used, probably we need one locally to the store
+            (*it).second.xSession->UNLOCK( pLock );
+        }
+        catch (DAVException & )
+        {}
+
         delete pLock;
         ++it;
     }
@@ -241,14 +248,14 @@ void SerfLockStore::refreshLocks()
             {
                 // refresh the lock.
                 sal_Int32 nlastChanceToSendRefreshRequest = -1;
-                if ( rInfo.xSession->LOCK(
-                         (*it).first,
-                         /* out param */ nlastChanceToSendRefreshRequest ) )
+                try
                 {
+                    rInfo.xSession->LOCK( (*it).first,
+                             /* out param */ nlastChanceToSendRefreshRequest );
                     rInfo.nLastChanceToSendRefreshRequest
                         = nlastChanceToSendRefreshRequest;
                 }
-                else
+                catch ( DAVException & e )
                 {
                     // refresh failed. stop auto-refresh.
                     rInfo.nLastChanceToSendRefreshRequest = -1;

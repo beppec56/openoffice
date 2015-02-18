@@ -644,8 +644,8 @@ sal_Bool SfxObjectShell::DoLoad( SfxMedium *pMed )
 
     EnableSetModified( sal_False );
 
-    pMedium->LockOrigFileOnDemand( sal_True, sal_False );
     pMedium->LockDAVResourceOnDemand( sal_True, sal_False );
+    pMedium->LockOrigFileOnDemand( sal_True, sal_False );
     if ( GetError() == ERRCODE_NONE && bOwnStorageFormat && ( !pFilter || !( pFilter->GetFilterFlags() & SFX_FILTER_STARONEFILTER ) ) )
     {
         uno::Reference< embed::XStorage > xStorage;
