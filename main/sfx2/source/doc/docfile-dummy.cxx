@@ -914,6 +914,115 @@ void SfxMedium::SetEncryptionDataToStorage_Impl()
 }
 
 //------------------------------------------------------------------
+sal_Int8 SfxMedium::ShowLockedDocumentDialog( const uno::Sequence< ::rtl::OUString >& aData, sal_Bool bIsLoading, sal_Bool bOwnLock )
+{
+    sal_Int8 nResult = LOCK_UI_NOLOCK;
+
+    // show the interaction regarding the document opening
+    uno::Reference< task::XInteractionHandler > xHandler = GetInteractionHandler();
+
+    if ( ::svt::DocumentLockFile::IsInteractionAllowed() && xHandler.is() && ( bIsLoading || bOwnLock ) )
+    {
+        ::rtl::OUString aDocumentURL = GetURLObject().GetLastName();
+        ::rtl::OUString aInfo;
+        ::rtl::Reference< ::ucbhelper::InteractionRequest > xInteractionRequestImpl;
+
+        if ( bOwnLock )
+        {
+            if ( aData.getLength() > LOCKFILE_EDITTIME_ID )
+                aInfo = aData[LOCKFILE_EDITTIME_ID];
+
+            xInteractionRequestImpl = new ::ucbhelper::InteractionRequest( uno::makeAny(
+                document::OwnLockOnDocumentRequest( ::rtl::OUString(), uno::Reference< uno::XInterface >(), aDocumentURL, aInfo, !bIsLoading ) ) );
+        }
+        else
+        {
+            if ( aData.getLength() > LOCKFILE_EDITTIME_ID )
+            {
+                if ( aData[LOCKFILE_OOOUSERNAME_ID].getLength() )
+                    aInfo = aData[LOCKFILE_OOOUSERNAME_ID];
+                else
+                    aInfo = aData[LOCKFILE_SYSUSERNAME_ID];
+
+                if ( aInfo.getLength() && aData[LOCKFILE_EDITTIME_ID].getLength() )
+                {
+                    aInfo += ::rtl::OUString( RTL_CONSTASCII_USTRINGPARAM( " ( " ) );
+                    aInfo += aData[LOCKFILE_EDITTIME_ID];
+                    aInfo += ::rtl::OUString( RTL_CONSTASCII_USTRINGPARAM( " )" ) );
+                }
+            }
+
+            if ( bIsLoading )
+            {
+                xInteractionRequestImpl = new ::ucbhelper::InteractionRequest( uno::makeAny(
+                    document::LockedDocumentRequest( ::rtl::OUString(), uno::Reference< uno::XInterface >(), aDocumentURL, aInfo ) ) );
+            }
+            else
+            {
+                xInteractionRequestImpl = new ::ucbhelper::InteractionRequest( uno::makeAny(
+                    document::LockedOnSavingRequest( ::rtl::OUString(), uno::Reference< uno::XInterface >(), aDocumentURL, aInfo ) ) );
+
+            }
+        }
+
+        uno::Sequence< uno::Reference< task::XInteractionContinuation > > aContinuations( 3 );
+        aContinuations[0] = new ::ucbhelper::InteractionAbort( xInteractionRequestImpl.get() );
+        aContinuations[1] = new ::ucbhelper::InteractionApprove( xInteractionRequestImpl.get() );
+        aContinuations[2] = new ::ucbhelper::InteractionDisapprove( xInteractionRequestImpl.get() );
+        xInteractionRequestImpl->setContinuations( aContinuations );
+
+        xHandler->handle( xInteractionRequestImpl.get() );
+
+        ::rtl::Reference< ::ucbhelper::InteractionContinuation > xSelected = xInteractionRequestImpl->getSelection();
+        if ( uno::Reference< task::XInteractionAbort >( xSelected.get(), uno::UNO_QUERY ).is() )
+        {
+            SetError( ERRCODE_ABORT, ::rtl::OUString( RTL_CONSTASCII_USTRINGPARAM( OSL_LOG_PREFIX ) ) );
+        }
+        else if ( uno::Reference< task::XInteractionDisapprove >( xSelected.get(), uno::UNO_QUERY ).is() )
+        {
+            // own lock on loading, user has selected to ignore the lock
+            // own lock on saving, user has selected to ignore the lock
+            // alien lock on loading, user has selected to edit a copy of document
+            // TODO/LATER: alien lock on saving, user has selected to do SaveAs to different location
+            if ( bIsLoading && !bOwnLock )
+            {
+                // means that a copy of the document should be opened
+                GetItemSet()->Put( SfxBoolItem( SID_TEMPLATE, sal_True ) );
+            }
+            else if ( bOwnLock )
+                nResult = LOCK_UI_SUCCEEDED;
+        }
+        else // if ( XSelected == aContinuations[1] )
+        {
+            // own lock on loading, user has selected to open readonly
+            // own lock on saving, user has selected to open readonly
+            // alien lock on loading, user has selected to retry saving
+            // TODO/LATER: alien lock on saving, user has selected to retry saving
+
+            if ( bIsLoading )
+                GetItemSet()->Put( SfxBoolItem( SID_DOC_READONLY, sal_True ) );
+            else
+                nResult = LOCK_UI_TRY;
+        }
+    }
+    else
+    {
+        if ( bIsLoading )
+        {
+            // if no interaction handler is provided the default answer is open readonly
+            // that usually happens in case the document is loaded per API
+            // so the document must be opened readonly for backward compatibility
+            GetItemSet()->Put( SfxBoolItem( SID_DOC_READONLY, sal_True ) );
+        }
+        else
+            SetError( ERRCODE_IO_ACCESSDENIED, ::rtl::OUString( RTL_CONSTASCII_USTRINGPARAM( OSL_LOG_PREFIX ) ) );
+
+    }
+
+    return nResult;
+}
+
+//------------------------------------------------------------------
 //for the time being the aData holds a single OUString, the owner of the lock
 sal_Int8 SfxMedium::ShowLockedDAVDocumentDialog( const uno::Sequence< ::rtl::OUString >& aData, sal_Bool bIsLoading, sal_Bool bOwnLock )
 {
@@ -1037,12 +1146,12 @@ sal_Bool SfxMedium::LockDAVResourceOnDemand( sal_Bool bLoading, sal_Bool bNoUI )
     if(aContent.getPropertyValue( ::rtl::OUString( RTL_CONSTASCII_USTRINGPARAM( "DAV:supportedlock" ) ) ) >>= aLockEntries)
     {
         //check if the required lock capabilities are available
-        sal_Bool    bHasRequiredLock = sal_False;
+        sal_Bool    bHasRequiredLock = false;
         for ( sal_Int32 n = 0; n < aLockEntries.getLength(); ++n )
         {
             if ( aLockEntries[ n ].Scope == ucb::LockScope_EXCLUSIVE &&
                  aLockEntries[ n ].Type == ucb::LockType_WRITE )
-                bHasRequiredLock = sal_True;
+                bHasRequiredLock = true;
         }
 
         OSL_TRACE("SfxMedium::LockDAVResourceOnDemand - resource is a DAV and supports required lock capabilities\n");
@@ -1135,18 +1244,19 @@ sal_Bool SfxMedium::LockDAVResourceOnDemand( sal_Bool bLoading, sal_Bool bNoUI )
                         }
                         else
                             OSL_TRACE("SfxMedium::LockDAVResourceOnDemand - DAV:lockdiscovery returned NO locks");
+                            
 
                         if ( !bResult && !bNoUI )
                         {
-                            uno::Sequence< ::rtl::OUString > aData( LOCKFILE_ENTRYSIZE );
+                            uno::Sequence< ::rtl::OUString > aData;
                             sal_Bool bOwnLock = sal_False;
 
                             aData[0] = aOwner;
                             bUIStatus = ShowLockedDAVDocumentDialog( aData, bLoading, bOwnLock );
                             if ( bUIStatus == LOCK_UI_SUCCEEDED )
                             {
-                                // take the ownership over the lock file, accept the current lock (already there)
-                                bResult = sal_True; //aLockFile.OverwriteOwnLockFile();
+                                // take the ownership over the lock file
+                                bResult = aLockFile.OverwriteOwnLockFile();
                             }
                         }
                     }
@@ -3019,6 +3129,7 @@ void SfxMedium::UnlockDAVResource()
                         rtl::OUStringToOString( e.Message,
                                                 RTL_TEXTENCODING_UTF8 ).getStr());
                 //in e.XInterface should be:  uno::Reference< ucb::XCommandEnvironment >, e.g. the one given above
+                DBG_UNHANDLED_EXCEPTION();
             }
         }
     }
