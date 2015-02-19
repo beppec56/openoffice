@@ -105,13 +105,11 @@ SerfLockStore::~SerfLockStore()
         SerfLock * pLock = (*it).first;
         try
         {
-//FIXME beppec56: there is a problem with the apr_pool used, probably we need one locally to the store
             (*it).second.xSession->UNLOCK( pLock );
+            (*it).second.xSession->release();
         }
         catch (DAVException & )
         {}
-
-        delete pLock;
         ++it;
     }
 }
@@ -142,6 +140,7 @@ void SerfLockStore::stopTicker()
     }
 }
 
+#if 0       //not currently used
 // -------------------------------------------------------------------
 void SerfLockStore::registerSession( SerfSession /* aSession */ )
 {
@@ -149,6 +148,7 @@ void SerfLockStore::registerSession( SerfSession /* aSession */ )
 
 //    ne_lockstore_register( m_pSerfLockStore, pHttpSession );
 }
+#endif
 
 // -------------------------------------------------------------------
 SerfLock * SerfLockStore::findByUri( rtl::OUString const & rUri )
@@ -183,7 +183,8 @@ void SerfLockStore::addLock( SerfLock * pLock,
 
     m_aLockInfoMap[ pLock ]
         = LockInfo( xSession, nLastChanceToSendRefreshRequest );
-
+    //acquire this session, needed to manage the lock refresh
+    xSession->acquire();
     {
         rtl::OUString   aOwner;
         pLock->getLock().Owner >>= aOwner;
@@ -222,10 +223,17 @@ void SerfLockStore::removeLock( SerfLock * pLock )
 {
     osl::MutexGuard aGuard( m_aMutex );
 
-    m_aLockInfoMap.erase( pLock );
-    //the caller should deallocate SerfLock class after the call!
-    if ( m_aLockInfoMap.size() == 0 )
-        stopTicker();
+    LockInfoMap::iterator it( m_aLockInfoMap.find( pLock ) );
+    if(it != m_aLockInfoMap.end())
+    {
+        LockInfo & rInfo = (*it).second;
+        rInfo.xSession->release();
+        m_aLockInfoMap.erase( pLock );
+        //the caller should deallocate SerfLock class after the call!
+        OSL_TRACE(">>>> SerfLockStore::removeLock - lock removed");
+        if ( m_aLockInfoMap.size() == 0 )
+            stopTicker();
+    }
 }
 
 // -------------------------------------------------------------------

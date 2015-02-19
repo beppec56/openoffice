@@ -87,8 +87,8 @@ SerfSession::SerfSession(
     m_pSerfContext = serf_context_create( getAprPool() );
 
     m_pSerfBucket_Alloc = serf_bucket_allocator_create( getAprPool(), NULL, NULL );
-    OSL_TRACE(">>>> SerfSession::SerfSession - Session created inUri: %s",
-              rtl::OUStringToOString( m_aUri.GetURI(), RTL_TEXTENCODING_UTF8 ).getStr());
+    OSL_TRACE(">>>> SerfSession::SerfSession - Session created host: %s",
+              rtl::OUStringToOString( m_aUri.GetHost(), RTL_TEXTENCODING_UTF8 ).getStr());
 }
 
 // -------------------------------------------------------------------
@@ -96,23 +96,23 @@ SerfSession::SerfSession(
 // -------------------------------------------------------------------
 SerfSession::~SerfSession( )
 {
-    OSL_TRACE(">>>> SerfSession::~SerfSession - Session destroyed inUri: %s\n",
-        rtl::OUStringToOString( m_aUri.GetURI(), RTL_TEXTENCODING_UTF8 ).getStr());
-//remove from lock store all this session owned locks
-    SerfLock *aLock;
-    while ( ( aLock = m_aSerfLockStore.findByUri( m_aUri.GetURI() ) ) != static_cast< SerfLock*>(0) )
-    {
-        try
-        {
-            m_aSerfLockStore.removeLock(aLock);
-            UNLOCK(aLock);
-            OSL_TRACE(">>>> SerfSession::~SerfSession - lock removed !\n");
-        }
-        catch (DAVException&)
-        {
-            OSL_TRACE(">>>> SerfSession::~SerfSession - cannot unlock !\n");
-        }
-    }
+    OSL_TRACE(">>>> SerfSession::~SerfSession - Session destroyed host: %s",
+        rtl::OUStringToOString( m_aUri.GetHost(), RTL_TEXTENCODING_UTF8 ).getStr());
+// //remove from lock store all this session owned locks
+//     SerfLock *aLock;
+//     while ( ( aLock = m_aSerfLockStore.findByUri( m_aUri.GetURI() ) ) != static_cast< SerfLock*>(0) )
+//     {
+//         try
+//         {
+//             m_aSerfLockStore.removeLock(aLock);
+//             UNLOCK(aLock);
+//             OSL_TRACE(">>>> SerfSession::~SerfSession - lock removed !\n");
+//         }
+//         catch (DAVException&)
+//         {
+//             OSL_TRACE(">>>> SerfSession::~SerfSession - cannot unlock !\n");
+//         }
+//     }
     
     if ( m_pSerfConnection )
     {
