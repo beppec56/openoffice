@@ -36,26 +36,25 @@ namespace http_dav_ucp
 
 typedef serf_connection_t SerfConnection;
 
-// TODO, figure out type of <SerfLock>
 class SerfLock
 {
 private:
     ucb::Lock               mLock;
-    const rtl::OUString     mSessionURI;
+    const rtl::OUString     mResourceUri;
     const rtl::OUString     mPathStr;
     // const DAVRequestEnvironment& mrRequestEnvironment;
 public:
 
-    SerfLock(const ucb::Lock inLock, rtl::OUString inURI, rtl::OUString inPath)
+    SerfLock(const ucb::Lock inLock, rtl::OUString inUri, rtl::OUString inPath)
         : mLock( inLock )
-        , mSessionURI( inURI )
+        , mResourceUri( inUri )
         , mPathStr( inPath ) 
         // , mrRequestEnvironment( rEnv )
         {};
 
     void setLock(const ucb::Lock inLock)  { mLock = inLock; };
     const ucb::Lock                 getLock() { return mLock; };
-    const rtl::OUString             getSessionURI() { return mSessionURI; };
+    const rtl::OUString             getResourceUri() { return mResourceUri; };
     const rtl::OUString             getResourcePath() { return mPathStr; };
     // const DAVRequestEnvironment&    getRequestEnvironment() { return mrRequestEnvironment; };
 };

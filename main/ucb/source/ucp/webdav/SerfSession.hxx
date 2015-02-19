@@ -72,7 +72,9 @@ private:
     char* getHostinfo();
     bool isSSLNeeded();
 
-    SerfRequestProcessor* createReqProc( const rtl::OUString & inPath );
+    SerfRequestProcessor*   createReqProc( const rtl::OUString & inPath );
+
+    rtl::OUString           composeCurrentUri( const rtl::OUString & inPath );
 
 protected:
     virtual ~SerfSession();

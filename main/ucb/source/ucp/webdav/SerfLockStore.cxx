@@ -151,7 +151,7 @@ void SerfLockStore::registerSession( SerfSession /* aSession */ )
 #endif
 
 // -------------------------------------------------------------------
-SerfLock * SerfLockStore::findByUri( rtl::OUString const & rUri )
+SerfLock * SerfLockStore::findByUri( rtl::OUString const & rUri)
 {
     osl::MutexGuard aGuard( m_aMutex );
 
@@ -161,7 +161,7 @@ SerfLock * SerfLockStore::findByUri( rtl::OUString const & rUri )
     while ( it != end )
     {
         SerfLock * pLock = (*it).first;
-        if( (*it).second.xSession->m_aUri.GetURI().equals( rUri ) )
+        if( pLock->getResourceUri().equals( rUri ) )
         {
             return pLock;
         }
@@ -193,7 +193,7 @@ void SerfLockStore::addLock( SerfLock * pLock,
         aToken = pLock->getLock().LockTokens[0];
 
         OSL_TRACE(">>>> SerfLockStore::addLock - a new lock was added: URI: %s, Owner: %s, token: %s, nLastChanceToSendRefreshRequest %d\n",
-                  rtl::OUStringToOString( pLock->getSessionURI() ,RTL_TEXTENCODING_UTF8 ).getStr(),
+                  rtl::OUStringToOString( pLock->getResourceUri() ,RTL_TEXTENCODING_UTF8 ).getStr(),
                   rtl::OUStringToOString( aOwner,RTL_TEXTENCODING_UTF8 ).getStr(),
                   rtl::OUStringToOString( aToken,RTL_TEXTENCODING_UTF8 ).getStr(),
                       nLastChanceToSendRefreshRequest );

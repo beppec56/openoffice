@@ -26,6 +26,7 @@
 #include <vector>
 #include <string.h>
 #include <rtl/string.h>
+#include <rtl/ustrbuf.hxx>
 #include <osl/time.h>
 #include "comphelper/sequence.hxx"
 #include "ucbhelper/simplecertificatevalidationrequest.hxx"
@@ -88,7 +89,7 @@ SerfSession::SerfSession(
 
     m_pSerfBucket_Alloc = serf_bucket_allocator_create( getAprPool(), NULL, NULL );
     OSL_TRACE(">>>> SerfSession::SerfSession - Session created host: %s",
-              rtl::OUStringToOString( m_aUri.GetHost(), RTL_TEXTENCODING_UTF8 ).getStr());
+              rtl::OUStringToOString( composeCurrentUri(rtl::OUString( RTL_CONSTASCII_USTRINGPARAM( "" ))), RTL_TEXTENCODING_UTF8 ).getStr());
 }
 
 // -------------------------------------------------------------------
@@ -97,22 +98,7 @@ SerfSession::SerfSession(
 SerfSession::~SerfSession( )
 {
     OSL_TRACE(">>>> SerfSession::~SerfSession - Session destroyed host: %s",
-        rtl::OUStringToOString( m_aUri.GetHost(), RTL_TEXTENCODING_UTF8 ).getStr());
-// //remove from lock store all this session owned locks
-//     SerfLock *aLock;
-//     while ( ( aLock = m_aSerfLockStore.findByUri( m_aUri.GetURI() ) ) != static_cast< SerfLock*>(0) )
-//     {
-//         try
-//         {
-//             m_aSerfLockStore.removeLock(aLock);
-//             UNLOCK(aLock);
-//             OSL_TRACE(">>>> SerfSession::~SerfSession - lock removed !\n");
-//         }
-//         catch (DAVException&)
-//         {
-//             OSL_TRACE(">>>> SerfSession::~SerfSession - cannot unlock !\n");
-//         }
-//     }
+        rtl::OUStringToOString( composeCurrentUri(rtl::OUString( RTL_CONSTASCII_USTRINGPARAM( "" ))), RTL_TEXTENCODING_UTF8 ).getStr());
     
     if ( m_pSerfConnection )
     {
@@ -237,13 +223,63 @@ bool SerfSession::isHeadRequestInProgress()
 bool SerfSession::isSSLNeeded()
 {
     return m_aUri.GetScheme().equalsIgnoreAsciiCase( rtl::OUString( RTL_CONSTASCII_USTRINGPARAM( "https" ) ) );
-}
+} 
 
 char* SerfSession::getHostinfo()
 {
     return m_aUri.getAprUri()->hostinfo;
 }
 
+// -------------------------------------------------------------------
+// helper function
+// it composes the uri for lockstore registration
+//FIXME yet to add userinfo
+rtl::OUString SerfSession::composeCurrentUri(const rtl::OUString & inPath)
+{
+    rtl::OUString aScheme( m_aUri.GetScheme() );
+    rtl::OUStringBuffer aBuf( aScheme );
+    aBuf.appendAscii( "://" );
+    if ( m_aUri.GetUserInfo().getLength() > 0 )
+    {
+        aBuf.append( m_aUri.GetUserInfo() );
+        aBuf.appendAscii( "@" );
+    }
+    // Is host a numeric IPv6 address?
+    if ( ( m_aUri.GetHost().indexOf( ':' ) != -1 ) &&
+         ( m_aUri.GetHost()[ 0 ] != sal_Unicode( '[' ) ) )
+    {
+        aBuf.appendAscii( "[" );
+        aBuf.append( m_aUri.GetHost() );
+        aBuf.appendAscii( "]" );
+    }
+    else
+    {
+        aBuf.append( m_aUri.GetHost() );
+    }
+
+    // append port, but only, if not default port.
+    bool bAppendPort = true;
+    sal_Int32 aPort = m_aUri.GetPort();
+    switch ( aPort )
+    {
+    case DEFAULT_HTTP_PORT:
+        bAppendPort = aScheme.equalsAsciiL( RTL_CONSTASCII_STRINGPARAM( "http" ) );
+        break;
+
+    case DEFAULT_HTTPS_PORT:
+        bAppendPort = !aScheme.equalsAsciiL( RTL_CONSTASCII_STRINGPARAM( "https" ) );
+        break;
+    }
+    if ( bAppendPort )
+    {
+        aBuf.appendAscii( ":" );
+        aBuf.append( rtl::OUString::valueOf( aPort ) );
+    }
+    aBuf.append( inPath );
+
+    rtl::OUString   aUri(aBuf.makeStringAndClear() );
+    return aUri;
+}
 
 // -------------------------------------------------------------------
 // virtual
@@ -1060,20 +1096,22 @@ void SerfSession::LOCK( const ::rtl::OUString & inPath,
                         const DAVRequestEnvironment & rEnv )
     throw ( DAVException )
 {
-    fprintf(stdout,">>>> SerfSession::LOCK - inPath: %s, session URI: %s\n",
-              rtl::OUStringToOString( inPath,RTL_TEXTENCODING_UTF8 ).getStr(),
-              rtl::OUStringToOString( m_aUri.GetURI(),RTL_TEXTENCODING_UTF8 ).getStr());
-
     osl::Guard< osl::Mutex > theGuard( m_aMutex );
+
+    rtl::OUString   aUri = composeCurrentUri(inPath);
+
+    fprintf(stdout,">>>> SerfSession::LOCK - URI: %s\n",
+              rtl::OUStringToOString( aUri,RTL_TEXTENCODING_UTF8 ).getStr());
 
     //before locking, search in the lock store if we already own a lock for this resource
     //if present, return with exception DAV_LOCKED_SELF
+
     SerfLock * pLock
-        = m_aSerfLockStore.findByUri( m_aUri.GetURI() );
+        = m_aSerfLockStore.findByUri( aUri );
     if ( pLock )
     {
         fprintf(stdout,">>>> SerfSession::LOCK - lock for path: %s already in local store (SerfLockStore)\n",
-                  rtl::OUStringToOString( m_aUri.GetURI(), RTL_TEXTENCODING_UTF8 ).getStr());
+                  rtl::OUStringToOString( aUri, RTL_TEXTENCODING_UTF8 ).getStr());
 //already present, meaning already locked by the same AOO session and already in the lockstore
 //just return, nothing to do
         fprintf(stdout,">>>> SerfSession::LOCK - Resource already locked by us, nothing to lock\n");
@@ -1114,7 +1152,7 @@ void SerfSession::LOCK( const ::rtl::OUString & inPath,
         outLock.Value >>= aLocks;
         ucb::Lock aLock = aLocks[0];
 
-        SerfLock* aNewLock = new SerfLock( aLock, m_aUri.GetURI(), inPath );
+        SerfLock* aNewLock = new SerfLock( aLock, aUri, inPath );
         // add the store the new lock
         m_aSerfLockStore.addLock(aNewLock,this,
                                  lastChanceToSendRefreshRequest(
@@ -1331,18 +1369,20 @@ void SerfSession::UNLOCK( const ::rtl::OUString & inPath,
 {
     osl::Guard< osl::Mutex > theGuard( m_aMutex );
 
+    rtl::OUString aUri( composeCurrentUri(inPath) );
+
     // get the lock from lock store
     SerfLock * pLock
-        = m_aSerfLockStore.findByUri( m_aUri.GetURI() );
+        = m_aSerfLockStore.findByUri( aUri );
     if ( !pLock )
     {
         fprintf(stdout,">>>> SerfSession::UNLOCK (DAVResourceAccess) - lock for path: %s is not in local store (SerfLockStore)\n",
-                  rtl::OUStringToOString( m_aUri.GetURI(), RTL_TEXTENCODING_UTF8 ).getStr());
+                  rtl::OUStringToOString( aUri, RTL_TEXTENCODING_UTF8 ).getStr());
         throw DAVException( DAVException::DAV_NOT_LOCKED );
     }
 
-    OSL_TRACE(">>>> SerfSession::UNLOCK (DAVResourceAccess) - unlocking: %s (token: %s)\n",
-              rtl::OUStringToOString( m_aUri.GetURI(), RTL_TEXTENCODING_UTF8 ).getStr(),
+    OSL_TRACE(">>>> SerfSession::UNLOCK (DAVResourceAccess) - unlocking: %s (token: %s)",
+              rtl::OUStringToOString( aUri, RTL_TEXTENCODING_UTF8 ).getStr(),
               rtl::OUStringToOString( pLock->getLock().LockTokens[0], RTL_TEXTENCODING_UTF8 ).getStr());
 
     Init( rEnv );
@@ -1358,7 +1398,7 @@ void SerfSession::UNLOCK( const ::rtl::OUString & inPath,
         DAVException* mpDAVExp( aReqProc->mpDAVException );
         //check the status returned
         fprintf(stdout, ">>>> SerfSession::UNLOCK - unlocking %s (token: %s) failed Status: %d\n",
-                   rtl::OUStringToOString( m_aUri.GetURI(), RTL_TEXTENCODING_UTF8 ).getStr(),
+                   rtl::OUStringToOString( aUri, RTL_TEXTENCODING_UTF8 ).getStr(),
                    rtl::OUStringToOString( pLock->getLock().LockTokens[0], RTL_TEXTENCODING_UTF8 ).getStr(),
                    mpDAVExp->getStatus() );
     }
@@ -1379,7 +1419,7 @@ bool SerfSession::UNLOCK( SerfLock * pLock )
     rtl::OUString inPath = pLock->getResourcePath();
 
     fprintf(stdout,">>>> SerfSession::UNLOCK (SerfLockStore) - URI: %s, token: %s\n",
-              rtl::OUStringToOString( pLock->getSessionURI(), RTL_TEXTENCODING_UTF8 ).getStr(),
+              rtl::OUStringToOString( pLock->getResourceUri(), RTL_TEXTENCODING_UTF8 ).getStr(),
               rtl::OUStringToOString( pLock->getLock().LockTokens[0], RTL_TEXTENCODING_UTF8 ).getStr());
 
     boost::shared_ptr<SerfRequestProcessor> aReqProc( createReqProc( inPath ) );

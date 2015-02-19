@@ -53,8 +53,8 @@ typedef struct _LockInfo
 
     _LockInfo( rtl::Reference< SerfSession > const & _xSession,
               sal_Int32 _nLastChanceToSendRefreshRequest )
-    : xSession( _xSession ),
-      nLastChanceToSendRefreshRequest( _nLastChanceToSendRefreshRequest ) {}
+        : xSession( _xSession )
+        , nLastChanceToSendRefreshRequest( _nLastChanceToSendRefreshRequest ) {}
 
 } LockInfo;
 
@@ -63,7 +63,6 @@ typedef std::map< SerfLock *, LockInfo, ltptr > LockInfoMap;
 class SerfLockStore
 {
     osl::Mutex         m_aMutex;
-//    ne_lock_store    * m_pSerfLockStore;
     TickerThread     * m_pTickerThread;
     LockInfoMap        m_aLockInfoMap;
 
