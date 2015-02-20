@@ -388,7 +388,7 @@ bool ContentProperties::containsAllNames(
         if ( !contains( rName ) )
         {
             // Not found.
-            OSL_TRACE("ContentProperties::containsAllNames - not found: '%s'\n",
+            OSL_TRACE("ContentProperties::containsAllNames - not found: '%s'",
                       rtl::OUStringToOString( rName,
                                        RTL_TEXTENCODING_UTF8 ).getStr());
             rNamesNotContained.push_back( rName );

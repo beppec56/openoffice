@@ -2996,7 +2996,7 @@ void SfxMedium::UnlockDAVResource()
         uno::Sequence< ::com::sun::star::ucb::LockEntry >  aLockEntries;
         if(aContent.getPropertyValue( ::rtl::OUString( RTL_CONSTASCII_USTRINGPARAM( "DAV:supportedlock" ) ) ) >>= aLockEntries)
         {
-            OSL_TRACE("SfxMedium::UnlockDAVResource - resource is DAV (DAV:supportedlock: %d)\n",aLockEntries.getLength());
+            OSL_TRACE("SfxMedium::UnlockDAVResource - resource is DAV (DAV:supportedlock: %d)",aLockEntries.getLength());
             try {
                 aContent.unlock();
                 fprintf(stdout,"SfxMedium::UnlockDAVResource - successful, resource %s\n",
