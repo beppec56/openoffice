@@ -1045,7 +1045,7 @@ sal_Bool SfxMedium::LockDAVResourceOnDemand( sal_Bool bLoading, sal_Bool bNoUI )
                 bHasRequiredLock = sal_True;
         }
 
-        OSL_TRACE("SfxMedium::LockDAVResourceOnDemand - resource is a DAV and supports required lock capabilities\n");
+        OSL_TRACE("SfxMedium::LockDAVResourceOnDemand - resource is a DAV and supports required lock capabilities");
         if ( !bResult )
         {
             // no read-write access is necessary on loading if the document is explicitly opened as copy
