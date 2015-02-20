@@ -1390,8 +1390,14 @@ void SerfSession::UNLOCK( const ::rtl::OUString & inPath,
     boost::shared_ptr<SerfRequestProcessor> aReqProc( createReqProc( inPath ) );
     apr_status_t status = APR_SUCCESS;
 
+    ucb::Lock inLock = pLock->getLock();
+    //remove lock from lockstore
+    // so, if something goes wrong, we don't refresh it anymore
+    m_aSerfLockStore.removeLock(pLock);
+    delete pLock;
+    
     // remove existing lock
-    aReqProc->processUnlock( inPath, pLock->getLock(), status);
+    aReqProc->processUnlock( inPath, inLock, status);
 
     if ( aReqProc->mpDAVException )
     {
@@ -1399,15 +1405,12 @@ void SerfSession::UNLOCK( const ::rtl::OUString & inPath,
         //check the status returned
         fprintf(stdout, ">>>> SerfSession::UNLOCK - unlocking %s (token: %s) failed Status: %d\n",
                    rtl::OUStringToOString( aUri, RTL_TEXTENCODING_UTF8 ).getStr(),
-                   rtl::OUStringToOString( pLock->getLock().LockTokens[0], RTL_TEXTENCODING_UTF8 ).getStr(),
+                   rtl::OUStringToOString( inLock.LockTokens[0], RTL_TEXTENCODING_UTF8 ).getStr(),
                    mpDAVExp->getStatus() );
     }
 
     //HandleError will handle the error and throw an exception, if needed
     HandleError( aReqProc );
-
-    m_aSerfLockStore.removeLock(pLock);
-    delete pLock;
 }
 
 // -------------------------------------------------------------------
