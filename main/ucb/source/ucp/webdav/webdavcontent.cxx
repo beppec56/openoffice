@@ -3021,25 +3021,6 @@ void Content::lock(
 {
     try
     {
-//        {
-//            OSL_TRACE(">>>> Content::lock check if locks are already present on the DAV resource");
-//            //TODO use the getresource function, not the CACHE!
-//            if ( m_xCachedProps.get() )
-//            {
-//                OSL_TRACE(">>>> Content::lock check if locks are already present on the DAV resource 2");
-//                uno::Sequence< ucb::Lock > aLocks;
-//                if ( m_xCachedProps->getValue( DAVProperties::LOCKDISCOVERY )
-//                     >>= aLocks )
-//                {
-//                    if(aLocks.getLength() > 0)
-//                    OSL_TRACE(">>>> Content::lock locks are already present on the DAV resource (%d)", aLocks.getLength());
-//                }
-//                else
-//                    OSL_TRACE(">>>> Content::lock lockdiscov NOT present");
-//                    
-//            }
-//        }
-        
         std::auto_ptr< DAVResourceAccess > xResAccess;
         {
             osl::Guard< osl::Mutex > aGuard( m_aMutex );

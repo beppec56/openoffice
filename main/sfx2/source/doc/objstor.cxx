@@ -644,7 +644,6 @@ sal_Bool SfxObjectShell::DoLoad( SfxMedium *pMed )
 
     EnableSetModified( sal_False );
 
-    pMedium->LockDAVResourceOnDemand( sal_True, sal_False );
     pMedium->LockOrigFileOnDemand( sal_True, sal_False );
     if ( GetError() == ERRCODE_NONE && bOwnStorageFormat && ( !pFilter || !( pFilter->GetFilterFlags() & SFX_FILTER_STARONEFILTER ) ) )
     {
@@ -2200,7 +2199,6 @@ sal_Bool SfxObjectShell::DoSaveCompleted( SfxMedium* pNewMed )
     }
 
     pMedium->ClearBackup_Impl();
-    pMedium->LockDAVResourceOnDemand( sal_True, sal_False );
     pMedium->LockOrigFileOnDemand( sal_True, sal_False );
     return bOk;
 }

@@ -492,10 +492,7 @@ void SfxViewFrame::ExecReload_Impl( SfxRequest& rReq )
 
                     pMed->CompleteReOpen();
                     if ( nOpenMode & STREAM_WRITE )
-                    {
-                        pMed->LockDAVResourceOnDemand( sal_False, sal_True );
                         pMed->LockOrigFileOnDemand( sal_False, sal_True );
-                    }
 
                     // LockOrigFileOnDemand might set the readonly flag itself, it should be set back
                     pMed->GetItemSet()->Put( SfxBoolItem( SID_DOC_READONLY, !( nOpenMode & STREAM_WRITE ) ) );

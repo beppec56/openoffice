@@ -212,7 +212,6 @@ public:
     sal_Bool            IsStorage();
 
     sal_Int8            ShowLockedDAVDocumentDialog( const ::com::sun::star::uno::Sequence< ::rtl::OUString >& aData, sal_Bool bIsLoading, sal_Bool bOwnLock );
-    sal_Bool            LockDAVResourceOnDemand( sal_Bool bLoading, sal_Bool bNoUI );
     sal_Int8            ShowLockedDocumentDialog( const ::com::sun::star::uno::Sequence< ::rtl::OUString >& aData, sal_Bool bIsLoading, sal_Bool bOwnLock );
     sal_Bool            LockOrigFileOnDemand( sal_Bool bLoading, sal_Bool bNoUI );
     void                UnlockDAVResource( );

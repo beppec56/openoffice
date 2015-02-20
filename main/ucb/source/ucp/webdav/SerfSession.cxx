@@ -99,7 +99,7 @@ SerfSession::~SerfSession( )
 {
     OSL_TRACE(">>>> SerfSession::~SerfSession - Session destroyed host: %s",
         rtl::OUStringToOString( composeCurrentUri(rtl::OUString( RTL_CONSTASCII_USTRINGPARAM( "" ))), RTL_TEXTENCODING_UTF8 ).getStr());
-    
+
     if ( m_pSerfConnection )
     {
         serf_connection_close( m_pSerfConnection );
@@ -173,7 +173,7 @@ void SerfSession::Init()
         if ( m_aProxyName.getLength() )
         {
             apr_sockaddr_t *proxy_address = NULL;
-            status = apr_sockaddr_info_get( &proxy_address, 
+            status = apr_sockaddr_info_get( &proxy_address,
                                                                rtl::OUStringToOString( m_aProxyName, RTL_TEXTENCODING_UTF8 ).getStr(), 
                                                                APR_UNSPEC,
                                                                static_cast<apr_port_t>(m_nProxyPort), 
@@ -223,7 +223,7 @@ bool SerfSession::isHeadRequestInProgress()
 bool SerfSession::isSSLNeeded()
 {
     return m_aUri.GetScheme().equalsIgnoreAsciiCase( rtl::OUString( RTL_CONSTASCII_USTRINGPARAM( "https" ) ) );
-} 
+}
 
 char* SerfSession::getHostinfo()
 {
@@ -316,11 +316,11 @@ apr_status_t SerfSession::setupSerfConnection( apr_socket_t * inAprSocket,
                                                apr_pool_t* /*inAprPool*/ )
 {
     serf_bucket_t *tmpInputBkt;
-    tmpInputBkt = serf_context_bucket_socket_create( getSerfContext(), 
-                                                     inAprSocket, 
+    tmpInputBkt = serf_context_bucket_socket_create( getSerfContext(),
+                                                     inAprSocket,
                                                      getSerfBktAlloc() );
-    
-    if ( isSSLNeeded() ) 
+
+    if ( isSSLNeeded() )
     {
         tmpInputBkt = serf_bucket_ssl_decrypt_create( tmpInputBkt,
                                                       0,
@@ -333,7 +333,7 @@ apr_status_t SerfSession::setupSerfConnection( apr_socket_t * inAprSocket,
             NULL,
             Serf_CertificateChainValidation,
             this);
-        serf_ssl_set_hostname( serf_bucket_ssl_decrypt_context_get( tmpInputBkt ), 
+        serf_ssl_set_hostname( serf_bucket_ssl_decrypt_context_get( tmpInputBkt ),
                                getHostinfo() );
 
         *outSerfOutputBucket = serf_bucket_ssl_encrypt_create( *outSerfOutputBucket, 
@@ -347,10 +347,10 @@ apr_status_t SerfSession::setupSerfConnection( apr_socket_t * inAprSocket,
 }
 
 apr_status_t SerfSession::provideSerfCredentials( bool bGiveProvidedCredentialsASecondTry,
-                                                  char ** outUsername, 
+                                                  char ** outUsername,
                                                   char ** outPassword,
-                                                  serf_request_t * /*inRequest*/, 
-                                                  int /*inCode*/, 
+                                                  serf_request_t * /*inRequest*/,
+                                                  int /*inCode*/,
                                                   const char *inAuthProtocol,
                                                   const char *inRealm,
                                                   apr_pool_t *inAprPool )
