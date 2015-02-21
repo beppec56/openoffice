@@ -30,9 +30,7 @@
 #include "SerfTypes.hxx"
 #include "SerfRequestProcessorImpl.hxx"
 #include "SerfInputStream.hxx"
-
 #include <com/sun/star/io/XOutputStream.hpp>
-
 
 namespace http_dav_ucp
 {
@@ -116,7 +114,7 @@ namespace http_dav_ucp
     SerfRequestProcessorImpl* createLockReqProcImpl( const char* inSourcePath,
                                                      const DAVRequestHeaders& inRequestHeaders,
                                                      const ucb::Lock& inLock,
-                                                     const char* inTimeout,                                                     
+                                                     const char* inTimeout,
                                                      DAVPropertyValue & outLock );
 
     SerfRequestProcessorImpl* createLockRefreshProcImpl( const char* inSourcePath,

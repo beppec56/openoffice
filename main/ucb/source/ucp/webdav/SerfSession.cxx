@@ -233,7 +233,6 @@ char* SerfSession::getHostinfo()
 // -------------------------------------------------------------------
 // helper function
 // it composes the uri for lockstore registration
-//FIXME yet to add userinfo
 rtl::OUString SerfSession::composeCurrentUri(const rtl::OUString & inPath)
 {
     rtl::OUString aScheme( m_aUri.GetScheme() );
@@ -657,7 +656,7 @@ serf_bucket_t* SerfSession::acceptSerfResponse( serf_request_t * inSerfRequest,
                                                              SerfBktAlloc );
 
     // create response bucket
-    responseBkt = serf_bucket_response_create( responseBkt, 
+    responseBkt = serf_bucket_response_create( responseBkt,
                                                SerfBktAlloc );
 
     if ( isHeadRequestInProgress() )
@@ -1395,7 +1394,7 @@ void SerfSession::UNLOCK( const ::rtl::OUString & inPath,
     // so, if something goes wrong, we don't refresh it anymore
     m_aSerfLockStore.removeLock(pLock);
     delete pLock;
-    
+
     // remove existing lock
     aReqProc->processUnlock( inPath, inLock, status);
 

@@ -40,7 +40,7 @@ namespace http_dav_ucp
     {
 
     protected:
-        std::vector< DAVResource > mpResources;  
+        std::vector< DAVResource > mpResources;
         const ucb::Lock     mLock;
         const char*         mDepthStr;
         const char*         mLockScope;

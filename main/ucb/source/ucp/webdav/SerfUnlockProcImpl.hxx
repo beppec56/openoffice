@@ -47,7 +47,7 @@ namespace http_dav_ucp
     public:
         SerfUnlockProcImpl( const char* inSourcePath,
                             const DAVRequestHeaders& inRequestHeaders,
-                            const ucb::Lock& inLock,                             
+                            const ucb::Lock& inLock,
                             const char* inToken );
 
         virtual ~SerfUnlockProcImpl();

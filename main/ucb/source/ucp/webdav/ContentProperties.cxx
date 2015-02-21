@@ -550,9 +550,9 @@ void ContentProperties::addProperty( const rtl::OUString & rName,
         (*m_xProps)[ rtl::OUString::createFromAscii( "DateModified" ) ]
             = PropertyValue( uno::makeAny( aDate ), true );
     }
-    // else if ( rName.equals( DAVProperties::LOCKDISCOVERY ) )
-    // {
-    // }
+    //  else if ( rName.equals( DAVProperties::LOCKDISCOVERY ) )
+    //  {
+    //  }
     else if ( rName.equals( DAVProperties::RESOURCETYPE ) )
     {
         rtl::OUString aValue;

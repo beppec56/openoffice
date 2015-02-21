@@ -1364,6 +1364,7 @@ sal_Bool SfxObjectShell::SaveTo_Impl
     AddLog( ::rtl::OUString( RTL_CONSTASCII_USTRINGPARAM( OSL_LOG_PREFIX "Locking" ) ) );
 
     rMedium.LockOrigFileOnDemand( sal_False, sal_False );
+
     if ( bStorageBasedTarget )
     {
         if ( rMedium.GetErrorCode() )
@@ -2200,6 +2201,7 @@ sal_Bool SfxObjectShell::DoSaveCompleted( SfxMedium* pNewMed )
 
     pMedium->ClearBackup_Impl();
     pMedium->LockOrigFileOnDemand( sal_True, sal_False );
+
     return bOk;
 }
 

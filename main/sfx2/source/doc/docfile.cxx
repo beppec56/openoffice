@@ -2953,8 +2953,6 @@ void SfxMedium::Close()
 
 	CloseStreams_Impl();
 
-//unlock first the DAV resource, if this is not a DAV resource, the unlock will do nothing
-    UnlockDAVResource();
     UnlockFile( sal_False );
 }
 
@@ -2988,89 +2986,91 @@ void SfxMedium::CloseAndRelease()
 
 	CloseAndReleaseStreams_Impl();
 
-//unlock first the DAV resource, if this is not a DAV resource, the unlock will do nothing
-    UnlockDAVResource();
     UnlockFile( sal_True );
-}
-
-void SfxMedium::UnlockDAVResource()
-{
-    if ( pImp->m_bLocked )
-    {
-        // an interaction handler should be used for
-        // authentication in case it is available
-        Reference< ::com::sun::star::ucb::XCommandEnvironment > xComEnv;
-        Reference< ::com::sun::star::task::XInteractionHandler > xInteractionHandler = GetInteractionHandler();
-        if (xInteractionHandler.is())
-            xComEnv = new ::ucbhelper::CommandEnvironment( xInteractionHandler,
-                                                           Reference< ::com::sun::star::ucb::XProgressHandler >() );
-
-        ::ucbhelper::Content aContent( GetURLObject().GetMainURL( INetURLObject::NO_DECODE ), xComEnv);
-        //look for a DAV:supportedlock property, to see if this is really a dav resource
-        uno::Sequence< ::com::sun::star::ucb::LockEntry >  aLockEntries;
-        if(aContent.getPropertyValue( ::rtl::OUString( RTL_CONSTASCII_USTRINGPARAM( "DAV:supportedlock" ) ) ) >>= aLockEntries)
-        {
-            OSL_TRACE("SfxMedium::UnlockDAVResource - resource is DAV (DAV:supportedlock: %d)",aLockEntries.getLength());
-            try {
-                aContent.unlock();
-                fprintf(stdout,"SfxMedium::UnlockDAVResource - successful, resource %s\n",
-                        rtl::OUStringToOString( GetURLObject().GetMainURL( INetURLObject::NO_DECODE ),
-                                                RTL_TEXTENCODING_UTF8 ).getStr());
-            }
-            catch( ucb::InteractiveLockingLockedException& e )
-            {
-                fprintf(stdout,">>>> SfxMedium::UnlockDAVResource - uno::InteractiveLockingLockedException signalled resource: %s, reason: %s!\n",
-                        rtl::OUStringToOString( GetURLObject().GetMainURL( INetURLObject::NO_DECODE ),
-                                                RTL_TEXTENCODING_UTF8 ).getStr(),
-                        rtl::OUStringToOString( e.Message,
-                                                RTL_TEXTENCODING_UTF8 ).getStr() );
-            }
-            catch( uno::Exception & e )
-            {
-                fprintf(stdout,"SfxMedium::UnlockDAVResource - uno::Exception: cannot unlock resource: %s, reason: %s!\n",
-                        rtl::OUStringToOString( GetURLObject().GetMainURL( INetURLObject::NO_DECODE ),
-                                                RTL_TEXTENCODING_UTF8 ).getStr(),
-                        rtl::OUStringToOString( e.Message,
-                                                RTL_TEXTENCODING_UTF8 ).getStr());
-            }
-        }
-    }
 }
 
 void SfxMedium::UnlockFile( sal_Bool bReleaseLockStream )
 {
-    if ( pImp->m_xLockingStream.is() )
+    //check if the file is local
+    if ( ::utl::LocalFileHelper::IsLocalFile( aLogicName ) )
     {
-        if ( bReleaseLockStream )
+        if ( pImp->m_xLockingStream.is() )
+        {
+            if ( bReleaseLockStream )
+            {
+                try
+                {
+                    uno::Reference< io::XInputStream > xInStream = pImp->m_xLockingStream->getInputStream();
+                    uno::Reference< io::XOutputStream > xOutStream = pImp->m_xLockingStream->getOutputStream();
+                    if ( xInStream.is() )
+                        xInStream->closeInput();
+                    if ( xOutStream.is() )
+                        xOutStream->closeOutput();
+                }
+                catch( uno::Exception& )
+                {}
+            }
+
+            pImp->m_xLockingStream = uno::Reference< io::XStream >();
+        }
+
+        if ( pImp->m_bLocked )
         {
             try
             {
-                uno::Reference< io::XInputStream > xInStream = pImp->m_xLockingStream->getInputStream();
-                uno::Reference< io::XOutputStream > xOutStream = pImp->m_xLockingStream->getOutputStream();
-                if ( xInStream.is() )
-                    xInStream->closeInput();
-                if ( xOutStream.is() )
-                    xOutStream->closeOutput();
+                pImp->m_bLocked = sal_False;
+                ::svt::DocumentLockFile aLockFile( aLogicName );
+                // TODO/LATER: A warning could be shown in case the file is not the own one
+                aLockFile.RemoveFile();
             }
             catch( uno::Exception& )
             {}
         }
-
-        pImp->m_xLockingStream = uno::Reference< io::XStream >();
     }
-
-    if ( pImp->m_bLocked )
+    else
     {
-        try
+        if ( pImp->m_bLocked )
         {
-            pImp->m_bLocked = sal_False;
-            ::svt::DocumentLockFile aLockFile( aLogicName );
-            // TODO/LATER: A warning could be shown in case the file is not the own one
-            aLockFile.RemoveFile();
+            // an interaction handler should be used for
+            // authentication in case it is available
+            Reference< ::com::sun::star::ucb::XCommandEnvironment > xComEnv;
+            Reference< ::com::sun::star::task::XInteractionHandler > xInteractionHandler = GetInteractionHandler();
+            if (xInteractionHandler.is())
+                xComEnv = new ::ucbhelper::CommandEnvironment( xInteractionHandler,
+                                                               Reference< ::com::sun::star::ucb::XProgressHandler >() );
+
+            ::ucbhelper::Content aContent( GetURLObject().GetMainURL( INetURLObject::NO_DECODE ), xComEnv);
+            //look for a DAV:supportedlock property, to see if this is really a dav resource
+            uno::Sequence< ::com::sun::star::ucb::LockEntry >  aLockEntries;
+            if(aContent.getPropertyValue( ::rtl::OUString( RTL_CONSTASCII_USTRINGPARAM( "DAV:supportedlock" ) ) ) >>= aLockEntries)
+            {
+                OSL_TRACE("SfxMedium::UnlockFile - resource is DAV (DAV:supportedlock: %d)",aLockEntries.getLength());
+                try {
+                    aContent.unlock();
+                    fprintf(stdout,"SfxMedium::UnlockFile - successful, resource %s\n",
+                            rtl::OUStringToOString( GetURLObject().GetMainURL( INetURLObject::NO_DECODE ),
+                                                    RTL_TEXTENCODING_UTF8 ).getStr());
+                }
+                catch( ucb::InteractiveLockingLockedException& e )
+                {
+                    fprintf(stdout,">>>> SfxMedium::UnlockFile - uno::InteractiveLockingLockedException signalled resource: %s, reason: %s!\n",
+                            rtl::OUStringToOString( GetURLObject().GetMainURL( INetURLObject::NO_DECODE ),
+                                                    RTL_TEXTENCODING_UTF8 ).getStr(),
+                            rtl::OUStringToOString( e.Message,
+                                                    RTL_TEXTENCODING_UTF8 ).getStr() );
+                }
+                catch( uno::Exception & e )
+                {
+                    fprintf(stdout,"SfxMedium::UnlockFile - uno::Exception: cannot unlock resource: %s, reason: %s!\n",
+                            rtl::OUStringToOString( GetURLObject().GetMainURL( INetURLObject::NO_DECODE ),
+                                                    RTL_TEXTENCODING_UTF8 ).getStr(),
+                            rtl::OUStringToOString( e.Message,
+                                                    RTL_TEXTENCODING_UTF8 ).getStr());
+                }
+            }
         }
-        catch( uno::Exception& )
-        {}
     }
+
 }
 
 void SfxMedium::CloseAndReleaseStreams_Impl()

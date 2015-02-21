@@ -24,8 +24,6 @@
 // MARKER(update_precomp.py): autogen include statement, do not remove
 #include "precompiled_ucb.hxx"
 
-//#include <ne_locks.h>
-//#include <ne_uri.h>
 #include <rtl/ustring.hxx>
 #include <osl/time.h>
 #include <osl/thread.hxx>
@@ -86,7 +84,6 @@ void TickerThread::run()
 SerfLockStore::SerfLockStore()
     : m_pTickerThread( 0 )
 {
-//    OSL_ENSURE( m_pSerfLockStore, "Unable to create neon lock store!" );
 }
 
 // -------------------------------------------------------------------
@@ -177,9 +174,6 @@ void SerfLockStore::addLock( SerfLock * pLock,
                              sal_Int32 nLastChanceToSendRefreshRequest )
 {
     osl::MutexGuard aGuard( m_aMutex );
-
-    //FIXME beppec56
-    // ne_lockstore_add( m_pSerfLockStore, pLock );
 
     m_aLockInfoMap[ pLock ]
         = LockInfo( xSession, nLastChanceToSendRefreshRequest );
