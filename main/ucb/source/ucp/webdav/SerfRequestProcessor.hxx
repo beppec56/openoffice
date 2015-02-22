@@ -94,6 +94,7 @@ public:
     // PUT
     bool processPut( const char* inData,
                      apr_size_t inDataLen,
+                     com::sun::star::ucb::Lock  inLock,
                      apr_status_t& outSerfStatus );
 
     // POST

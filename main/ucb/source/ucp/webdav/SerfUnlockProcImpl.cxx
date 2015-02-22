@@ -37,10 +37,10 @@ namespace http_dav_ucp
 SerfUnlockProcImpl::SerfUnlockProcImpl( const char* inSourcePath,
                                         const DAVRequestHeaders& inRequestHeaders,
                                         const ucb::Lock& inLock,
-                                        const char* inToken )
+                                        const char* inLockToken )
     : SerfRequestProcessorImpl( inSourcePath, inRequestHeaders )
     , mLock( inLock )
-    , mTokenStr( inToken )
+    , mpLockToken( inLockToken )
     , xInputStream( new SerfInputStream() )
 {
 
@@ -66,7 +66,7 @@ serf_bucket_t * SerfUnlockProcImpl::createSerfRequestBucket( serf_request_t * in
         setRequestHeaders( hdrs_bkt );
 
         // request specific header fields
-        serf_bucket_headers_set( hdrs_bkt, "Lock-Token", mTokenStr );
+        serf_bucket_headers_set( hdrs_bkt, "Lock-Token", mpLockToken );
     }
     else
     {

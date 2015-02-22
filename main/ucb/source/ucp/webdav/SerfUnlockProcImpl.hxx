@@ -41,14 +41,14 @@ namespace http_dav_ucp
 
     protected:
         const ucb::Lock     mLock;
-        const char*         mTokenStr;
+        const char*         mpLockToken;
         com::sun::star::uno::Reference< SerfInputStream > xInputStream;
 
     public:
         SerfUnlockProcImpl( const char* inSourcePath,
                             const DAVRequestHeaders& inRequestHeaders,
                             const ucb::Lock& inLock,
-                            const char* inToken );
+                            const char* inLockToken );
 
         virtual ~SerfUnlockProcImpl();
 

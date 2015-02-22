@@ -1374,6 +1374,14 @@ sal_Bool SfxMedium::LockOrigFileOnDemand( sal_Bool bLoading, sal_Bool bNoUI )
 
                     if ( !bResult && !IsReadOnly() )
                     {
+
+                        // in case of storing the document should request the output before locking
+                        if ( bLoading )
+                        {
+                            // let the stream be opened to check the system file locking
+                            GetMedium_Impl();
+                        }
+
                         sal_Int8 bUIStatus = LOCK_UI_NOLOCK;
                         do
                         {
@@ -3046,6 +3054,7 @@ void SfxMedium::UnlockFile( sal_Bool bReleaseLockStream )
             {
                 OSL_TRACE("SfxMedium::UnlockFile - resource is DAV (DAV:supportedlock: %d)",aLockEntries.getLength());
                 try {
+                    pImp->m_bLocked = sal_False;                    
                     aContent.unlock();
                     fprintf(stdout,"SfxMedium::UnlockFile - successful, resource %s\n",
                             rtl::OUStringToOString( GetURLObject().GetMainURL( INetURLObject::NO_DECODE ),
@@ -3099,7 +3108,7 @@ void SfxMedium::CloseAndReleaseStreams_Impl()
             if ( xInToClose.is() )
                 xInToClose->closeInput();
             if ( xOutToClose.is() )
-                xOutToClose->closeOutput();
+               xOutToClose->closeOutput();
         }
         catch ( uno::Exception& )
         {

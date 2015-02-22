@@ -30,13 +30,13 @@ namespace http_dav_ucp
     class SerfLockRefreshProcImpl : public SerfLockReqProcImpl
     {
     protected:
-        const char*         mTokenStr;
+        const char*         mpLockToken;
 
     public:
         SerfLockRefreshProcImpl( const char* inSourcePath,
                                  const DAVRequestHeaders& inRequestHeaders,
                                  const ucb::Lock& inLock,
-                                 const char* inToken,
+                                 const char* inLockToken,
                                  const char* inTimeout,
                                  DAVPropertyValue & outLock);
 

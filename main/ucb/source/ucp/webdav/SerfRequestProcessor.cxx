@@ -194,11 +194,20 @@ bool SerfRequestProcessor::processHead( const std::vector< ::rtl::OUString > & i
 // PUT
 bool SerfRequestProcessor::processPut( const char* inData,
                                        apr_size_t inDataLen,
+                                       com::sun::star::ucb::Lock inLock,
                                        apr_status_t& outSerfStatus )
 {
+    char * inLockToken = static_cast<char*>(0);
+    if(inLock.LockTokens.getLength() > 0)
+    {
+        inLockToken = apr_psprintf( mrSerfSession.getAprPool(), "(<%s>)",
+                               rtl::OUStringToOString(inLock.LockTokens[0], RTL_TEXTENCODING_UTF8 ).getStr() );
+    }
+
     mpProcImpl = createPutReqProcImpl( mPathStr,
                                        mrSerfSession.getRequestEnvironment().m_aRequestHeaders,
                                        inData,
+                                       inLockToken,
                                        inDataLen );
     outSerfStatus = runProcessor();
 
@@ -343,13 +352,13 @@ bool SerfRequestProcessor::processLockRefresh( const rtl::OUString & inDestinati
     else
         Timeout = apr_psprintf( mrSerfSession.getAprPool(), "Second-%ld", inLock.Timeout );
 
-    char * aToken = apr_psprintf( mrSerfSession.getAprPool(), "(<%s>)",
+    char * inLockToken = apr_psprintf( mrSerfSession.getAprPool(), "(<%s>)",
                                  rtl::OUStringToOString(inLock.LockTokens[0], RTL_TEXTENCODING_UTF8 ).getStr() );
 
     mpProcImpl = createLockRefreshProcImpl( mPathStr,
                                             mrSerfSession.getRequestEnvironment().m_aRequestHeaders,
                                             inLock,
-                                            aToken,
+                                            inLockToken,
                                             Timeout,
                                             outLock);
     outSerfStatus = runProcessor();

@@ -77,6 +77,7 @@ namespace http_dav_ucp
     SerfRequestProcessorImpl* createPutReqProcImpl( const char* inPath,
                                                     const DAVRequestHeaders& inRequestHeaders,
                                                     const char* inData,
+                                                    const char* inLockToken,
                                                     apr_size_t inDataLen );
 
     SerfRequestProcessorImpl* createPostReqProcImpl( const char* inPath,

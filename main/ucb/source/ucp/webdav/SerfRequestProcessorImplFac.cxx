@@ -140,11 +140,13 @@ namespace http_dav_ucp
     SerfRequestProcessorImpl* createPutReqProcImpl( const char* inPath,
                                                     const DAVRequestHeaders& inRequestHeaders,
                                                     const char* inData,
+                                                    const char* inLockToken,
                                                     apr_size_t inDataLen )
     {
         SerfRequestProcessorImpl* pReqProcImpl = new SerfPutReqProcImpl( inPath,
                                                                          inRequestHeaders, 
                                                                          inData,
+                                                                         inLockToken,
                                                                          inDataLen );
         return pReqProcImpl;
     }
@@ -242,14 +244,14 @@ namespace http_dav_ucp
     SerfRequestProcessorImpl* createLockRefreshProcImpl( const char* inSourcePath,
                                                          const DAVRequestHeaders& inRequestHeaders,
                                                          const ucb::Lock& inLock,
-                                                         const char* inToken,
+                                                         const char* inLockToken,
                                                          const char* inTimeout,
                                                          DAVPropertyValue & outLock)
     {
         SerfRequestProcessorImpl* pReqProcImpl = new SerfLockRefreshProcImpl( inSourcePath,
                                                                               inRequestHeaders,
                                                                               inLock,
-                                                                              inToken,
+                                                                              inLockToken,
                                                                               inTimeout,
                                                                               outLock);
         return pReqProcImpl;

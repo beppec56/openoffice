@@ -899,8 +899,21 @@ void SerfSession::PUT( const rtl::OUString & inPath,
     if ( !getDataFromInputStream( inInputStream, aDataToSend, false ) )
         throw DAVException( DAVException::DAV_INVALID_ARG );
     apr_status_t status = APR_SUCCESS;
+
+    //check whether a lock on this resource is already owned
+    rtl::OUString aUri( composeCurrentUri(inPath) );
+    ucb::Lock inLock;
+    SerfLock * pLock = m_aSerfLockStore.findByUri( aUri );
+    if ( pLock )
+    {
+        OSL_TRACE( "SerfSession::PUT - A lock for this resource is present, aURI %s, token: %s",
+                   rtl::OUStringToOString( aUri, RTL_TEXTENCODING_UTF8 ).getStr(),
+                   rtl::OUStringToOString( pLock->getLock().LockTokens[0], RTL_TEXTENCODING_UTF8 ).getStr());
+        inLock = pLock->getLock();
+    }
     aReqProc->processPut( reinterpret_cast< const char * >( aDataToSend.getConstArray() ),
                           aDataToSend.getLength(),
+                          inLock,
                           status );
 
     HandleError( aReqProc );

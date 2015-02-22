@@ -37,11 +37,11 @@ namespace http_dav_ucp
 SerfLockRefreshProcImpl::SerfLockRefreshProcImpl( const char* inSourcePath,
                                                   const DAVRequestHeaders& inRequestHeaders, // on debug the header look empty
                                                   const ucb::Lock& inLock,
-                                                  const char* inToken,
+                                                  const char* inLockToken,
                                                   const char* inTimeout,
                                           DAVPropertyValue & outLock)
     : SerfLockReqProcImpl( inSourcePath, inRequestHeaders, inLock, inTimeout, outLock )
-    , mTokenStr( inToken )
+    , mpLockToken( inLockToken )
 {
 }
 
@@ -66,7 +66,7 @@ serf_bucket_t * SerfLockRefreshProcImpl::createSerfRequestBucket( serf_request_t
 
         // request specific header fields
         serf_bucket_headers_set( hdrs_bkt, "Timeout", mTimeout );
-        serf_bucket_headers_set( hdrs_bkt, "if", mTokenStr );
+        serf_bucket_headers_set( hdrs_bkt, "if", mpLockToken );
     }
     else
     {
