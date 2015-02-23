@@ -78,6 +78,40 @@
 
 #endif  // OSL_DEBUG_LEVEL
 
+//same as above, to print on standard output the same thing
+#include <cppuhelper/exc_hlp.hxx>
+#include <osl/diagnose.h>
+#include <osl/thread.h>
+#include <boost/current_function.hpp>
+#include <typeinfo>
+
+    /** reports a caught UNO exception
+
+        Note that whenever you use this, it might be an indicator that your error
+        handling is not correct ....
+    */
+#define PRINT_EXCEPTION()   \
+        ::com::sun::star::uno::Any caught( ::cppu::getCaughtException() ); \
+        ::rtl::OString sMessage( "caught an exception!" );              \
+        sMessage += "\nin function:"; \
+        sMessage += BOOST_CURRENT_FUNCTION; \
+        sMessage += "\ntype: ";                                         \
+        sMessage += ::rtl::OString( caught.getValueTypeName().getStr(), caught.getValueTypeName().getLength(), osl_getThreadTextEncoding() ); \
+        ::com::sun::star::uno::Exception exception; \
+        caught >>= exception; \
+        if ( exception.Message.getLength() ) \
+        { \
+            sMessage += "\nmessage: ";                                  \
+            sMessage += ::rtl::OString( exception.Message.getStr(), exception.Message.getLength(), osl_getThreadTextEncoding() ); \
+        } \
+        if ( exception.Context.is() ) \
+        { \
+            const char* pContext = typeid( *exception.Context.get() ).name(); \
+            sMessage += "\ncontext: "; \
+            sMessage += pContext; \
+        } \
+        sMessage += "\n"; \
+        osl_assertFailedLine( __FILE__ , __LINE__, sMessage)
 
 /** This macro asserts the given condition (in debug mode), and throws
     an IllegalArgumentException afterwards.
