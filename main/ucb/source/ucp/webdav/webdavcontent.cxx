@@ -3045,7 +3045,7 @@ void Content::lock(
     }
     catch ( DAVException const & e )
     {
-        fprintf(stdout,">>>> Content::lock - Exception received: data: '%s' status: %d\n",
+        fprintf(stdout,">>>> ucb::(webdav)Content::lock - Exception received: data: '%s' status: %d\n",
                   rtl::OUStringToOString( e.getData(),
                                             RTL_TEXTENCODING_UTF8 ).getStr() ,e.getStatus() );
         if(e.getStatus() == SC_LOCKED)

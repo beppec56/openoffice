@@ -1331,195 +1331,129 @@ sal_Bool SfxMedium::LockOrigFileOnDemand( sal_Bool bLoading, sal_Bool bNoUI )
             }
             else
             {
-                // an interaction handler should be used for authentication in case it is available
                 Reference< ::com::sun::star::task::XInteractionHandler > xInteractionHandler = GetInteractionHandler();
-                uno::Sequence< ::com::sun::star::ucb::LockEntry >  aLockEntries;
-                try
+                if ( !bResult )
                 {
-                    Reference< ::com::sun::star::ucb::XCommandEnvironment > xComEnv;
-                    if (xInteractionHandler.is())
-                        xComEnv = new ::ucbhelper::CommandEnvironment( xInteractionHandler,
-                                                                       Reference< ::com::sun::star::ucb::XProgressHandler >() );
-                    // for DAV:supportedlock instead of the resource, better check the container: the dav directory containing the resource
-                    // look for a DAV:supportedlock property, to see if this is really a dav resource
-                    INetURLObject aDest( GetURLObject() );
-                    aDest.removeSegment();
-                    ::ucbhelper::Content aSupportedLockCheckContent( aDest.GetMainURL( INetURLObject::NO_DECODE ), xComEnv);
+                    // no read-write access is necessary on loading if the document is explicitly opened as copy
+                    SFX_ITEMSET_ARG( GetItemSet(), pTemplateItem, SfxBoolItem, SID_TEMPLATE, sal_False);
+                    bResult = ( bLoading && pTemplateItem && pTemplateItem->GetValue() );
+                }
 
-                    OSL_TRACE("======= SfxMedium::LockOrigFileOnDemand - URL for DAV:supportedlock '%s' ======\n",
-                              rtl::OUStringToOString( aDest.GetMainURL(INetURLObject::NO_DECODE ), RTL_TEXTENCODING_UTF8 ).getStr());
-                    OSL_TRACE("SfxMedium::LockOrigFileOnDemand - accessing DAV:supportedlock...");
-                    aSupportedLockCheckContent.getPropertyValue( ::rtl::OUString( RTL_CONSTASCII_USTRINGPARAM( "DAV:supportedlock" ) ) ) >>= aLockEntries;
-                }
-                catch(const uno::Exception &e)
+                if ( !bResult && !IsReadOnly() )
                 {
-                    OSL_TRACE("SfxMedium::LockOrigFileOnDemand - got exception while accessing DAV:supportedlock: %s, url: %s",
-                              rtl::OUStringToOString( e.Message, RTL_TEXTENCODING_UTF8 ).getStr(),
-                              rtl::OUStringToOString( GetURLObject().GetMainURL( INetURLObject::NO_DECODE ), RTL_TEXTENCODING_UTF8 ).getStr());
-                }
-                if(aLockEntries.getLength() > 0)
-                {
-                    //check if the required lock capabilities are available
-                    sal_Bool    bHasRequiredLock = sal_False;
-                    for ( sal_Int32 n = 0; n < aLockEntries.getLength(); ++n )
+
+                    // in case of storing the document should request the output before locking
+                    if ( bLoading )
                     {
-                        if ( aLockEntries[ n ].Scope == ucb::LockScope_EXCLUSIVE &&
-                             aLockEntries[ n ].Type == ucb::LockType_WRITE )
-                            bHasRequiredLock = sal_True;
+                        // let the stream be opened to check the system file locking
+                        GetMedium_Impl();
                     }
 
-                    if ( !bResult )
+                    sal_Int8 bUIStatus = LOCK_UI_NOLOCK;
+                    do
                     {
-                        // no read-write access is necessary on loading if the document is explicitly opened as copy
-                        SFX_ITEMSET_ARG( GetItemSet(), pTemplateItem, SfxBoolItem, SID_TEMPLATE, sal_False);
-                        bResult = ( bLoading && pTemplateItem && pTemplateItem->GetValue() );
-                    }
-
-                    if ( !bResult && !IsReadOnly() )
-                    {
-
-                        // in case of storing the document should request the output before locking
-                        if ( bLoading )
+                        if( !bResult )
                         {
-                            // let the stream be opened to check the system file locking
-                            GetMedium_Impl();
-                        }
-
-                        sal_Int8 bUIStatus = LOCK_UI_NOLOCK;
-                        do
-                        {
-                            if(!bHasRequiredLock)
-                            {
-                                OSL_TRACE("SfxMedium::LockDAVResourceOnDemand - resource is DAV but lock are not supported\n",aLockEntries.getLength());
-                                // DAV file locking is not active, ask user whether he wants to open the document without any locking
-                                if ( xInteractionHandler.is() )
-                                {
-                                    ::rtl::Reference< ::ucbhelper::InteractionRequest > xIgnoreRequestImpl
-                                        = new ::ucbhelper::InteractionRequest( uno::makeAny( document::LockFileIgnoreRequest() ) );
-
-                                    uno::Sequence< uno::Reference< task::XInteractionContinuation > > aContinuations( 2 );
-                                    aContinuations[0] = new ::ucbhelper::InteractionAbort( xIgnoreRequestImpl.get() );
-                                    aContinuations[1] = new ::ucbhelper::InteractionApprove( xIgnoreRequestImpl.get() );
-                                    xIgnoreRequestImpl->setContinuations( aContinuations );
-
-                                    xInteractionHandler->handle( xIgnoreRequestImpl.get() );
-
-                                    ::rtl::Reference< ::ucbhelper::InteractionContinuation > xSelected = xIgnoreRequestImpl->getSelection();
-                                    bResult = (  uno::Reference< task::XInteractionApprove >( xSelected.get(), uno::UNO_QUERY ).is() );
-                                }
+                            Reference< ::com::sun::star::ucb::XCommandEnvironment > xComEnv;
+                            if (xInteractionHandler.is())
+                                xComEnv = new ::ucbhelper::CommandEnvironment( xInteractionHandler,
+                                                                               Reference< ::com::sun::star::ucb::XProgressHandler >() );
+                            ::ucbhelper::Content aContentToLock( GetURLObject().GetMainURL( INetURLObject::NO_DECODE ), xComEnv);
+                            OSL_TRACE("======= SfxMedium::LockOrigFileOnDemand - URL for lock '%s' ======\n",
+                                      rtl::OUStringToOString( GetURLObject().GetMainURL(INetURLObject::NO_DECODE ), RTL_TEXTENCODING_UTF8 ).getStr());
+                            rtl::OUString   aOwner;
+                            try {
+                                aContentToLock.lock();
+                                bResult = sal_True;
                             }
-                            else
+                            catch( ucb::InteractiveLockingLockedException& e )
                             {
-                                OSL_TRACE("SfxMedium::LockOrigFileOnDemand - resource is a DAV and supports required lock capabilities");
-                            }
-
-                            if( !bResult && bHasRequiredLock )
-                            {
-                                Reference< ::com::sun::star::ucb::XCommandEnvironment > xComEnv;
-                                if (xInteractionHandler.is())
-                                    xComEnv = new ::ucbhelper::CommandEnvironment( xInteractionHandler,
-                                                                                   Reference< ::com::sun::star::ucb::XProgressHandler >() );
-                                ::ucbhelper::Content aContentToLock( GetURLObject().GetMainURL( INetURLObject::NO_DECODE ), xComEnv);
-                                OSL_TRACE("======= SfxMedium::LockOrigFileOnDemand - URL for lock '%s' ======\n",
-                                          rtl::OUStringToOString( GetURLObject().GetMainURL(INetURLObject::NO_DECODE ), RTL_TEXTENCODING_UTF8 ).getStr());
-                                rtl::OUString   aOwner;
-                                try {
-                                    aContentToLock.lock();
-                                    bResult = sal_True;
-                                }
-                                catch( ucb::InteractiveLockingLockedException& e )
+                                PRINT_EXCEPTION();
+                                fprintf(stdout,">>>> SfxMedium::LockOrigFileOnDemand - uno::InteractiveLockingLockedException signalled, reason: %s!\n",
+                                        rtl::OUStringToOString( e.Message,
+                                                                RTL_TEXTENCODING_UTF8 ).getStr());
+                                // in e.XInterface should be:  uno::Reference< ucb::XCommandEnvironment >, e.g. the one given above
+                                // bContentReadonly = sal_True;
+                                // here get the lock currently present, via lockdiscovery
+                                uno::Sequence< ::com::sun::star::ucb::Lock >  aLocks;
+                                if(aContentToLock.getPropertyValue( ::rtl::OUString( RTL_CONSTASCII_USTRINGPARAM( "DAV:lockdiscovery" ) ) ) >>= aLocks)
                                 {
-                                    fprintf(stdout,">>>> SfxMedium::LockOrigFileOnDemand - uno::InteractiveLockingLockedException signalled, reason: %s!\n",
-                                            rtl::OUStringToOString( e.Message,
-                                                                    RTL_TEXTENCODING_UTF8 ).getStr());
-                                    // in e.XInterface should be:  uno::Reference< ucb::XCommandEnvironment >, e.g. the one given above
-                                    // bContentReadonly = sal_True;
-                                    // here get the lock currently present, via lockdiscovery
-                                    uno::Sequence< ::com::sun::star::ucb::Lock >  aLocks;
-                                    if(aContentToLock.getPropertyValue( ::rtl::OUString( RTL_CONSTASCII_USTRINGPARAM( "DAV:lockdiscovery" ) ) ) >>= aLocks)
+                                    OSL_TRACE(">>>> SfxMedium::LockOrigFileOnDemand - DAV:lockdiscovery returned %d locks\n",aLocks.getLength());
+                                    if(aLocks.getLength() > 0)
                                     {
-                                        OSL_TRACE(">>>> SfxMedium::LockOrigFileOnDemand - DAV:lockdiscovery returned %d locks\n",aLocks.getLength());
-                                        if(aLocks.getLength() > 0)
-                                        {
-                                            ucb::Lock aLock = aLocks[0];
+                                        ucb::Lock aLock = aLocks[0];
 
-                                            //for debug, prinmt first received lock
-                                            { //============================
+                                        //for debug, prinmt first received lock
+                                        { //============================
 //            block of code for print/debug only, remove when done
-                                                rtl::OUString   aToken;
-                                                aLock.Owner >>= aOwner;
-                                                long    aTimeout = aLock.Timeout;
+                                            rtl::OUString   aToken;
+                                            aLock.Owner >>= aOwner;
+                                            long    aTimeout = aLock.Timeout;
 
-                                                aToken = aLock.LockTokens[0];
-                                                const char *depth;
-                                                switch(aLock.Depth) {
-                                                default:
-                                                case ucb::LockDepth_ZERO:
-                                                    depth =  "0";
-                                                    break;
-                                                case ucb::LockDepth_ONE:
-                                                    depth =  "1";
-                                                    break;
-                                                case ucb::LockDepth_INFINITY:
-                                                    depth = "infinity";
-                                                    break;
-                                                }
-
-                                                fprintf(stdout,">>>> SfxMedium::LockOrigFileOnDemand - a Lock is present: Owner: %s, token: %s, depth: %s, timeout = %li\n",
-                                                        rtl::OUStringToOString( aOwner,RTL_TEXTENCODING_UTF8 ).getStr(),
-                                                        rtl::OUStringToOString( aToken,RTL_TEXTENCODING_UTF8 ).getStr(),
-                                                        depth, aTimeout );
+                                            aToken = aLock.LockTokens[0];
+                                            const char *depth;
+                                            switch(aLock.Depth) {
+                                            default:
+                                            case ucb::LockDepth_ZERO:
+                                                depth =  "0";
+                                                break;
+                                            case ucb::LockDepth_ONE:
+                                                depth =  "1";
+                                                break;
+                                            case ucb::LockDepth_INFINITY:
+                                                depth = "infinity";
+                                                break;
                                             }
-                                        }
-                                    }
-                                    else
-                                        OSL_TRACE("SfxMedium::LockOrigFileOnDemand - DAV:lockdiscovery returned NO locks");
 
-                                    if ( !bResult && !bNoUI )
-                                    {
-                                        uno::Sequence< ::rtl::OUString > aData( LOCKFILE_ENTRYSIZE );
-                                        sal_Bool bOwnLock = sal_False;
-
-                                        aData[0] = aOwner;
-                                        bUIStatus = ShowLockedDAVDocumentDialog( aData, bLoading, bOwnLock );
-                                        if ( bUIStatus == LOCK_UI_SUCCEEDED )
-                                        {
-                                            // take the ownership over the lock file, accept the current lock (already there)
-                                            bResult = sal_True; //aLockFile.OverwriteOwnLockFile();
+                                            fprintf(stdout,">>>> SfxMedium::LockOrigFileOnDemand - a Lock is present: Owner: %s, token: %s, depth: %s, timeout = %li\n",
+                                                    rtl::OUStringToOString( aOwner,RTL_TEXTENCODING_UTF8 ).getStr(),
+                                                    rtl::OUStringToOString( aToken,RTL_TEXTENCODING_UTF8 ).getStr(),
+                                                    depth, aTimeout );
                                         }
                                     }
                                 }
-                                catch( uno::Exception & e )
+                                else
+                                    OSL_TRACE("SfxMedium::LockOrigFileOnDemand - DAV:lockdiscovery returned NO locks");
+
+                                if ( !bResult && !bNoUI )
                                 {
-                                    PRINT_EXCEPTION();
+                                    uno::Sequence< ::rtl::OUString > aData( LOCKFILE_ENTRYSIZE );
+                                    sal_Bool bOwnLock = sal_False;
+
+                                    aData[0] = aOwner;
+                                    bUIStatus = ShowLockedDAVDocumentDialog( aData, bLoading, bOwnLock );
+                                    if ( bUIStatus == LOCK_UI_SUCCEEDED )
+                                    {
+                                        // take the ownership over the lock file, accept the current lock (already there)
+                                        bResult = sal_True; //aLockFile.OverwriteOwnLockFile();
+                                    }
                                 }
                             }
-                        } while( !bResult && bUIStatus == LOCK_UI_TRY );
-                    }
-
-                    if ( !bResult && GetError() == ERRCODE_NONE )
-                    {
-                        // the error should be set in case it is storing process
-                        // or the document has been opened for editing explicitly
-
-                        SFX_ITEMSET_ARG( pSet, pReadOnlyItem, SfxBoolItem, SID_DOC_READONLY, sal_False );
-                        if ( !bLoading || (pReadOnlyItem && !pReadOnlyItem->GetValue()) )
-                            SetError( ERRCODE_IO_ACCESSDENIED, ::rtl::OUString( RTL_CONSTASCII_USTRINGPARAM( OSL_LOG_PREFIX ) ) );
-                        else
-                            GetItemSet()->Put( SfxBoolItem( SID_DOC_READONLY, sal_True ) );
-                    }
-
-                    // when the file is locked, get the current file date
-                    if ( bResult && DocNeedsFileDateCheck() )
-                        GetInitFileDate( sal_True );
-
-                    pImp->m_bLocked = bResult;
+                            catch( uno::Exception & e )
+                            {
+                                PRINT_EXCEPTION();
+                            }
+                        }
+                    } while( !bResult && bUIStatus == LOCK_UI_TRY );
                 }
-                else
+
+                if ( !bResult && GetError() == ERRCODE_NONE )
                 {
-                    OSL_TRACE("SfxMedium::LockOrigFileOnDemand - resource is NOT a DAV or it's a DAV but lock are not supported");
-                    bResult = !bContentReadonly;
+                    // the error should be set in case it is storing process
+                    // or the document has been opened for editing explicitly
+
+                    SFX_ITEMSET_ARG( pSet, pReadOnlyItem, SfxBoolItem, SID_DOC_READONLY, sal_False );
+                    if ( !bLoading || (pReadOnlyItem && !pReadOnlyItem->GetValue()) )
+                        SetError( ERRCODE_IO_ACCESSDENIED, ::rtl::OUString( RTL_CONSTASCII_USTRINGPARAM( OSL_LOG_PREFIX ) ) );
+                    else
+                        GetItemSet()->Put( SfxBoolItem( SID_DOC_READONLY, sal_True ) );
                 }
+
+                // when the file is locked, get the current file date
+                if ( bResult && DocNeedsFileDateCheck() )
+                    GetInitFileDate( sal_True );
+
+                pImp->m_bLocked = bResult;
             }
         }
     }
