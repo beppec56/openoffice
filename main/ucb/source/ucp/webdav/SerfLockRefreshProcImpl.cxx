@@ -65,8 +65,14 @@ serf_bucket_t * SerfLockRefreshProcImpl::createSerfRequestBucket( serf_request_t
         setRequestHeaders( hdrs_bkt );
 
         // request specific header fields
-        serf_bucket_headers_set( hdrs_bkt, "Timeout", mTimeout );
-        serf_bucket_headers_set( hdrs_bkt, "if", mpLockToken );
+        if(mTimeout != 0)
+        {
+            serf_bucket_headers_set( hdrs_bkt, "Timeout", mTimeout );
+        }
+        if(mpLockToken != 0)
+        {
+            serf_bucket_headers_set( hdrs_bkt, "if", mpLockToken );
+        }
     }
     else
     {

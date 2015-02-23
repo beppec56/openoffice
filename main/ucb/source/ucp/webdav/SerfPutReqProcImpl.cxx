@@ -72,9 +72,8 @@ serf_bucket_t * SerfPutReqProcImpl::createSerfRequestBucket( serf_request_t * in
     setRequestHeaders( hdrs_bkt );
     if(mpLockToken)
     {
-    // request specific header fields
+    // request specific header field
         serf_bucket_headers_set( hdrs_bkt, "if", mpLockToken );
-        OSL_TRACE("SerfPutReqProcImpl::createSerfRequestBucket - locktoken: %s",mpLockToken);
     }
 
     return req_bkt;

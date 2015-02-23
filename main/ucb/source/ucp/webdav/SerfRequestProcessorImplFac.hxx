@@ -47,7 +47,8 @@ namespace http_dav_ucp
 
     SerfRequestProcessorImpl* createPropPatchReqProcImpl( const char* inPath,
                                                           const DAVRequestHeaders& inRequestHeaders,
-                                                          const std::vector< ProppatchValue > & inProperties );
+                                                          const std::vector< ProppatchValue > & inProperties,
+                                                          const char* inLockToken );
 
     SerfRequestProcessorImpl* createGetReqProcImpl( const char* inPath,
                                                     const DAVRequestHeaders& inRequestHeaders,
@@ -84,6 +85,7 @@ namespace http_dav_ucp
                                                      const DAVRequestHeaders& inRequestHeaders,
                                                      const char* inData,
                                                      apr_size_t inDataLen,
+                                                     const char* inLockToken,
                                                      const char* inContentType,
                                                      const char* inReferer,
                                                      const com::sun::star::uno::Reference< SerfInputStream >& xioInStrm );
@@ -92,25 +94,30 @@ namespace http_dav_ucp
                                                      const DAVRequestHeaders& inRequestHeaders,
                                                      const char* inData,
                                                      apr_size_t inDataLen,
+                                                     const char* inLockToken,
                                                      const char* inContentType,
                                                      const char* inReferer,
                                                      const com::sun::star::uno::Reference< com::sun::star::io::XOutputStream >& xioOutStrm );
 
     SerfRequestProcessorImpl* createDeleteReqProcImpl( const char* inPath,
-                                                       const DAVRequestHeaders& inRequestHeaders );
+                                                       const DAVRequestHeaders& inRequestHeaders,
+                                                       const char * inLockToken );
 
     SerfRequestProcessorImpl* createMkColReqProcImpl( const char* inPath,
-                                                      const DAVRequestHeaders& inRequestHeaders );
+                                                      const DAVRequestHeaders& inRequestHeaders,
+                                                      const char * inLockToken );
 
     SerfRequestProcessorImpl* createCopyReqProcImpl( const char* inSourcePath,
                                                      const DAVRequestHeaders& inRequestHeaders,
                                                      const char* inDestinationPath,
-                                                     const bool inOverwrite );
+                                                     const bool inOverwrite,
+                                                     const char* inLockToken );
 
     SerfRequestProcessorImpl* createMoveReqProcImpl( const char* inSourcePath,
                                                      const DAVRequestHeaders& inRequestHeaders,
                                                      const char* inDestinationPath,
-                                                     const bool inOverwrite );
+                                                     const bool inOverwrite,
+                                                     const char* inLockToken );
 
     SerfRequestProcessorImpl* createLockReqProcImpl( const char* inSourcePath,
                                                      const DAVRequestHeaders& inRequestHeaders,

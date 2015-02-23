@@ -89,7 +89,7 @@ SerfSession::SerfSession(
 
     m_pSerfBucket_Alloc = serf_bucket_allocator_create( getAprPool(), NULL, NULL );
     OSL_TRACE(">>>> SerfSession::SerfSession - Session created host: %s",
-              rtl::OUStringToOString( composeCurrentUri(rtl::OUString( RTL_CONSTASCII_USTRINGPARAM( "" ))), RTL_TEXTENCODING_UTF8 ).getStr());
+              rtl::OUStringToOString( composeCurrentUri( rtl::OUString( RTL_CONSTASCII_USTRINGPARAM( "" ) ) ), RTL_TEXTENCODING_UTF8 ).getStr() );
 }
 
 // -------------------------------------------------------------------
@@ -98,7 +98,7 @@ SerfSession::SerfSession(
 SerfSession::~SerfSession( )
 {
     OSL_TRACE(">>>> SerfSession::~SerfSession - Session destroyed host: %s",
-        rtl::OUStringToOString( composeCurrentUri(rtl::OUString( RTL_CONSTASCII_USTRINGPARAM( "" ))), RTL_TEXTENCODING_UTF8 ).getStr());
+        rtl::OUStringToOString( composeCurrentUri( rtl::OUString( RTL_CONSTASCII_USTRINGPARAM( "" ) ) ), RTL_TEXTENCODING_UTF8 ).getStr() );
 
     if ( m_pSerfConnection )
     {
@@ -749,7 +749,19 @@ void SerfSession::PROPPATCH( const rtl::OUString & inPath,
 
     apr_status_t status = APR_SUCCESS;
     boost::shared_ptr<SerfRequestProcessor> aReqProc( createReqProc( inPath ) );
+    //check whether a lock on this resource is already owned
+    rtl::OUString aUri( composeCurrentUri( inPath ) );
+    ucb::Lock inLock;
+    SerfLock * pLock = m_aSerfLockStore.findByUri( aUri );
+    if ( pLock )
+    {
+        OSL_TRACE( "SerfSession::PROPPATCH - A lock for this resource is present, aURI %s, token: %s",
+                   rtl::OUStringToOString( aUri, RTL_TEXTENCODING_UTF8 ).getStr(),
+                   rtl::OUStringToOString( pLock->getLock().LockTokens[0], RTL_TEXTENCODING_UTF8 ).getStr());
+        inLock = pLock->getLock();
+    }
     aReqProc->processPropPatch( inValues,
+                                inLock,
                                 status );
 
     HandleError( aReqProc );
@@ -901,14 +913,11 @@ void SerfSession::PUT( const rtl::OUString & inPath,
     apr_status_t status = APR_SUCCESS;
 
     //check whether a lock on this resource is already owned
-    rtl::OUString aUri( composeCurrentUri(inPath) );
+    rtl::OUString aUri( composeCurrentUri( inPath ) );
     ucb::Lock inLock;
     SerfLock * pLock = m_aSerfLockStore.findByUri( aUri );
     if ( pLock )
     {
-        OSL_TRACE( "SerfSession::PUT - A lock for this resource is present, aURI %s, token: %s",
-                   rtl::OUStringToOString( aUri, RTL_TEXTENCODING_UTF8 ).getStr(),
-                   rtl::OUStringToOString( pLock->getLock().LockTokens[0], RTL_TEXTENCODING_UTF8 ).getStr());
         inLock = pLock->getLock();
     }
     aReqProc->processPut( reinterpret_cast< const char * >( aDataToSend.getConstArray() ),
@@ -943,10 +952,22 @@ SerfSession::POST( const rtl::OUString & inPath,
     boost::shared_ptr<SerfRequestProcessor> aReqProc( createReqProc( inPath ) );
     uno::Reference< SerfInputStream > xInputStream( new SerfInputStream );
     apr_status_t status = APR_SUCCESS;
+    //check whether a lock on this resource is already owned
+    rtl::OUString aUri( composeCurrentUri( inPath ) );
+    ucb::Lock inLock;
+    SerfLock * pLock = m_aSerfLockStore.findByUri( aUri );
+    if ( pLock )
+    {
+        OSL_TRACE( "SerfSession::POST - A lock for this resource is present, aURI %s, token: %s",
+                   rtl::OUStringToOString( aUri, RTL_TEXTENCODING_UTF8 ).getStr(),
+                   rtl::OUStringToOString( pLock->getLock().LockTokens[0], RTL_TEXTENCODING_UTF8 ).getStr());
+        inLock = pLock->getLock();
+    }
     aReqProc->processPost( reinterpret_cast< const char * >( aDataToSend.getConstArray() ),
                            aDataToSend.getLength(),
                            rContentType,
                            rReferer,
+                           inLock,
                            xInputStream,
                            status );
 
@@ -977,10 +998,22 @@ void SerfSession::POST( const rtl::OUString & inPath,
 
     boost::shared_ptr<SerfRequestProcessor> aReqProc( createReqProc( inPath ) );
     apr_status_t status = APR_SUCCESS;
+    //check whether a lock on this resource is already owned
+    rtl::OUString aUri( composeCurrentUri( inPath ) );
+    ucb::Lock inLock;
+    SerfLock * pLock = m_aSerfLockStore.findByUri( aUri );
+    if ( pLock )
+    {
+        OSL_TRACE( "SerfSession::POST - A lock for this resource is present, aURI %s, token: %s",
+                   rtl::OUStringToOString( aUri, RTL_TEXTENCODING_UTF8 ).getStr(),
+                   rtl::OUStringToOString( pLock->getLock().LockTokens[0], RTL_TEXTENCODING_UTF8 ).getStr());
+        inLock = pLock->getLock();
+    }
     aReqProc->processPost( reinterpret_cast< const char * >( aDataToSend.getConstArray() ),
                            aDataToSend.getLength(),
                            rContentType,
                            rReferer,
+                           inLock,
                            oOutputStream,
                            status );
 
@@ -1000,7 +1033,18 @@ void SerfSession::MKCOL( const rtl::OUString & inPath,
 
     boost::shared_ptr<SerfRequestProcessor> aReqProc( createReqProc( inPath ) );
     apr_status_t status = APR_SUCCESS;
-    aReqProc->processMkCol( status );
+    //check whether a lock on the destination resource is already owned
+    rtl::OUString aUri( composeCurrentUri( inPath ) );
+    ucb::Lock inLock;
+    SerfLock * pLock = m_aSerfLockStore.findByUri( aUri );
+    if ( pLock )
+    {
+        OSL_TRACE( "SerfSession::MKCOL - A lock for this resource is present, aURI %s, token: %s",
+                   rtl::OUStringToOString( aUri, RTL_TEXTENCODING_UTF8 ).getStr(),
+                   rtl::OUStringToOString( pLock->getLock().LockTokens[0], RTL_TEXTENCODING_UTF8 ).getStr());
+        inLock = pLock->getLock();
+    }
+    aReqProc->processMkCol( inLock, status );
 
     HandleError( aReqProc );
 }
@@ -1021,8 +1065,20 @@ void SerfSession::COPY( const rtl::OUString & inSourceURL,
     SerfUri theSourceUri( inSourceURL );
     boost::shared_ptr<SerfRequestProcessor> aReqProc( createReqProc( theSourceUri.GetPath() ) );
     apr_status_t status = APR_SUCCESS;
+    //check whether a lock on the destination resource is already owned
+    rtl::OUString aUri( composeCurrentUri( inDestinationURL ) );
+    ucb::Lock inLock;
+    SerfLock * pLock = m_aSerfLockStore.findByUri( aUri );
+    if ( pLock )
+    {
+        OSL_TRACE( "SerfSession::COPY - A lock for the destination resource is present, aURI %s, token: %s",
+                   rtl::OUStringToOString( aUri, RTL_TEXTENCODING_UTF8 ).getStr(),
+                   rtl::OUStringToOString( pLock->getLock().LockTokens[0], RTL_TEXTENCODING_UTF8 ).getStr());
+        inLock = pLock->getLock();
+    }
     aReqProc->processCopy( inDestinationURL,
                            (inOverWrite ? true : false),
+                           inLock,
                            status );
 
     HandleError( aReqProc );
@@ -1044,8 +1100,20 @@ void SerfSession::MOVE( const rtl::OUString & inSourceURL,
     SerfUri theSourceUri( inSourceURL );
     boost::shared_ptr<SerfRequestProcessor> aReqProc( createReqProc( theSourceUri.GetPath() ) );
     apr_status_t status = APR_SUCCESS;
+    //check whether a lock on the destination resource is already owned
+    rtl::OUString aUri( composeCurrentUri( inDestinationURL ) );
+    ucb::Lock inLock;
+    SerfLock * pLock = m_aSerfLockStore.findByUri( aUri );
+    if ( pLock )
+    {
+        OSL_TRACE( "SerfSession::MOVE - A lock for the destination resource is present, aURI %s, token: %s",
+                   rtl::OUStringToOString( aUri, RTL_TEXTENCODING_UTF8 ).getStr(),
+                   rtl::OUStringToOString( pLock->getLock().LockTokens[0], RTL_TEXTENCODING_UTF8 ).getStr());
+        inLock = pLock->getLock();
+    }
     aReqProc->processMove( inDestinationURL,
                            (inOverWrite ? true : false),
+                           inLock,
                            status );
 
     HandleError( aReqProc );
@@ -1064,7 +1132,18 @@ void SerfSession::DESTROY( const rtl::OUString & inPath,
 
     boost::shared_ptr<SerfRequestProcessor> aReqProc( createReqProc( inPath ) );
     apr_status_t status = APR_SUCCESS;
-    aReqProc->processDelete( status );
+    //check whether a lock on this resource is already owned
+    rtl::OUString aUri( composeCurrentUri( inPath ) );
+    ucb::Lock inLock;
+    SerfLock * pLock = m_aSerfLockStore.findByUri( aUri );
+    if ( pLock )
+    {
+        OSL_TRACE( "SerfSession::DESTROY/DELETE - A lock for this resource is present, aURI %s, token: %s",
+                   rtl::OUStringToOString( aUri, RTL_TEXTENCODING_UTF8 ).getStr(),
+                   rtl::OUStringToOString( pLock->getLock().LockTokens[0], RTL_TEXTENCODING_UTF8 ).getStr());
+        inLock = pLock->getLock();
+    }
+    aReqProc->processDelete( inLock, status );
 
     HandleError( aReqProc );
 }
@@ -1110,16 +1189,12 @@ void SerfSession::LOCK( const ::rtl::OUString & inPath,
 {
     osl::Guard< osl::Mutex > theGuard( m_aMutex );
 
-    rtl::OUString   aUri = composeCurrentUri(inPath);
-
-    fprintf(stdout,">>>> SerfSession::LOCK - URI: %s\n",
-              rtl::OUStringToOString( aUri,RTL_TEXTENCODING_UTF8 ).getStr());
-
     //before locking, search in the lock store if we already own a lock for this resource
     //if present, return with exception DAV_LOCKED_SELF
-
-    SerfLock * pLock
-        = m_aSerfLockStore.findByUri( aUri );
+    rtl::OUString   aUri( composeCurrentUri( inPath ) );
+    fprintf(stdout,">>>> SerfSession::LOCK - URI: %s\n",
+              rtl::OUStringToOString( aUri,RTL_TEXTENCODING_UTF8 ).getStr());
+    SerfLock * pLock = m_aSerfLockStore.findByUri( aUri );
     if ( pLock )
     {
         fprintf(stdout,">>>> SerfSession::LOCK - lock for path: %s already in local store (SerfLockStore)\n",
@@ -1381,11 +1456,8 @@ void SerfSession::UNLOCK( const ::rtl::OUString & inPath,
 {
     osl::Guard< osl::Mutex > theGuard( m_aMutex );
 
-    rtl::OUString aUri( composeCurrentUri(inPath) );
-
-    // get the lock from lock store
-    SerfLock * pLock
-        = m_aSerfLockStore.findByUri( aUri );
+    rtl::OUString aUri( composeCurrentUri( inPath ) );
+    SerfLock * pLock = m_aSerfLockStore.findByUri( aUri );
     if ( !pLock )
     {
         fprintf(stdout,">>>> SerfSession::UNLOCK (DAVResourceAccess) - lock for path: %s is not in local store (SerfLockStore)\n",
