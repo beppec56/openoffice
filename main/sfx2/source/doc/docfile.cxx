@@ -1491,10 +1491,7 @@ sal_Bool SfxMedium::LockOrigFileOnDemand( sal_Bool bLoading, sal_Bool bNoUI )
                                 }
                                 catch( uno::Exception & e )
                                 {
-                                    fprintf(stdout,"SfxMedium::LockOrigFileOnDemand - uno::Exception: %s!\n",
-                                            rtl::OUStringToOString( e.Message,
-                                                                    RTL_TEXTENCODING_UTF8 ).getStr());
-                                    DBG_UNHANDLED_EXCEPTION();
+                                    PRINT_EXCEPTION();
                                 }
                             }
                         } while( !bResult && bUIStatus == LOCK_UI_TRY );
@@ -3051,47 +3048,24 @@ void SfxMedium::UnlockFile( sal_Bool bReleaseLockStream )
     }
     else
     {
+        //not local, try with the standard ucb unlock command, available through ucbhelper::Content
+        // an interaction handler should be used for authentication in case it is available
+        Reference< ::com::sun::star::task::XInteractionHandler > xInteractionHandler = GetInteractionHandler();
+        Reference< ::com::sun::star::ucb::XCommandEnvironment > xComEnv;
+        if (xInteractionHandler.is())
+            xComEnv = new ::ucbhelper::CommandEnvironment( xInteractionHandler,
+                                                           Reference< ::com::sun::star::ucb::XProgressHandler >() );
+        ::ucbhelper::Content aContentToUnlock( GetURLObject().GetMainURL( INetURLObject::NO_DECODE ), xComEnv);        
         if ( pImp->m_bLocked )
         {
-            //FIXME: unlock can be sent directly, the ucb command executer will take care of the rest
-            // an interaction handler should be used for authentication in case it is available
-            // Reference< ::com::sun::star::ucb::XCommandEnvironment > xComEnv;
-            // Reference< ::com::sun::star::task::XInteractionHandler > xInteractionHandler = GetInteractionHandler();
-            // if (xInteractionHandler.is())
-            //     xComEnv = new ::ucbhelper::CommandEnvironment( xInteractionHandler,
-            //                                                    Reference< ::com::sun::star::ucb::XProgressHandler >() );
-
-            // ::ucbhelper::Content aContent( GetURLObject().GetMainURL( INetURLObject::NO_DECODE ), xComEnv);
-            // //FIXME for DAV:supportedlock instead of the resource, better check the container: the dav directory containing the resource
-            // //look for a DAV:supportedlock property, to see if this is really a dav resource
-            // uno::Sequence< ::com::sun::star::ucb::LockEntry >  aLockEntries;
-            // if(aContent.getPropertyValue( ::rtl::OUString( RTL_CONSTASCII_USTRINGPARAM( "DAV:supportedlock" ) ) ) >>= aLockEntries)
-            // {
-            //     OSL_TRACE("SfxMedium::UnlockFile - resource is DAV (DAV:supportedlock: %d)",aLockEntries.getLength());
-                try {
-                    pImp->m_bLocked = sal_False;                    
-                    aContent.unlock();
-                    fprintf(stdout,"SfxMedium::UnlockFile - successful, resource %s\n",
-                            rtl::OUStringToOString( GetURLObject().GetMainURL( INetURLObject::NO_DECODE ),
-                                                    RTL_TEXTENCODING_UTF8 ).getStr());
-                }
-                catch( ucb::InteractiveLockingLockedException& e )
-                {
-                    fprintf(stdout,">>>> SfxMedium::UnlockFile - uno::InteractiveLockingLockedException signalled resource: %s, reason: %s!\n",
-                            rtl::OUStringToOString( GetURLObject().GetMainURL( INetURLObject::NO_DECODE ),
-                                                    RTL_TEXTENCODING_UTF8 ).getStr(),
-                            rtl::OUStringToOString( e.Message,
-                                                    RTL_TEXTENCODING_UTF8 ).getStr() );
-                }
-                catch( uno::Exception & e )
-                {
-                    fprintf(stdout,"SfxMedium::UnlockFile - uno::Exception: cannot unlock resource: %s, reason: %s!\n",
-                            rtl::OUStringToOString( GetURLObject().GetMainURL( INetURLObject::NO_DECODE ),
-                                                    RTL_TEXTENCODING_UTF8 ).getStr(),
-                            rtl::OUStringToOString( e.Message,
-                                                    RTL_TEXTENCODING_UTF8 ).getStr());
-                }
-//            }
+            try {
+                pImp->m_bLocked = sal_False;                    
+                aContentToUnlock.unlock();
+            }
+            catch( uno::Exception& e )
+            {
+                PRINT_EXCEPTION();
+            }
         }
     }
 }
