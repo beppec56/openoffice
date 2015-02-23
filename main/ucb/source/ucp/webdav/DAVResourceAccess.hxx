@@ -203,7 +203,8 @@ public:
     void
     LOCK( com::sun::star::ucb::Lock & inLock,
           const com::sun::star::uno::Reference<
-              com::sun::star::ucb::XCommandEnvironment > & xEnv )
+          com::sun::star::ucb::XCommandEnvironment > & xEnv,
+          const sal_Bool bForceNoResource )
         throw( DAVException );
 
 #if 0 // currently not used, but please don't remove code

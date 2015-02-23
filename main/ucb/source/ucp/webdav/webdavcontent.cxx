@@ -728,23 +728,19 @@ uno::Any SAL_CALL Content::execute(
         post( aArg, Environment );
     }
     else if ( aCommand.Name.equalsAsciiL(
-                  RTL_CONSTASCII_STRINGPARAM( "lock" ) ) &&
-              supportsExclusiveWriteLock( Environment ) )
+                  RTL_CONSTASCII_STRINGPARAM( "lock" ) ) )
     {
         //////////////////////////////////////////////////////////////////
         // lock
         //////////////////////////////////////////////////////////////////
-
         lock( Environment );
     }
     else if ( aCommand.Name.equalsAsciiL(
-                  RTL_CONSTASCII_STRINGPARAM( "unlock" ) ) &&
-              supportsExclusiveWriteLock( Environment ) )
+                  RTL_CONSTASCII_STRINGPARAM( "unlock" ) ) )
     {
         //////////////////////////////////////////////////////////////////
         // unlock
         //////////////////////////////////////////////////////////////////
-
         unlock( Environment );
     }
     else if ( aCommand.Name.equalsAsciiL(
@@ -3040,7 +3036,7 @@ void Content::lock(
             //-1, // infinite lock
             uno::Sequence< ::rtl::OUString >() );
 
-        xResAccess->LOCK( aLock, Environment );
+        xResAccess->LOCK( aLock, Environment, supportsExclusiveWriteLock( Environment ) );
 
         {
             osl::Guard< osl::Mutex > aGuard( m_aMutex );
@@ -3515,7 +3511,6 @@ const Content::ResourceType & Content::getResourceType(
         catch ( DAVException const & e )
         {
             rResAccess->resetUri();
-
             if ( e.getStatus() == SC_METHOD_NOT_ALLOWED )
             {
                 // Status SC_METHOD_NOT_ALLOWED is a safe indicator that the

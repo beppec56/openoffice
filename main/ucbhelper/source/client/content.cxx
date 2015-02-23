@@ -1631,9 +1631,6 @@ sal_Bool Content::isDocument()
 void Content::lock()
     throw( CommandAbortedException, RuntimeException, Exception )
 {
-    if ( !isDocument() )
-      return; //perhaps throw exception?
-
     Command aCommand;
     aCommand.Name     = rtl::OUString::createFromAscii( "lock" );
     aCommand.Handle   = -1; // n/a
@@ -1648,8 +1645,6 @@ void Content::lock()
 void Content::unlock()
     throw( CommandAbortedException, RuntimeException, Exception )
 {
-    if ( !isDocument() )
-      return; //perhaps throw exception?
 
     //    OpenCommandArgument2 aArg;
     //aArg.Mode       = OpenMode::DOCUMENT_SHARE_DENY_NONE;
