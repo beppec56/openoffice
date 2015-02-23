@@ -195,6 +195,7 @@ void SerfLockStore::addLock( SerfLock * pLock,
     startTicker();
 }
 
+#if 0       //not currently used
 // -------------------------------------------------------------------
 void SerfLockStore::updateLock( SerfLock * pLock,
                                 sal_Int32 nLastChanceToSendRefreshRequest )
@@ -211,6 +212,7 @@ void SerfLockStore::updateLock( SerfLock * pLock,
             = nLastChanceToSendRefreshRequest;
     }
 }
+#endif
 
 // -------------------------------------------------------------------
 void SerfLockStore::removeLock( SerfLock * pLock )
