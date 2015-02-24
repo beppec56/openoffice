@@ -113,6 +113,21 @@
         sMessage += "\n"; \
         osl_assertFailedLine( __FILE__ , __LINE__, sMessage)
 
+
+#define PRINT_STACK(condition) \
+        if(condition) \
+        { \
+            try \
+            { \
+                throw uno::Exception(); \
+            } \
+            catch (uno::Exception& e) \
+            { \
+                PRINT_EXCEPTION(); \
+            } \
+        } \
+
+
 /** This macro asserts the given condition (in debug mode), and throws
     an IllegalArgumentException afterwards.
  */
