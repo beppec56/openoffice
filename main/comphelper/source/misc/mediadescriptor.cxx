@@ -175,6 +175,12 @@ const ::rtl::OUString& MediaDescriptor::PROP_INTERACTIONHANDLER()
     return sProp;
 }
 
+const ::rtl::OUString& MediaDescriptor::PROP_AUTHENTICATIONHANDLER()
+{
+    static const ::rtl::OUString sProp(RTL_CONSTASCII_USTRINGPARAM("AuthenticationHandler"));
+    return sProp;
+}
+
 const ::rtl::OUString& MediaDescriptor::PROP_JUMPMARK()
 {
     static const ::rtl::OUString sProp(RTL_CONSTASCII_USTRINGPARAM("JumpMark"));
@@ -706,8 +712,11 @@ sal_Bool MediaDescriptor::impl_openStreamWithURL( const ::rtl::OUString& sURL, s
 	css::uno::Reference< css::task::XInteractionHandler > xOrgInteraction = getUnpackedValueOrDefault(
 		MediaDescriptor::PROP_INTERACTIONHANDLER(),
 		css::uno::Reference< css::task::XInteractionHandler >());
+	css::uno::Reference< css::task::XInteractionHandler > xAuthenticationInteraction = getUnpackedValueOrDefault(
+		MediaDescriptor::PROP_AUTHENTICATIONHANDLER(),
+		css::uno::Reference< css::task::XInteractionHandler >());
 
-    StillReadWriteInteraction* pInteraction = new StillReadWriteInteraction(xOrgInteraction);
+    StillReadWriteInteraction* pInteraction = new StillReadWriteInteraction(xOrgInteraction, xAuthenticationInteraction);
 	css::uno::Reference< css::task::XInteractionHandler > xInteraction(static_cast< css::task::XInteractionHandler* >(pInteraction), css::uno::UNO_QUERY);
 
 	css::uno::Reference< css::ucb::XProgressHandler > xProgress;
@@ -738,7 +747,10 @@ sal_Bool MediaDescriptor::impl_openStreamWithURL( const ::rtl::OUString& sURL, s
     css::uno::Reference< css::io::XInputStream > xInputStream;
 
     sal_Bool bReadOnly = sal_False;
+    //bModeRequestedExplicitly means 'read/write mode requested explicitly'
 	sal_Bool bModeRequestedExplicitly = sal_False;
+    // MediaDescriptor::PROP_READONLY is present only if the mediadescriptor was used at least one time
+    // that is, it exists if the file was changed from readonly mode to read/write using the GUI interface
     const_iterator pIt = find(MediaDescriptor::PROP_READONLY());
     if (pIt != end())
 	{
@@ -765,7 +777,20 @@ sal_Bool MediaDescriptor::impl_openStreamWithURL( const ::rtl::OUString& sURL, s
                 // All other errors must be handled as real error an
                 // break this method.
                 if (!pInteraction->wasWriteError() || bModeRequestedExplicitly)
-                    return sal_False;
+                {
+                    //-> i126305
+                    rtl::OUString aScheme;
+                    css::uno::Reference< css::ucb::XContentIdentifier > xContId(
+                        aContent.get().is() ? aContent.get()->getIdentifier() : 0 );
+                    if ( xContId.is() )
+                        aScheme = xContId->getContentProviderScheme();
+                    // if the proto is webdav, then we need to treat the stream as readonly, even if the
+                    // operation was requested as read/write explicitly
+                    if(!aScheme.equalsIgnoreAsciiCaseAscii( "http" ) && !aScheme.equalsIgnoreAsciiCaseAscii( "https" ))
+                        return sal_False;
+                    //<- i126305
+                }
+
                 xStream.clear();
                 xInputStream.clear();
             }

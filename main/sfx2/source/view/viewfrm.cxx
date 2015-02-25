@@ -514,13 +514,15 @@ void SfxViewFrame::ExecReload_Impl( SfxRequest& rReq )
                         pSh->DoSaveCompleted( pMed );
                     }
 
-                    // r/o-Doc kann nicht in Editmode geschaltet werden?
+                    // r/o-Doc can not be switched to edit mode?
                     rReq.Done( sal_False );
 
                     if ( nOpenMode == SFX_STREAM_READWRITE && !rReq.IsAPI() )
                     {
-                        // dem ::com::sun::star::sdbcx::User anbieten, als Vorlage zu oeffnen
+                        // ::com::sun::star::sdbcx::User ask to open as template (a copy of the document)
                         QueryBox aBox( &GetWindow(), SfxResId(MSG_QUERY_OPENASTEMPLATE) );
+                        // this is the querybox that is opened when the file is asked to move from r/o to edit using the button
+                        // on the toolbar
                         if ( RET_YES == aBox.Execute() )
                         {
                             SfxApplication* pApp = SFX_APP();
@@ -615,15 +617,15 @@ void SfxViewFrame::ExecReload_Impl( SfxRequest& rReq )
             {
                 SfxMedium *pMedium = xOldObj->GetMedium();
 
-				// Frameset abziehen, bevor FramesetView evtl. verschwindet
+				//Pull frameset before FramesetView possibly disappear
 				String aURL = pURLItem ? pURLItem->GetValue() :
 								pMedium->GetName();
 
                 sal_Bool bHandsOff =
                     ( pMedium->GetURLObject().GetProtocol() == INET_PROT_FILE && !xOldObj->IsDocShared() );
 
-                // bestehende SfxMDIFrames f"ur dieses Doc leeren
-                // eigenes Format oder R/O jetzt editierbar "offnen?
+                // empty existing SfxMDIFrames of this Doc
+                // own format or R/O is now open editable?
                 SfxObjectShellLock xNewObj;
 
                 // collect the views of the document
@@ -704,7 +706,7 @@ void SfxViewFrame::ExecReload_Impl( SfxRequest& rReq )
 
                 xOldObj->CancelTransfers();
 
-                // eigentliches Reload
+                //actual reload
                 //pNewSet->Put( SfxFrameItem ( SID_DOCFRAME, GetFrame() ) );
 
                 if ( pSilentItem && pSilentItem->GetValue() )
@@ -727,8 +729,7 @@ void SfxViewFrame::ExecReload_Impl( SfxRequest& rReq )
 		            pNewSet->Put( SfxUInt16Item(SID_UPDATEDOCMODE,::com::sun::star::document::UpdateDocMode::ACCORDING_TO_CONFIG) );
 
 				xOldObj->SetModified( sal_False );
-                // Altes Dok nicht cachen! Gilt nicht, wenn anderes
-				// Doc geladen wird.
+                // Old Doc not cached! Does not apply if another Doc is loaded.
 
                 SFX_ITEMSET_ARG( pMedium->GetItemSet(), pSavedOptions, SfxStringItem, SID_FILE_FILTEROPTIONS, sal_False);
                 SFX_ITEMSET_ARG( pMedium->GetItemSet(), pSavedReferer, SfxStringItem, SID_REFERER, sal_False);
@@ -760,6 +761,11 @@ void SfxViewFrame::ExecReload_Impl( SfxRequest& rReq )
                 }
                 catch ( uno::Exception& )
                 {
+                    //->i126305
+                    //need to reset the reloading, since it will no longer take part in following code
+                    //this specific flag, if not reset, will break the flow on the next call of this function
+                    pImp->bReloading = sal_False;
+                    //<-i126305
                     xNewObj->DoClose();
                     xNewObj = 0;
                 }
@@ -857,14 +863,14 @@ void SfxViewFrame::ExecReload_Impl( SfxRequest& rReq )
                     SFX_APP()->NotifyEvent( SfxEventHint( SFX_EVENT_CLOSEDOC, GlobalEventConfig::GetEventName( STR_EVENT_CLOSEDOC ), xOldObj ) );
                 }
 
-                // als erledigt recorden
+                // register as done
                 rReq.Done( sal_True );
                 rReq.SetReturnValue(SfxBoolItem(rReq.GetSlot(), sal_True));
                 return;
             }
             else
             {
-                // als nicht erledigt recorden
+                // register as not done
                 rReq.Done();
                 rReq.SetReturnValue(SfxBoolItem(rReq.GetSlot(), sal_False));
                 pImp->bReloading = sal_False;
