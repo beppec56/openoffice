@@ -41,6 +41,9 @@ IDLFILES = \
     SimpleLogRing.idl\
     XConsoleHandler.idl\
     XCsvLogFormatter.idl\
+    DebugLogRing.idl\
+    SingleDebugLogRing.idl\
+    XDebugLogRing.idl\
     XLogFormatter.idl\
     XLogger.idl\
     XLoggerPool.idl\

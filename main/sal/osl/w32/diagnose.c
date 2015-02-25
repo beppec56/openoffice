@@ -35,6 +35,8 @@
 static pfunc_osl_printDebugMessage	_pPrintDebugMessage = NULL;
 static pfunc_osl_printDetailedDebugMessage	_pPrintDetailedDebugMessage = NULL;
 
+static pfunc_osl_log_TraceMessage _pTraceMessage = NULL;
+
 pfunc_osl_printDebugMessage SAL_CALL osl_setDebugMessageFunc( pfunc_osl_printDebugMessage pNewFunc )
 {
 	pfunc_osl_printDebugMessage	pOldFunc = _pPrintDebugMessage;
@@ -57,6 +59,22 @@ pfunc_osl_printDetailedDebugMessage SAL_CALL osl_setDetailedDebugMessageFunc( pf
 void SAL_CALL osl_breakDebug(void)
 {
 	DebugBreak();
+}
+
+pfunc_osl_log_TraceMessage SAL_CALL osl_setLogMessageFunc( pfunc_osl_log_TraceMessage pNewFunc )
+{
+    pfunc_osl_log_TraceMessage pOldFunc = _pTraceMessage;
+    _pTraceMessage = pNewFunc;
+    return pOldFunc;
+}
+
+void osl_log_trace(const sal_Char* pszFunOrFileName, sal_Int32 nLine, const sal_Char* pszFormat, ...)
+{
+    va_list args;
+    va_start(args, pszFormat);
+    if(_pTraceMessage != NULL)
+        _pTraceMessage(pszFunOrFileName, nLine, pszFormat, args);
+    va_end(args);
 }
 
 void osl_trace(char const * pszFormat, ...) {
@@ -163,5 +181,47 @@ sal_Int32 SAL_CALL osl_reportError(sal_uInt32 nType, const sal_Char* pszMessage)
 	nDisposition = MessageBox(hWndParent, pszMessage, "Exception!", nFlags);
 
 	return nDisposition;
+}
+
+/************************************************************************/
+/************************************************************************/
+/* code added for debug logger */
+/************************************************************************/
+static pfunc_osl_printDebugMessage	_pPrintDebugMessageDebugLog = NULL;
+
+pfunc_osl_printDebugMessage SAL_CALL osl_setDebugMessageFuncDebugLog( pfunc_osl_printDebugMessage pNewFunc )
+{
+	pfunc_osl_printDebugMessage	pOldFunc = _pPrintDebugMessageDebugLog;
+	_pPrintDebugMessageDebugLog = pNewFunc;
+
+	return pOldFunc;
+}
+
+void SAL_CALL osl_assertFailedLineDebugLog( const sal_Char* pszFileName, sal_Int32 nLine, const sal_Char* pszMessage)
+{
+	HWND hWndParent;
+	UINT nFlags;
+	int  nCode;
+
+	/* get app name or NULL if unknown (don't call assert) */
+    char* starting="\n======vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv========\nError: ";
+    char* closing= "========^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^========\n";
+
+	sal_Char   szMessage[512];
+ 	
+	/* format message into buffer */
+	szMessage[sizeof(szMessage)-1] = '\0';	/* zero terminate always */
+	_snprintf(szMessage, sizeof(szMessage)-1, "%sFile %hs, Line %d\n:%s\n%s",
+              starting, pszFileName, nLine,	pszMessage, closing);
+
+    if ( _pPrintDebugMessageDebugLog )
+		_pPrintDebugMessageDebugLog( szMessage );
+}
+
+/************************************************************************/
+/* osl_getpid */
+/************************************************************************/
+sal_uInt32 osl_getpidDebugLog() {
+    return (sal_uInt32) _getpid();
 }
 

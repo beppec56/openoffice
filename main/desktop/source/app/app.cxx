@@ -167,6 +167,9 @@
 #include "com/sun/star/deployment/VersionException.hpp"
 #include <dp_gui_handleversionexception.hxx>
 
+#include <tools/debuglogger.hxx>
+
+
 #if defined MACOSX
 #include <errno.h>
 #include <sys/wait.h>
@@ -2265,9 +2268,12 @@ void Desktop::Main()
 
 void Desktop::doShutdown()
 {
-    if( ! pExecGlobals )
+    //close and flush to file the debug log event recorder
+    DBGLOG_TRACE("%s:%d - shutting down the office application",OSL_THIS_FILE,__LINE__);
+    DBGLOG_FLUSH("main_desktop_source_app_app_doShutdown.log");
+   if( ! pExecGlobals )
         return;
-    
+
     if ( pExecGlobals->bRestartRequested )
         SetRestartState();
 
