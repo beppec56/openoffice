@@ -21,10 +21,10 @@
 
 
 
-#ifndef __com_sun_star_logging_SimpleLogRing_idl__
-#define __com_sun_star_logging_SimpleLogRing_idl__
+#ifndef __com_sun_star_logging_DebugLogRing_idl__
+#define __com_sun_star_logging_DebugLogRing_idl__
 
-#ifndef __com_sun_star_lang_IllegalArgumentException_idl__
+#ifndef __com_sun_star_lang_IllegalArgumentException_idl__ 
 #include <com/sun/star/lang/IllegalArgumentException.idl>
 #endif
 #ifndef __com_sun_star_beans_NamedValue_idl__
@@ -33,19 +33,19 @@
 
 //=============================================================================
 
-module com { module sun { module star { module logging {
+module com { module sun { module star { module logging { 
 
-interface XSimpleLogRing;
+interface XDebugLogRing;
 
 //=============================================================================
 
 /** This service allows to log the events in a ring of specified size.
 
-    @since OpenOffice 3.2
+    @since OpenOffice 4.2
  */
-service SimpleLogRing : XSimpleLogRing
+service DebugLogRing : XDebugLogRing
 {
-    /** creates a ring of default size - 256 messages
+    /** creates a ring of default size - 4096 messages
      */
     create();
 

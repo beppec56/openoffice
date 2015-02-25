@@ -167,6 +167,9 @@
 #include "com/sun/star/deployment/VersionException.hpp"
 #include <dp_gui_handleversionexception.hxx>
 
+#include <tools/debuglogger.hxx>
+
+
 #if defined MACOSX
 #include <errno.h>
 #include <sys/wait.h>
@@ -360,6 +363,7 @@ OUString MakeStartupConfigAccessErrorMessage( OUString const & aInternalErrMsg )
 //=============================================================================
 void FatalError(const ::rtl::OUString& sMessage, const sal_Bool isDisplayErrorString)
 {
+    ::tools::writeDebugLogDefaultNameIfNotEmpty();
     ::rtl::OUString sProductKey = ::utl::Bootstrap::getProductKey();
     if ( ! sProductKey.getLength())
     {
@@ -1901,7 +1905,8 @@ void Desktop::Main()
             return;
         }
 #endif
-
+        //init the embedded debug logger
+        ::tools::initDebugLog();
         // check user installation directory for lockfile so we can be sure
         // there is no other instance using our data files from a remote host
         RTL_LOGFILE_CONTEXT_TRACE( aLog, "desktop (lo119109) Desktop::Main -> Lockfile" );
@@ -2213,7 +2218,6 @@ void Desktop::Main()
 
         // call Application::Execute to process messages in vcl message loop
         RTL_LOGFILE_PRODUCT_TRACE( "PERFORMANCE - enter Application::Execute()" );
-
         try
         {
             // The JavaContext contains an interaction handler which is used when
@@ -2235,26 +2239,31 @@ void Desktop::Main()
 		catch(const com::sun::star::document::CorruptedFilterConfigurationException& exFilterCfg)
 		{
 			OfficeIPCThread::SetDowning();
+            DBGLOG_EXCEPTION_BRIEF();
 			FatalError( MakeStartupErrorMessage(exFilterCfg.Message) );
 		}
 		catch(const com::sun::star::configuration::CorruptedConfigurationException& exAnyCfg)
 		{
 			OfficeIPCThread::SetDowning();
+            DBGLOG_EXCEPTION_BRIEF();
 			FatalError( MakeStartupErrorMessage(exAnyCfg.Message) );
 		}
 		catch( const ::com::sun::star::uno::Exception& exUNO)
 		{
 			OfficeIPCThread::SetDowning();
+            DBGLOG_EXCEPTION_BRIEF();
 			FatalError( exUNO.Message);
 		}
 		catch( const std::exception& exSTD)
 		{
 			OfficeIPCThread::SetDowning();
+            DBGLOG_EXCEPTION_BRIEF();
 			FatalError( OUString::createFromAscii( exSTD.what()));
 		}
 		catch( ...)
 		{
 			OfficeIPCThread::SetDowning();
+            DBGLOG_EXCEPTION_BRIEF();
 			FatalError( OUString(RTL_CONSTASCII_USTRINGPARAM( "Caught Unknown Exception: Aborting!")));
 		}
 	}
@@ -2265,9 +2274,11 @@ void Desktop::Main()
 
 void Desktop::doShutdown()
 {
-    if( ! pExecGlobals )
+    //close and flush to file the debug log event recorder
+   ::tools::writeDebugLogDefaultNameIfNotEmpty();
+   if( ! pExecGlobals )
         return;
-    
+
     if ( pExecGlobals->bRestartRequested )
         SetRestartState();
 

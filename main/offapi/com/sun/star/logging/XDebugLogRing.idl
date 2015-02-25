@@ -21,39 +21,54 @@
 
 
 
-#ifndef __com_sun_star_logging_SimpleLogRing_idl__
-#define __com_sun_star_logging_SimpleLogRing_idl__
+#ifndef __com_sun_star_logging_XDebugLogRing_idl__
+#define __com_sun_star_logging_XDebugLogRing_idl__
 
-#ifndef __com_sun_star_lang_IllegalArgumentException_idl__
-#include <com/sun/star/lang/IllegalArgumentException.idl>
-#endif
-#ifndef __com_sun_star_beans_NamedValue_idl__
-#include <com/sun/star/beans/NamedValue.idl>
+#ifndef __com_sun_star_uno_XInterface_idl__ 
+#include <com/sun/star/uno/XInterface.idl>
 #endif
 
 //=============================================================================
 
-module com { module sun { module star { module logging {
-
-interface XSimpleLogRing;
+module com { module sun { module star { module logging { 
 
 //=============================================================================
 
-/** This service allows to log the events in a ring of specified size.
+/** a simple log ring allowing to collect a limited number of last events
 
-    @since OpenOffice 3.2
+    <p>
+    The intention of this interface is to provide a simple possibility
+    for developer to collect the most important events without affecting
+    the performance. For this reasons the messages related API is quite
+    simple, the strings should be produced by the preprocessor mainly.
+    </p>
+
+    @since OpenOffice 4.1.1
  */
-service SimpleLogRing : XSimpleLogRing
+interface XDebugLogRing
 {
-    /** creates a ring of default size - 256 messages
+    /** allows to add a message to the logger
      */
-    create();
+    void logString( [in] string aMessage );
 
-    /** creates a ring of specified size
-        @param nSize
-            the number of messages in a ring
+    /** allows to get the collected messages from the logger
+        
+        <p> 
+        It is up to logger implementation to provide only the limited
+        number of last messages.
+        </p>
      */
-    createWithSize( [in] long nSize );
+    sequence< string > getCollectedLog();
+
+    /** return true if the logger contains no log
+     *
+     */
+    boolean isEmpty();
+
+    /** flush the collected logs to a file in <user config>/temp directory
+     * the name should be privided
+     */
+    void flushLog( [in] string aFileName );
 };
 
 //=============================================================================
