@@ -211,6 +211,9 @@ public:
 	sal_Bool            Commit();
     sal_Bool            IsStorage();
 
+    //->i126305
+    sal_Int8            ShowLockedWebDAVDocumentDialog( const ::com::sun::star::uno::Sequence< ::rtl::OUString >& aData, sal_Bool bIsLoading );
+    //<-i126305
     sal_Int8            ShowLockedDocumentDialog( const ::com::sun::star::uno::Sequence< ::rtl::OUString >& aData, sal_Bool bIsLoading, sal_Bool bOwnLock );
     sal_Bool            LockOrigFileOnDemand( sal_Bool bLoading, sal_Bool bNoUI );
     void                UnlockFile( sal_Bool bReleaseLockStream );

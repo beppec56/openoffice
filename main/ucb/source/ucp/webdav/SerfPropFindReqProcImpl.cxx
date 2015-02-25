@@ -30,7 +30,6 @@
 #include <comphelper/seqstream.hxx>
 #include <rtl/ustrbuf.hxx>
 
-
 using namespace com::sun::star;
 
 namespace http_dav_ucp

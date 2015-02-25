@@ -53,6 +53,7 @@
 #include <com/sun/star/ucb/InsertCommandArgument.hpp>
 #include <com/sun/star/ucb/InteractiveBadTransferURLException.hpp>
 #include <com/sun/star/ucb/InteractiveAugmentedIOException.hpp>
+#include <com/sun/star/ucb/InteractiveLockingLockNotAvailableException.hpp>
 #include <com/sun/star/ucb/InteractiveLockingLockedException.hpp>
 #include <com/sun/star/ucb/InteractiveLockingLockExpiredException.hpp>
 #include <com/sun/star/ucb/InteractiveLockingNotLockedException.hpp>
@@ -728,23 +729,19 @@ uno::Any SAL_CALL Content::execute(
         post( aArg, Environment );
     }
     else if ( aCommand.Name.equalsAsciiL(
-                  RTL_CONSTASCII_STRINGPARAM( "lock" ) ) &&
-              supportsExclusiveWriteLock( Environment ) )
+                  RTL_CONSTASCII_STRINGPARAM( "lock" ) ) )
     {
         //////////////////////////////////////////////////////////////////
         // lock
         //////////////////////////////////////////////////////////////////
-
         lock( Environment );
     }
     else if ( aCommand.Name.equalsAsciiL(
-                  RTL_CONSTASCII_STRINGPARAM( "unlock" ) ) &&
-              supportsExclusiveWriteLock( Environment ) )
+                  RTL_CONSTASCII_STRINGPARAM( "unlock" ) ) )
     {
         //////////////////////////////////////////////////////////////////
         // unlock
         //////////////////////////////////////////////////////////////////
-
         unlock( Environment );
     }
     else if ( aCommand.Name.equalsAsciiL(
@@ -1454,7 +1451,8 @@ uno::Reference< sdbc::XRow > Content::getPropertyValues(
 
             if ( !bHasAll )
             {
-                // Only DAV resources support PROPFIND
+                // Only DAV resources support PROPFIND,
+                // check already done above in the outer 'if' head
                 std::vector< rtl::OUString > aPropNames;
 
                 uno::Sequence< beans::Property > aProperties(
@@ -1475,16 +1473,15 @@ uno::Reference< sdbc::XRow > Content::getPropertyValues(
 
                         while ( it != end )
                         {
-                            if ( *it == rName )
+                            if ( *it == rName ) {
+                                //the failed property in cache is the same as the requested one
+                                //add to the requested properties list
+                                aProperties[ nProps ] = rProperties[ n ];
+                                nProps++;
                                 break;
+                            }
 
                             ++it;
-                        }
-
-                        if ( it == end )
-                        {
-                            aProperties[ nProps ] = rProperties[ n ];
-                            nProps++;
                         }
                     }
 
@@ -3013,6 +3010,23 @@ void Content::lock(
         const uno::Reference< ucb::XCommandEnvironment >& Environment )
     throw( uno::Exception )
 {
+    // i126305 TODO: add a check to see if this is really a DAV resource ?
+    // currently if the lock is not supported
+    // we got an error from the server that should be checked by the client (framework)
+    rtl::OUString aURL;
+    if ( m_bTransient )
+    {
+        aURL = getParentURL();
+        if ( aURL.lastIndexOf( '/' ) != ( aURL.getLength() - 1 ) )
+            aURL += rtl::OUString::createFromAscii( "/" );
+
+        aURL += m_aEscapedTitle;
+    }
+    else
+    {
+        aURL = m_xIdentifier->getContentIdentifier();
+    }
+
     try
     {
         std::auto_ptr< DAVResourceAccess > xResAccess;
@@ -3043,6 +3057,44 @@ void Content::lock(
     }
     catch ( DAVException const & e )
     {
+        switch(e.getStatus())
+        {
+        case SC_LOCKED:
+        {
+            rtl::OUString aOwner( getLockOwner( Environment ) );
+
+            throw(ucb::InteractiveLockingLockedException(
+                      rtl::OUString::createFromAscii( "Locked!" ),
+                      static_cast< cppu::OWeakObject * >( this ),
+                      task::InteractionClassification_ERROR,
+                      aURL,
+                      e.getExtendedError(),
+                      sal_False,
+                      aOwner ));
+        }
+        break;
+        case SC_METHOD_NOT_ALLOWED:
+            // this it's not always received, but the RFC4918 (which supersed RFC2518)
+            // tells about this in:
+            // http://tools.ietf.org/html/rfc4918#appendix-D.1
+            // throw exception, will be interpreted by the lock requester (framework)
+            // it is actually a info, not an error
+            throw ucb::InteractiveLockingLockNotAvailableException( e.getData(),
+                                                                    static_cast< cppu::OWeakObject * >( this ),
+                                                                    task::InteractionClassification_INFO,
+                                                                    aURL,
+                                                                    e.getExtendedError() );
+            break;
+            //i126305 TODO
+            //see http://tools.ietf.org/html/rfc4918#section-9.10.6
+            //not sure how to handle them, for the time being a dialog box is shown,
+            //the client (framework) should manage it
+        case SC_CONFLICT:
+        case SC_PRECONDITION_FAILED:
+        default:
+            //fallthrou
+            ;
+        }
         cancelCommandExecution( e, Environment, sal_False );
         // Unreachable
     }
@@ -3070,8 +3122,15 @@ void Content::unlock(
     }
     catch ( DAVException const & e )
     {
-        cancelCommandExecution( e, Environment, sal_False );
+        //i126305 TODO need to rise an exception of the right type ?
+        //meaning that the lock can not be released, since there is no such
+        //exception we use ucb::InteractiveNetworkReadException
+        throw ucb::InteractiveNetworkReadException( e.getData(),
+                                                    static_cast< cppu::OWeakObject * >( this ),
+                                                    task::InteractionClassification_INFO,
+                                                    e.getData() );//perhaps a more better should be used ?
         // Unreachable
+        cancelCommandExecution( e, Environment, sal_False );
     }
 }
 
@@ -3292,7 +3351,9 @@ uno::Any Content::MapDAVException( const DAVException & e, sal_Bool bWrite )
                 static_cast< cppu::OWeakObject * >( this ),
                 task::InteractionClassification_ERROR,
                 aURL,
-                sal_False ); // not SelfOwned
+                e.getExtendedError(),
+                sal_False,  // not SelfOwned
+                rtl::OUString() );
 #else
         {
             uno::Sequence< uno::Any > aArgs( 1 );
@@ -3319,7 +3380,9 @@ uno::Any Content::MapDAVException( const DAVException & e, sal_Bool bWrite )
                 static_cast< cppu::OWeakObject * >( this ),
                 task::InteractionClassification_ERROR,
                 aURL,
-                sal_True ); // SelfOwned
+                e.getExtendedError(),
+                sal_True,  // SelfOwned
+                e.getOwner() );
         break;
 
     case DAVException::DAV_NOT_LOCKED:
@@ -3328,7 +3391,8 @@ uno::Any Content::MapDAVException( const DAVException & e, sal_Bool bWrite )
                 rtl::OUString::createFromAscii( "Not locked!" ),
                 static_cast< cppu::OWeakObject * >( this ),
                 task::InteractionClassification_ERROR,
-                aURL );
+                aURL,
+                rtl::OUString() );//no extended info here
         break;
 
     case DAVException::DAV_LOCK_EXPIRED:
@@ -3337,7 +3401,8 @@ uno::Any Content::MapDAVException( const DAVException & e, sal_Bool bWrite )
                 rtl::OUString::createFromAscii( "Lock expired!" ),
                 static_cast< cppu::OWeakObject * >( this ),
                 task::InteractionClassification_ERROR,
-                aURL );
+                aURL,
+                rtl::OUString() );//no extended info here
         break;
 
     default:
@@ -3450,7 +3515,7 @@ const Content::ResourceType & Content::getResourceType(
             // this is a DAV resource.
             std::vector< DAVResource > resources;
             std::vector< rtl::OUString > aPropNames;
-            uno::Sequence< beans::Property > aProperties( 5 );
+            uno::Sequence< beans::Property > aProperties( 6 );
             aProperties[ 0 ].Name
                 = rtl::OUString::createFromAscii( "IsFolder" );
             aProperties[ 1 ].Name
@@ -3461,6 +3526,9 @@ const Content::ResourceType & Content::getResourceType(
                 = rtl::OUString::createFromAscii( "MediaType" );
             aProperties[ 4 ].Name
                 = DAVProperties::SUPPORTEDLOCK;
+            //we will need this to check for existing locks
+            aProperties[ 5 ].Name
+                = DAVProperties::LOCKDISCOVERY;
 
             ContentProperties::UCBNamesToDAVNames(
                 aProperties, aPropNames );
@@ -3469,20 +3537,23 @@ const Content::ResourceType & Content::getResourceType(
                 DAVZERO, aPropNames, resources, xEnv );
 
             // TODO - is this really only one?
+            // only one resource is received, see at:
+            // WebDAVResponseParser::endElement()
+            //   case WebDAVName_response
+            //in file: ucb/source/ucp/webdav/webdavresponseparser.cxx:
             if ( resources.size() == 1 )
             {
+                // there is a single resource
                 m_xCachedProps.reset(
                     new CachableContentProperties( resources[ 0 ] ) );
                 m_xCachedProps->containsAllNames(
                     aProperties, m_aFailedPropNames );
             }
-
             eResourceType = DAV;
         }
         catch ( DAVException const & e )
         {
             rResAccess->resetUri();
-
             if ( e.getStatus() == SC_METHOD_NOT_ALLOWED )
             {
                 // Status SC_METHOD_NOT_ALLOWED is a safe indicator that the
@@ -3506,4 +3577,36 @@ const Content::ResourceType & Content::getResourceType(
     throw ( uno::Exception )
 {
     return getResourceType( xEnv, m_xResAccess );
+}
+
+rtl::OUString Content::getLockOwner( const uno::Reference< ucb::XCommandEnvironment >& Environment )
+{
+    rtl::OUString aOwner;
+    try
+    {
+        //DAVProperties::LOCKDISCOVERY is not cached, need to get it from the server
+        uno::Sequence< beans::Property > aProperties( 1 );
+        aProperties[ 0 ].Name   = DAVProperties::LOCKDISCOVERY;
+        aProperties[ 0 ].Handle = -1;
+
+        uno::Reference< sdbc::XRow > xRow( getPropertyValues( aProperties, Environment ) );
+
+        sal_Int32 nCount = aProperties.getLength();
+        uno::Sequence< uno::Any > aValues( nCount );
+        uno::Any* pValues = aValues.getArray();
+        pValues[ 0 ] = xRow->getObject( 1, uno::Reference< container::XNameAccess >() );
+
+        uno::Sequence< ::com::sun::star::ucb::Lock >  aLocks;
+
+        if(aValues.getConstArray()[ 0 ] >>= aLocks)
+            if(aLocks.getLength() > 0)
+            {
+                ucb::Lock aLock = aLocks[0];
+                aLock.Owner >>= aOwner;
+            }
+    }
+    catch ( uno::Exception&)
+    { }
+        
+    return aOwner;
 }

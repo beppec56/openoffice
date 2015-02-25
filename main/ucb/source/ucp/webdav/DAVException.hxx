@@ -138,18 +138,27 @@ class DAVException
     private:
         ExceptionCode   mExceptionCode;
         rtl::OUString   mData;
+    //owner of the lock in case of DAV_LOCKED
+        rtl::OUString   mOwner;
+    //extendend error information, if the server has a specific header
+    //see in SerfRequestProcessor::handleSerfResponse for detail on how this is obtained
+        rtl::OUString   mExtendedError;
         sal_uInt16      mStatusCode;
 
     public:
          DAVException( ExceptionCode inExceptionCode ) 
              : mExceptionCode( inExceptionCode )
              , mData()
+             , mOwner()
+             , mExtendedError()
              , mStatusCode( SC_NONE )
          {};
          DAVException( ExceptionCode inExceptionCode,
                        const rtl::OUString & rData ) 
              : mExceptionCode( inExceptionCode )
              , mData( rData )
+             , mOwner()
+             , mExtendedError()
              , mStatusCode( SC_NONE )
          {};
          DAVException( ExceptionCode inExceptionCode,
@@ -157,13 +166,86 @@ class DAVException
                        sal_uInt16 nStatusCode )
             : mExceptionCode( inExceptionCode )
             , mData( rData )
+            , mOwner()
+            , mExtendedError()
+            , mStatusCode( nStatusCode )
+         {};
+         DAVException( ExceptionCode inExceptionCode,
+                       const rtl::OUString & rData,
+                       const rtl::OUString & rExtendedError,
+                       sal_uInt16 nStatusCode = SC_NONE )
+            : mExceptionCode( inExceptionCode )
+            , mData( rData )
+            , mOwner()
+            , mExtendedError( rExtendedError )
             , mStatusCode( nStatusCode )
          {};
         ~DAVException( ) {};
 
     const ExceptionCode & getError() const { return mExceptionCode; }
     const rtl::OUString & getData() const  { return mData; }
+    const rtl::OUString & getExtendedError() const { return  mExtendedError; }
     sal_uInt16 getStatus() const { return mStatusCode; }
+    const rtl::OUString & getOwner() const { return mOwner; }
+    void setOwner(const rtl::OUString & rOwner) { mOwner = rOwner; }
+
+    //only for debug, remove when done
+    inline const rtl::OUString getErrorString() const {
+        rtl::OUString aError;
+        switch(mExceptionCode) {
+        case DAV_HTTP_ERROR:
+            aError += rtl::OUString( RTL_CONSTASCII_USTRINGPARAM("DAV_HTTP_ERROR") );
+            break;
+        case DAV_HTTP_LOOKUP:
+            aError += rtl::OUString( RTL_CONSTASCII_USTRINGPARAM("DAV_HTTP_LOOKUP") );
+            break;
+        case DAV_HTTP_NOAUTH:
+            aError += rtl::OUString( RTL_CONSTASCII_USTRINGPARAM("DAV_HTTP_NOAUTH") );
+            break;
+        case DAV_HTTP_AUTH:
+            aError += rtl::OUString( RTL_CONSTASCII_USTRINGPARAM("DAV_HTTP_AUTH") );
+            break;
+        case DAV_HTTP_AUTHPROXY:
+            aError += rtl::OUString( RTL_CONSTASCII_USTRINGPARAM("DAV_HTTP_AUTHPROXY") );
+            break;
+        case DAV_HTTP_CONNECT:
+            aError += rtl::OUString( RTL_CONSTASCII_USTRINGPARAM("DAV_HTTP_CONNECT") );
+            break;
+        case DAV_HTTP_TIMEOUT:
+            aError += rtl::OUString( RTL_CONSTASCII_USTRINGPARAM("DAV_HTTP_TIMEOUT") );
+            break;
+        case DAV_HTTP_FAILED:
+            aError += rtl::OUString( RTL_CONSTASCII_USTRINGPARAM("DAV_HTTP_FAILED") );
+            break;
+        case DAV_HTTP_RETRY:
+            aError += rtl::OUString( RTL_CONSTASCII_USTRINGPARAM("DAV_HTTP_RETRY") );
+            break;
+        case DAV_HTTP_REDIRECT:
+            aError += rtl::OUString( RTL_CONSTASCII_USTRINGPARAM("DAV_HTTP_REDIRECT") );
+            break;
+        case DAV_SESSION_CREATE:
+            aError += rtl::OUString( RTL_CONSTASCII_USTRINGPARAM("DAV_SESSION_CREATE") );
+            break;
+        case DAV_INVALID_ARG:
+            aError += rtl::OUString( RTL_CONSTASCII_USTRINGPARAM("DAV_INVALID_ARG") );
+            break;
+        case DAV_LOCK_EXPIRED:
+            aError += rtl::OUString( RTL_CONSTASCII_USTRINGPARAM("DAV_LOCK_EXPIRED") );
+            break;
+        case DAV_NOT_LOCKED:
+            aError += rtl::OUString( RTL_CONSTASCII_USTRINGPARAM("DAV_NOT_LOCKED") );
+            break;
+        case DAV_LOCKED_SELF:
+            aError += rtl::OUString( RTL_CONSTASCII_USTRINGPARAM("DAV_LOCKED_SELF") );
+            break;
+        case DAV_LOCKED:
+            aError += rtl::OUString( RTL_CONSTASCII_USTRINGPARAM("DAV_LOCKED") );
+            break;
+        default:
+            aError += rtl::OUString( RTL_CONSTASCII_USTRINGPARAM("UNKNOWN exception code") );
+        }
+        return aError;
+    };
 };
 
 } // namespace http_dav_ucp

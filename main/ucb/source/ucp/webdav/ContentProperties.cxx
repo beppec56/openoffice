@@ -31,12 +31,16 @@
  *************************************************************************/
 #include <osl/diagnose.h>
 #include <com/sun/star/util/DateTime.hpp>
+#include <com/sun/star/ucb/Lock.hpp>
 #include "SerfUri.hxx"
 #include "DAVResource.hxx"
 #include "DAVProperties.hxx"
 #include "DateTimeHelper.hxx"
 #include "webdavprovider.hxx"
 #include "ContentProperties.hxx"
+
+#include <rtl/uri.hxx>
+#include <rtl/ustrbuf.hxx>
 
 using namespace com::sun::star;
 using namespace http_dav_ucp;
