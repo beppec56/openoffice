@@ -19,43 +19,30 @@
  * 
  *************************************************************/
 
-#ifndef INCLUDED_SERFPUTREQPROCIMPL_HXX
-#define INCLUDED_SERFPUTREQPROCIMPL_HXX
 
-#include "SerfRequestProcessorImpl.hxx"
+#ifndef __com_sun_star_ucb_InteractiveLockingLockNotAvailableException_idl__
+#define __com_sun_star_ucb_InteractiveLockingLockNotAvailableException_idl__
 
-namespace http_dav_ucp
+#ifndef __com_sun_star_ucb_InteractiveLockingException_idl__
+#include <com/sun/star/ucb/InteractiveLockingException.idl>
+#endif
+
+
+//=============================================================================
+
+module com { module sun { module star { module ucb {
+
+//=============================================================================
+/** An error indicating that the resource can not be locked because the lock capabiliy is not available
+
+    @since OpenOffice 4.2
+*/
+/*published*/ exception InteractiveLockingLockNotAvailableException : com::sun::star::ucb::InteractiveLockingException
 {
-
-class SerfPutReqProcImpl : public SerfRequestProcessorImpl
-{
-public:
-    SerfPutReqProcImpl( const char* inPath,
-                        const DAVRequestHeaders& inRequestHeaders,
-                        const char* inData,
-                        const char* inLockToken,
-                        apr_size_t inDataLen );
-    
-
-    virtual ~SerfPutReqProcImpl();
-
-    virtual
-    serf_bucket_t * createSerfRequestBucket( serf_request_t * inSerfRequest );
-
-protected:
-    virtual
-    void processChunkOfResponseData( const char* data, apr_size_t len );
-
-    virtual
-    void handleEndOfResponseData( serf_bucket_t * inSerfResponseBucket );
-
-private:
-    const char* mpData;
-    const char* mpLockToken;
-    apr_size_t mnDataLen;
-
 };
 
-} // namespace http_dav_ucp
+//=============================================================================
 
-#endif // INCLUDED_SERFPUTREQPROCIMPL_HXX
+}; }; }; };
+
+#endif

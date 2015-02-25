@@ -31,12 +31,16 @@
  *************************************************************************/
 #include <osl/diagnose.h>
 #include <com/sun/star/util/DateTime.hpp>
+#include <com/sun/star/ucb/Lock.hpp>
 #include "SerfUri.hxx"
 #include "DAVResource.hxx"
 #include "DAVProperties.hxx"
 #include "DateTimeHelper.hxx"
 #include "webdavprovider.hxx"
 #include "ContentProperties.hxx"
+
+#include <rtl/uri.hxx>
+#include <rtl/ustrbuf.hxx>
 
 using namespace com::sun::star;
 using namespace http_dav_ucp;
@@ -384,6 +388,9 @@ bool ContentProperties::containsAllNames(
         if ( !contains( rName ) )
         {
             // Not found.
+            OSL_TRACE("ContentProperties::containsAllNames - not found: '%s'",
+                      rtl::OUStringToOString( rName,
+                                       RTL_TEXTENCODING_UTF8 ).getStr());
             rNamesNotContained.push_back( rName );
         }
     }
@@ -459,6 +466,7 @@ void ContentProperties::addProperty( const rtl::OUString & rName,
                                      const com::sun::star::uno::Any & rValue,
                                      bool bIsCaseSensitive )
 {
+//    OSL_TRACE(">>>> ContentProperties::addProperty: %s\n", OUStringToOString( rName , RTL_TEXTENCODING_ISO_8859_1 ).getStr());
     if ( rName.equals( DAVProperties::CREATIONDATE ) )
     {
         // Map DAV:creationdate to UCP:DateCreated

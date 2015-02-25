@@ -1628,6 +1628,40 @@ sal_Bool Content::isDocument()
 }
 
 //=========================================================================
+void Content::lock()
+    throw( CommandAbortedException, RuntimeException, Exception )
+{
+    Command aCommand;
+    aCommand.Name     = rtl::OUString::createFromAscii( "lock" );
+    aCommand.Handle   = -1; // n/a
+    //    aCommand.Argument <<= aArg;
+
+    m_xImpl->executeCommand( aCommand );
+
+    //    return xSink->getInputStream();
+}
+
+//=========================================================================
+void Content::unlock()
+    throw( CommandAbortedException, RuntimeException, Exception )
+{
+
+    //    OpenCommandArgument2 aArg;
+    //aArg.Mode       = OpenMode::DOCUMENT_SHARE_DENY_NONE;
+    //aArg.Priority   = 0; // unused
+    //aArg.Sink       = xSink;
+    //aArg.Properties = Sequence< Property >( 0 ); // unused
+
+    Command aCommand;
+    aCommand.Name     = rtl::OUString::createFromAscii( "unlock" );
+    aCommand.Handle   = -1; // n/a
+    //    aCommand.Argument <<= aArg;
+
+    m_xImpl->executeCommand( aCommand );
+
+}
+
+//=========================================================================
 //=========================================================================
 //
 // Content_Impl Implementation.

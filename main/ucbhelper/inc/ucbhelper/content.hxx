@@ -1029,6 +1029,25 @@ public:
         throw( ::com::sun::star::ucb::CommandAbortedException,
                ::com::sun::star::uno::RuntimeException,
                ::com::sun::star::uno::Exception );
+    /** lock the resource
+      *
+      *
+      */
+    void
+      lock()
+        throw( ::com::sun::star::ucb::CommandAbortedException,
+               ::com::sun::star::uno::RuntimeException,
+               ::com::sun::star::uno::Exception );      
+
+    /** ulock the resource
+      *
+      *
+      */
+    void
+      unlock()
+        throw( ::com::sun::star::ucb::CommandAbortedException,
+               ::com::sun::star::uno::RuntimeException,
+               ::com::sun::star::uno::Exception );      
 };
 
 } /* namespace ucbhelper */

@@ -45,6 +45,11 @@ module com { module sun { module star { module ucb {
     /** The Url of the resource this exception is related to.
     */
     string Url;
+
+    //i125129
+    /** Extended information, some Internet Server send this to the client
+    */
+    string ExtendedInfo;
 };
 
 //=============================================================================
