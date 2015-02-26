@@ -1369,7 +1369,7 @@ sal_Bool SfxMedium::LockOrigFileOnDemand( sal_Bool bLoading, sal_Bool bNoUI )
                             }
                             catch( ucb::InteractiveLockingLockedException& e )
                             {
-                                PRINT_EXCEPTION();
+                                DBGLOG_UNHANDLED_EXCEPTION();
                                 ::tools::addDebugLog("%s:%d\n - uno::InteractiveLockingLockedException signalled, reason: %s!",BOOST_CURRENT_FUNCTION, __LINE__,
                                         rtl::OUStringToOString( e.Message,
                                                                 RTL_TEXTENCODING_UTF8 ).getStr());
@@ -1433,7 +1433,7 @@ sal_Bool SfxMedium::LockOrigFileOnDemand( sal_Bool bLoading, sal_Bool bNoUI )
                             }
                             catch( uno::Exception & e )
                             {
-                                PRINT_EXCEPTION();
+                                DBGLOG_UNHANDLED_EXCEPTION();
                             }
                         }
                     } while( !bResult && bUIStatus == LOCK_UI_TRY );
@@ -3001,7 +3001,7 @@ void SfxMedium::UnlockFile( sal_Bool bReleaseLockStream )
             }
             catch( uno::Exception& e )
             {
-                PRINT_EXCEPTION();
+                DBGLOG_UNHANDLED_EXCEPTION();
             }
         }
     }
