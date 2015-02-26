@@ -85,6 +85,8 @@
 #include "SerfUri.hxx"
 #include "UCBDeadPropertyValue.hxx"
 
+#include <tools/debuglogger.hxx>
+
 using namespace com::sun::star;
 using namespace http_dav_ucp;
 
@@ -1315,7 +1317,7 @@ uno::Reference< sdbc::XRow > Content::getPropertyValues(
             const beans::Property& rProp = pProps[ n ];
 
 
-            fprintf( stdout, ">>>> Content::getPropertyValues - prop:  %s \n", OUStringToOString( rProp.Name , RTL_TEXTENCODING_ISO_8859_1 ).getStr());
+            ::tools::addDebugLog(">>>> Content::getPropertyValues - prop:  %s \n", OUStringToOString( rProp.Name , RTL_TEXTENCODING_ISO_8859_1 ).getStr());
 
             // Process standard UCB, DAV and HTTP properties.
             const uno::Any & rValue = rData.getValue( rProp.Name );
@@ -1468,7 +1470,7 @@ uno::Reference< sdbc::XRow > Content::getPropertyValues(
                     {
                         const rtl::OUString & rName = rProperties[ n ].Name;
 
-                        OSL_TRACE("Content::getPropertyValues - prop name '%s'\n",
+                        ::tools::addDebugLog("Content::getPropertyValues - prop name '%s'\n",
                             rtl::OUStringToOString( rName,
                                             RTL_TEXTENCODING_UTF8 ).getStr());
                         std::vector< rtl::OUString >::const_iterator it
@@ -3045,12 +3047,12 @@ void Content::lock(
     }
     catch ( DAVException const & e )
     {
-        fprintf(stdout,">>>> ucb::(webdav)Content::lock - Exception received: data: '%s' status: %d\n",
+        ::tools::addDebugLog(">>>> ucb::(webdav)Content::lock - Exception received: data: '%s' status: %d\n",
                   rtl::OUStringToOString( e.getData(),
                                             RTL_TEXTENCODING_UTF8 ).getStr() ,e.getStatus() );
         if(e.getStatus() == SC_LOCKED)
         {
-            OSL_TRACE(">>>> Content::lock - Already locked");
+            ::tools::addDebugLog(">>>> Content::lock - Already locked");
         }
         cancelCommandExecution( e, Environment, sal_False );
         // Unreachable
@@ -3490,16 +3492,14 @@ const Content::ResourceType & Content::getResourceType(
                 //first print resources received ready for cache
                 // there is a single resource
                 //debug:
-#if OSL_DEBUG_LEVEL > 0
                 {
                     std::vector< http_dav_ucp::DAVPropertyValue > aResponseProperties(resources[0].properties);
                     for(unsigned int i = 0; i < aResponseProperties.size(); i++) {
-                        OSL_TRACE("Content::getResourceType - returned: '%s'",
+                        ::tools::addDebugLog("Content::getResourceType - returned: '%s'",
                                   rtl::OUStringToOString( aResponseProperties[i].Name,
                                                           RTL_TEXTENCODING_UTF8 ).getStr());
                     }
                 }
-#endif
 
                 m_xCachedProps.reset(
                     new CachableContentProperties( resources[ 0 ] ) );

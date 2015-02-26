@@ -152,6 +152,7 @@ SHL1IMPLIB=i$(TARGET)
 SHL1VERSIONMAP=$(SOLARENV)/src/component.map
 
 SHL1STDLIBS+=\
+        $(TOOLSLIB) \
         $(CPPUHELPERLIB) \
         $(CPPULIB)       \
         $(SALLIB)        \
