@@ -85,7 +85,9 @@
 #include "SerfUri.hxx"
 #include "UCBDeadPropertyValue.hxx"
 
+//to debug via log recorder, remove when done
 #include <tools/debuglogger.hxx>
+#include <boost/current_function.hpp>
 
 using namespace com::sun::star;
 using namespace http_dav_ucp;
@@ -1316,8 +1318,7 @@ uno::Reference< sdbc::XRow > Content::getPropertyValues(
         {
             const beans::Property& rProp = pProps[ n ];
 
-
-            ::tools::addDebugLog(">>>> Content::getPropertyValues - prop:  %s \n", OUStringToOString( rProp.Name , RTL_TEXTENCODING_ISO_8859_1 ).getStr());
+            ::tools::addDebugLog("%s - prop:  %s", BOOST_CURRENT_FUNCTION, OUStringToOString( rProp.Name , RTL_TEXTENCODING_ISO_8859_1 ).getStr());
 
             // Process standard UCB, DAV and HTTP properties.
             const uno::Any & rValue = rData.getValue( rProp.Name );
@@ -1470,7 +1471,7 @@ uno::Reference< sdbc::XRow > Content::getPropertyValues(
                     {
                         const rtl::OUString & rName = rProperties[ n ].Name;
 
-                        ::tools::addDebugLog("Content::getPropertyValues - prop name '%s'\n",
+                        ::tools::addDebugLog("%s:%d\n - prop name '%s'", BOOST_CURRENT_FUNCTION,__LINE__,
                             rtl::OUStringToOString( rName,
                                             RTL_TEXTENCODING_UTF8 ).getStr());
                         std::vector< rtl::OUString >::const_iterator it
@@ -3047,7 +3048,7 @@ void Content::lock(
     }
     catch ( DAVException const & e )
     {
-        ::tools::addDebugLog(">>>> ucb::(webdav)Content::lock - Exception received: data: '%s' status: %d\n",
+        ::tools::addDebugLog(">>>> ucb::(webdav)Content::lock - Exception received: data: '%s' status: %d",
                   rtl::OUStringToOString( e.getData(),
                                             RTL_TEXTENCODING_UTF8 ).getStr() ,e.getStatus() );
         if(e.getStatus() == SC_LOCKED)

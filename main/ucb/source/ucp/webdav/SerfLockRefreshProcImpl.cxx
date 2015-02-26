@@ -31,6 +31,10 @@
 #include <rtl/ustrbuf.hxx>
 #include <apr/apr_strings.h>
 
+//to debug via log recorder, remove when done
+#include <tools/debuglogger.hxx>
+#include <boost/current_function.hpp>
+
 namespace http_dav_ucp
 {
 
@@ -76,7 +80,7 @@ serf_bucket_t * SerfLockRefreshProcImpl::createSerfRequestBucket( serf_request_t
     }
     else
     {
-        OSL_ASSERT("Headers Bucket missing");
+        ::tools::addDebugLog("%s Headers Bucket missing",BOOST_CURRENT_FUNCTION);
     }
 
     return req_bkt;

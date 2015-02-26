@@ -31,6 +31,10 @@
 #include <rtl/ustrbuf.hxx>
 #include <apr/apr_strings.h>
 
+//for debug logger printing remove when finalized
+#include <tools/debuglogger.hxx>
+#include <boost/current_function.hpp>
+
 namespace http_dav_ucp
 {
 
@@ -81,7 +85,7 @@ void SerfUnlockProcImpl::processChunkOfResponseData( const char* data,
 {
     {//debug only, remove when done
         rtl::OUString aStr(data,len,RTL_TEXTENCODING_ASCII_US);
-        fprintf( stdout, ">>>> SerfLockReqProcImpl::processChunkOfResponseData - \n'\n%s\n'\n",
+        ::tools::addDebugLog(">>>> SerfLockReqProcImpl::processChunkOfResponseData - \n'\n%s\n'",
             rtl::OUStringToOString( aStr, RTL_TEXTENCODING_UTF8 ).getStr());
     }
     if ( xInputStream.is() )
