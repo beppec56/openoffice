@@ -3048,9 +3048,11 @@ void Content::lock(
     }
     catch ( DAVException const & e )
     {
-        ::tools::addDebugLog(">>>> ucb::(webdav)Content::lock - Exception received: data: '%s' status: %d",
-                  rtl::OUStringToOString( e.getData(),
-                                            RTL_TEXTENCODING_UTF8 ).getStr() ,e.getStatus() );
+        ::tools::addDebugLog("%s:%d\n - Exception received: data: '%s' status: %d, code %s",BOOST_CURRENT_FUNCTION,__LINE__,
+                             rtl::OUStringToOString( e.getData(),
+                                                     RTL_TEXTENCODING_UTF8 ).getStr() ,e.getStatus(),
+                             rtl::OUStringToOString( e.getErrorString(),
+                                                     RTL_TEXTENCODING_UTF8 ).getStr());
         if(e.getStatus() == SC_LOCKED)
         {
             ::tools::addDebugLog(">>>> Content::lock - Already locked");
