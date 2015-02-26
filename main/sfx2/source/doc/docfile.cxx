@@ -77,6 +77,7 @@
 #include <tools/cachestr.hxx>
 #include <tools/urlobj.hxx>
 #include <tools/diagnose_ex.h>
+#include <tools/debuglogger.hxx>
 #include <unotools/tempfile.hxx>
 #include <comphelper/processfactory.hxx>
 #include <comphelper/componentcontext.hxx>
@@ -1137,6 +1138,7 @@ sal_Int8 SfxMedium::ShowLockedDocumentDialog( const uno::Sequence< ::rtl::OUStri
 //------------------------------------------------------------------
 sal_Bool SfxMedium::LockOrigFileOnDemand( sal_Bool bLoading, sal_Bool bNoUI )
 {
+    ::tools::addDebugLog("%s",BOOST_CURRENT_FUNCTION);
     // returns true if the document can be opened for editing ( even if it should be a copy )
     // otherwise the document should be opened readonly
     // if user cancel the loading the ERROR_ABORT is set
@@ -1359,7 +1361,7 @@ sal_Bool SfxMedium::LockOrigFileOnDemand( sal_Bool bLoading, sal_Bool bNoUI )
                                 xComEnv = new ::ucbhelper::CommandEnvironment( xInteractionHandler,
                                                                                Reference< ::com::sun::star::ucb::XProgressHandler >() );
                             ::ucbhelper::Content aContentToLock( GetURLObject().GetMainURL( INetURLObject::NO_DECODE ), xComEnv);
-                            OSL_TRACE("======= SfxMedium::LockOrigFileOnDemand - URL for lock '%s' ======\n",
+                            ::tools::addDebugLog("======= SfxMedium::LockOrigFileOnDemand - URL for lock '%s' ======\n",
                                       rtl::OUStringToOString( GetURLObject().GetMainURL(INetURLObject::NO_DECODE ), RTL_TEXTENCODING_UTF8 ).getStr());
                             rtl::OUString   aOwner;
                             try {
@@ -1369,7 +1371,7 @@ sal_Bool SfxMedium::LockOrigFileOnDemand( sal_Bool bLoading, sal_Bool bNoUI )
                             catch( ucb::InteractiveLockingLockedException& e )
                             {
                                 PRINT_EXCEPTION();
-                                fprintf(stdout,">>>> SfxMedium::LockOrigFileOnDemand - uno::InteractiveLockingLockedException signalled, reason: %s!\n",
+                                ::tools::addDebugLog(">>>> SfxMedium::LockOrigFileOnDemand - uno::InteractiveLockingLockedException signalled, reason: %s!",
                                         rtl::OUStringToOString( e.Message,
                                                                 RTL_TEXTENCODING_UTF8 ).getStr());
                                 // in e.XInterface should be:  uno::Reference< ucb::XCommandEnvironment >, e.g. the one given above
@@ -1378,7 +1380,7 @@ sal_Bool SfxMedium::LockOrigFileOnDemand( sal_Bool bLoading, sal_Bool bNoUI )
                                 uno::Sequence< ::com::sun::star::ucb::Lock >  aLocks;
                                 if(aContentToLock.getPropertyValue( ::rtl::OUString( RTL_CONSTASCII_USTRINGPARAM( "DAV:lockdiscovery" ) ) ) >>= aLocks)
                                 {
-                                    OSL_TRACE(">>>> SfxMedium::LockOrigFileOnDemand - DAV:lockdiscovery returned %d locks\n",aLocks.getLength());
+                                    ::tools::addDebugLog(">>>> SfxMedium::LockOrigFileOnDemand - DAV:lockdiscovery returned %d locks",aLocks.getLength());
                                     if(aLocks.getLength() > 0)
                                     {
                                         ucb::Lock aLock = aLocks[0];
@@ -1405,7 +1407,7 @@ sal_Bool SfxMedium::LockOrigFileOnDemand( sal_Bool bLoading, sal_Bool bNoUI )
                                                 break;
                                             }
 
-                                            fprintf(stdout,">>>> SfxMedium::LockOrigFileOnDemand - a Lock is present: Owner: %s, token: %s, depth: %s, timeout = %li\n",
+                                            ::tools::addDebugLog(">>>> SfxMedium::LockOrigFileOnDemand - a Lock is present: Owner: %s, token: %s, depth: %s, timeout = %li\n",
                                                     rtl::OUStringToOString( aOwner,RTL_TEXTENCODING_UTF8 ).getStr(),
                                                     rtl::OUStringToOString( aToken,RTL_TEXTENCODING_UTF8 ).getStr(),
                                                     depth, aTimeout );
@@ -1413,7 +1415,7 @@ sal_Bool SfxMedium::LockOrigFileOnDemand( sal_Bool bLoading, sal_Bool bNoUI )
                                     }
                                 }
                                 else
-                                    OSL_TRACE("SfxMedium::LockOrigFileOnDemand - DAV:lockdiscovery returned NO locks");
+                                    ::tools::addDebugLog("SfxMedium::LockOrigFileOnDemand - DAV:lockdiscovery returned NO locks");
 
                                 if ( !bResult && !bNoUI )
                                 {
@@ -2944,6 +2946,7 @@ void SfxMedium::CloseAndRelease()
 
 void SfxMedium::UnlockFile( sal_Bool bReleaseLockStream )
 {
+    ::tools::addDebugLog("%s",BOOST_CURRENT_FUNCTION);
     //check if the file is local
     if ( ::utl::LocalFileHelper::IsLocalFile( aLogicName ) )
     {
