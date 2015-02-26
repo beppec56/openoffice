@@ -3055,7 +3055,27 @@ void Content::lock(
                                                      RTL_TEXTENCODING_UTF8 ).getStr());
         if(e.getStatus() == SC_LOCKED)
         {
-            ::tools::addDebugLog(">>>> Content::lock - Already locked");
+            ::tools::addDebugLog("%s:%d\n - Already locked",BOOST_CURRENT_FUNCTION,__LINE__);
+            rtl::OUString aURL;
+            if ( m_bTransient )
+            {
+                aURL = getParentURL();
+                if ( aURL.lastIndexOf( '/' ) != ( aURL.getLength() - 1 ) )
+                    aURL += rtl::OUString::createFromAscii( "/" );
+
+                aURL += m_aEscapedTitle;
+            }
+            else
+            {
+                aURL = m_xIdentifier->getContentIdentifier();
+            }
+            
+            throw(ucb::InteractiveLockingLockedException(
+                      rtl::OUString::createFromAscii( "Locked!" ),
+                      static_cast< cppu::OWeakObject * >( this ),
+                      task::InteractionClassification_ERROR,
+                      aURL,
+                      sal_False ));
         }
         cancelCommandExecution( e, Environment, sal_False );
         // Unreachable
