@@ -34,6 +34,9 @@
 #include <tools/debuglogger.hxx>
 #include <boost/current_function.hpp>
 
+//to examine returned http code
+#include "DAVException.hxx"
+
 namespace http_dav_ucp
 {
 
@@ -550,19 +553,6 @@ void SerfRequestProcessor::postprocessProcessor( const apr_status_t inStatus )
         mpDAVException = new DAVException( DAVException::DAV_HTTP_ERROR );
         break;
     }
-
-//debug only
-    {
-        if(mpDAVException)
-        {
-            DBGLOG_STACK_SNAPSHOT(sal_True);
-            DBGLOG_TRACE("%s:%d\n - DAVException prepared: data: '%s' status: %d, code %s",BOOST_CURRENT_FUNCTION,__LINE__,
-                                 rtl::OUStringToOString( mpDAVException->getData(),
-                                                         RTL_TEXTENCODING_UTF8 ).getStr() ,mpDAVException->getStatus(),
-                                 rtl::OUStringToOString( mpDAVException->getErrorString(),
-                                                         RTL_TEXTENCODING_UTF8 ).getStr());
-        }
-    }
 }
 
 apr_status_t SerfRequestProcessor::provideSerfCredentials( char ** outUsername, 
@@ -689,6 +679,14 @@ apr_status_t SerfRequestProcessor::handleSerfResponse( serf_request_t * inSerfRe
             {
                 // keep going as authentication is not required on HEAD request.
                 // the response already contains header fields.
+            }
+            else if ( mnHTTPStatusCode == SC_LOCKED )
+            {
+                DBGLOG_TRACE( "%s:%d\n - Locked received, may be implement a reading of response bucket ?\n - for the time being treat as an error, ignore load",
+                             BOOST_CURRENT_FUNCTION,__LINE__ );
+
+                mbProcessingDone = true;
+                return APR_EGENERAL;
             }
             else
             {

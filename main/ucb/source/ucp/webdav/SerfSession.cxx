@@ -1227,8 +1227,8 @@ void SerfSession::LOCK( const ::rtl::OUString & inPath,
     if ( aReqProc->mpDAVException )
     {
         DAVException* mpDAVExp( aReqProc->mpDAVException );
-        DBGLOG_TRACE("%s:%d\n - DAVException raised while locking: mExceptionCode: %d, mData '%s', mStatusCode %d",BOOST_CURRENT_FUNCTION,__LINE__,
-                mpDAVExp->getError(),
+        DBGLOG_TRACE("%s:%d\n - DAVException raised while locking: mExceptionCode: %s, mData '%s', mStatusCode %d",BOOST_CURRENT_FUNCTION,__LINE__,
+                rtl::OUStringToOString( mpDAVExp->getErrorString(),RTL_TEXTENCODING_UTF8 ).getStr(),
                 rtl::OUStringToOString( mpDAVExp->getData(),RTL_TEXTENCODING_UTF8 ).getStr(),
                 mpDAVExp->getStatus());
     }
