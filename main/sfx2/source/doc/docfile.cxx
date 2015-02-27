@@ -1357,77 +1357,84 @@ sal_Bool SfxMedium::LockOrigFileOnDemand( sal_Bool bLoading, sal_Bool bNoUI )
                     {
                         if( !bResult )
                         {
-                            Reference< ::com::sun::star::ucb::XCommandEnvironment > xComEnv;
-                            if (xInteractionHandler.is())
-                                xComEnv = new ::ucbhelper::CommandEnvironment( xInteractionHandler,
-                                                                               Reference< ::com::sun::star::ucb::XProgressHandler >() );
-                            ::ucbhelper::Content aContentToLock( GetURLObject().GetMainURL( INetURLObject::NO_DECODE ), xComEnv);
-                            DBGLOG_TRACE("%s:%d\n - URL for lock '%s'", BOOST_CURRENT_FUNCTION, __LINE__,
-                                      rtl::OUStringToOString( GetURLObject().GetMainURL(INetURLObject::NO_DECODE ), RTL_TEXTENCODING_UTF8 ).getStr());
-                            rtl::OUString   aOwner;
-                            try {
-                                aContentToLock.lock();
-                                bResult = sal_True;
-                            }
-                            catch( ucb::InteractiveLockingLockedException& e )
+                            try
                             {
-                                DBGLOG_UNHANDLED_EXCEPTION();
-                                // in e.XInterface should be:  uno::Reference< ucb::XCommandEnvironment >, e.g. the one given above
-                                // bContentReadonly = sal_True;
-                                // here get the lock currently present, via lockdiscovery
-                                uno::Sequence< ::com::sun::star::ucb::Lock >  aLocks;
-                                if(aContentToLock.getPropertyValue( ::rtl::OUString( RTL_CONSTASCII_USTRINGPARAM( "DAV:lockdiscovery" ) ) ) >>= aLocks)
+                                Reference< ::com::sun::star::ucb::XCommandEnvironment > xComEnv;
+                                if (xInteractionHandler.is())
+                                    xComEnv = new ::ucbhelper::CommandEnvironment( xInteractionHandler,
+                                                                                   Reference< ::com::sun::star::ucb::XProgressHandler >() );
+                                ::ucbhelper::Content aContentToLock( GetURLObject().GetMainURL( INetURLObject::NO_DECODE ), xComEnv);
+                                DBGLOG_TRACE("%s:%d\n - URL for lock '%s'", BOOST_CURRENT_FUNCTION, __LINE__,
+                                             rtl::OUStringToOString( GetURLObject().GetMainURL(INetURLObject::NO_DECODE ), RTL_TEXTENCODING_UTF8 ).getStr());
+                                rtl::OUString   aOwner;
+                                try {
+                                    aContentToLock.lock();
+                                    bResult = sal_True;
+                                }
+                                catch( ucb::InteractiveLockingLockedException& e )
                                 {
-                                    DBGLOG_TRACE("%s:%d\n - DAV:lockdiscovery returned %d locks",BOOST_CURRENT_FUNCTION, __LINE__, aLocks.getLength());
-                                    if(aLocks.getLength() > 0)
+                                    DBGLOG_UNHANDLED_EXCEPTION();
+                                    // in e.XInterface should be:  uno::Reference< ucb::XCommandEnvironment >, e.g. the one given above
+                                    // bContentReadonly = sal_True;
+                                    // here get the lock currently present, via lockdiscovery
+                                    uno::Sequence< ::com::sun::star::ucb::Lock >  aLocks;
+                                    if(aContentToLock.getPropertyValue( ::rtl::OUString( RTL_CONSTASCII_USTRINGPARAM( "DAV:lockdiscovery" ) ) ) >>= aLocks)
                                     {
-                                        ucb::Lock aLock = aLocks[0];
+                                        DBGLOG_TRACE("%s:%d\n - DAV:lockdiscovery returned %d locks",BOOST_CURRENT_FUNCTION, __LINE__, aLocks.getLength());
+                                        if(aLocks.getLength() > 0)
+                                        {
+                                            ucb::Lock aLock = aLocks[0];
 
-                                        //for debug, prinmt first received lock
-                                        { //============================
+                                            //for debug, prinmt first received lock
+                                            { //============================
 //            block of code for print/debug only, remove when done
-                                            rtl::OUString   aToken;
-                                            aLock.Owner >>= aOwner;
-                                            long    aTimeout = aLock.Timeout;
+                                                rtl::OUString   aToken;
+                                                aLock.Owner >>= aOwner;
+                                                long    aTimeout = aLock.Timeout;
 
-                                            aToken = aLock.LockTokens[0];
-                                            const char *depth;
-                                            switch(aLock.Depth) {
-                                            default:
-                                            case ucb::LockDepth_ZERO:
-                                                depth =  "0";
-                                                break;
-                                            case ucb::LockDepth_ONE:
-                                                depth =  "1";
-                                                break;
-                                            case ucb::LockDepth_INFINITY:
-                                                depth = "infinity";
-                                                break;
+                                                aToken = aLock.LockTokens[0];
+                                                const char *depth;
+                                                switch(aLock.Depth) {
+                                                default:
+                                                case ucb::LockDepth_ZERO:
+                                                    depth =  "0";
+                                                    break;
+                                                case ucb::LockDepth_ONE:
+                                                    depth =  "1";
+                                                    break;
+                                                case ucb::LockDepth_INFINITY:
+                                                    depth = "infinity";
+                                                    break;
+                                                }
+
+                                                DBGLOG_TRACE("%s:%d\n - a Lock is present: Owner: %s, token: %s, depth: %s, timeout = %li",
+                                                             BOOST_CURRENT_FUNCTION, __LINE__,
+                                                             rtl::OUStringToOString( aOwner,RTL_TEXTENCODING_UTF8 ).getStr(),
+                                                             rtl::OUStringToOString( aToken,RTL_TEXTENCODING_UTF8 ).getStr(),
+                                                             depth, aTimeout );
                                             }
+                                        }
+                                    }
+                                    else
+                                        ::tools::addDebugLog("%s:%d\n - DAV:lockdiscovery returned NO locks",BOOST_CURRENT_FUNCTION, __LINE__);
 
-                                            DBGLOG_TRACE("%s:%d\n - a Lock is present: Owner: %s, token: %s, depth: %s, timeout = %li",
-                                                                 BOOST_CURRENT_FUNCTION, __LINE__,
-                                                                 rtl::OUStringToOString( aOwner,RTL_TEXTENCODING_UTF8 ).getStr(),
-                                                                 rtl::OUStringToOString( aToken,RTL_TEXTENCODING_UTF8 ).getStr(),
-                                                                 depth, aTimeout );
+                                    if ( !bResult && !bNoUI )
+                                    {
+                                        uno::Sequence< ::rtl::OUString > aData( LOCKFILE_ENTRYSIZE );
+                                        sal_Bool bOwnLock = sal_False;
+
+                                        aData[0] = aOwner;
+                                        bUIStatus = ShowLockedDAVDocumentDialog( aData, bLoading, bOwnLock );
+                                        if ( bUIStatus == LOCK_UI_SUCCEEDED )
+                                        {
+                                            // take the ownership over the lock file, accept the current lock (already there)
+                                            bResult = sal_True; //aLockFile.OverwriteOwnLockFile();
                                         }
                                     }
                                 }
-                                else
-                                    ::tools::addDebugLog("%s:%d\n - DAV:lockdiscovery returned NO locks",BOOST_CURRENT_FUNCTION, __LINE__);
-
-                                if ( !bResult && !bNoUI )
+                                catch( uno::Exception & e )
                                 {
-                                    uno::Sequence< ::rtl::OUString > aData( LOCKFILE_ENTRYSIZE );
-                                    sal_Bool bOwnLock = sal_False;
-
-                                    aData[0] = aOwner;
-                                    bUIStatus = ShowLockedDAVDocumentDialog( aData, bLoading, bOwnLock );
-                                    if ( bUIStatus == LOCK_UI_SUCCEEDED )
-                                    {
-                                        // take the ownership over the lock file, accept the current lock (already there)
-                                        bResult = sal_True; //aLockFile.OverwriteOwnLockFile();
-                                    }
+                                    DBGLOG_UNHANDLED_EXCEPTION();
                                 }
                             }
                             catch( uno::Exception & e )
@@ -2984,17 +2991,17 @@ void SfxMedium::UnlockFile( sal_Bool bReleaseLockStream )
     else
     {
         //not local, try with the standard ucb unlock command, available through ucbhelper::Content
-        // an interaction handler should be used for authentication in case it is available
-        ::tools::addDebugLog("%s:%d",BOOST_CURRENT_FUNCTION,__LINE__);
-        Reference< ::com::sun::star::task::XInteractionHandler > xInteractionHandler = GetInteractionHandler();
-        Reference< ::com::sun::star::ucb::XCommandEnvironment > xComEnv;
-        if (xInteractionHandler.is())
-            xComEnv = new ::ucbhelper::CommandEnvironment( xInteractionHandler,
-                                                           Reference< ::com::sun::star::ucb::XProgressHandler >() );
-        ::ucbhelper::Content aContentToUnlock( GetURLObject().GetMainURL( INetURLObject::NO_DECODE ), xComEnv);        
         if ( pImp->m_bLocked )
         {
+            // an interaction handler should be used for authentication in case it is available
             try {
+                DBGLOG_TRACE("%s:%d",BOOST_CURRENT_FUNCTION,__LINE__);
+                Reference< ::com::sun::star::task::XInteractionHandler > xInteractionHandler = GetInteractionHandler();
+                Reference< ::com::sun::star::ucb::XCommandEnvironment > xComEnv;
+                if (xInteractionHandler.is())
+                    xComEnv = new ::ucbhelper::CommandEnvironment( xInteractionHandler,
+                                                                   Reference< ::com::sun::star::ucb::XProgressHandler >() );
+                ::ucbhelper::Content aContentToUnlock( GetURLObject().GetMainURL( INetURLObject::NO_DECODE ), xComEnv);        
                 pImp->m_bLocked = sal_False;                    
                 aContentToUnlock.unlock();
             }
