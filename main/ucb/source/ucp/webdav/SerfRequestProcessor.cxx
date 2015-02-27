@@ -30,6 +30,10 @@
 
 #include <apr_strings.h>
 
+//for debug logger printing remove when finalized
+#include <tools/debuglogger.hxx>
+#include <boost/current_function.hpp>
+
 namespace http_dav_ucp
 {
 
@@ -547,6 +551,17 @@ void SerfRequestProcessor::postprocessProcessor( const apr_status_t inStatus )
         break;
     }
 
+//debug only
+    {
+        if(mpDAVException)
+        {
+            ::tools::addDebugLog("%s:%d\n - Exception received: data: '%s' status: %d, code %s",BOOST_CURRENT_FUNCTION,__LINE__,
+                                 rtl::OUStringToOString( mpDAVException->getData(),
+                                                         RTL_TEXTENCODING_UTF8 ).getStr() ,mpDAVException->getStatus(),
+                                 rtl::OUStringToOString( mpDAVException->getErrorString(),
+                                                         RTL_TEXTENCODING_UTF8 ).getStr());
+        }
+    }
 }
 
 apr_status_t SerfRequestProcessor::provideSerfCredentials( char ** outUsername, 
