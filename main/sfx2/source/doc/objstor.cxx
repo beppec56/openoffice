@@ -140,6 +140,9 @@
 
 #include "../appl/app.hrc"
 
+//for debug logger printing remove when finalized
+#include <tools/debuglogger.hxx>
+
 extern sal_uInt32 CheckPasswd_Impl( SfxObjectShell*, SfxItemPool&, SfxMedium* );
 
 using namespace ::com::sun::star;

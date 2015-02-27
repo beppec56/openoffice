@@ -129,6 +129,9 @@
 
 #include <sfx2/sfxresid.hxx>
 
+//for debug logger printing remove when finalized
+#include <tools/debuglogger.hxx>
+
 //________________________________________________________________________________________________________
 // const
 static const ::rtl::OUString SERVICENAME_DESKTOP = ::rtl::OUString::createFromAscii ("com.sun.star.frame.Desktop");

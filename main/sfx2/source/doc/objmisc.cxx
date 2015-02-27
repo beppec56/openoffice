@@ -148,6 +148,9 @@ using namespace ::com::sun::star::container;
 #include "appbaslib.hxx"
 #include <openflag.hxx>                 // SFX_STREAM_READWRITE
 
+//for debug logger printing remove when finalized
+#include <tools/debuglogger.hxx>
+
 using namespace ::com::sun::star;
 
 // class SfxHeaderAttributes_Impl ----------------------------------------
