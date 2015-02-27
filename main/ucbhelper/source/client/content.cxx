@@ -69,10 +69,6 @@
 #include <ucbhelper/interactionrequest.hxx>
 #include <ucbhelper/cancelcommandexecution.hxx>
 
-//for debug logger printing remove when finalized
-#include <tools/debuglogger.hxx>
-#include <boost/current_function.hpp>
-
 using namespace com::sun::star::container;
 using namespace com::sun::star::beans;
 using namespace com::sun::star::io;
@@ -237,19 +233,6 @@ static void ensureContentProviderForURL( const ContentBroker & rBroker,
             = xMgr->queryContentProvider( rURL );
         if ( !xProv.is() )
         {
-            {
-                DBGLOG_TRACE("%s: rUrl: %s",BOOST_CURRENT_FUNCTION,
-                    rtl::OUStringToOString( rURL, RTL_TEXTENCODING_UTF8 ).getStr());
-                try
-                {
-                    throw Exception();
-                }
-                catch (Exception& e)
-                {
-                    DBGLOG_UNHANDLED_EXCEPTION();
-                }
-            }
-            
             throw ContentCreationException(
                 rtl::OUString::createFromAscii(
                     "No Content Provider available for given URL!" ),
