@@ -555,7 +555,8 @@ void SerfRequestProcessor::postprocessProcessor( const apr_status_t inStatus )
     {
         if(mpDAVException)
         {
-            ::tools::addDebugLog("%s:%d\n - Exception received: data: '%s' status: %d, code %s",BOOST_CURRENT_FUNCTION,__LINE__,
+            DBGLOG_STACK_SNAPSHOT(sal_True);
+            DBGLOG_TRACE("%s:%d\n - DAVException prepared: data: '%s' status: %d, code %s",BOOST_CURRENT_FUNCTION,__LINE__,
                                  rtl::OUStringToOString( mpDAVException->getData(),
                                                          RTL_TEXTENCODING_UTF8 ).getStr() ,mpDAVException->getStatus(),
                                  rtl::OUStringToOString( mpDAVException->getErrorString(),
