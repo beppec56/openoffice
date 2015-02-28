@@ -1318,7 +1318,8 @@ uno::Reference< sdbc::XRow > Content::getPropertyValues(
         {
             const beans::Property& rProp = pProps[ n ];
 
-            ::tools::addDebugLog("%s - prop:  %s", BOOST_CURRENT_FUNCTION, OUStringToOString( rProp.Name , RTL_TEXTENCODING_ISO_8859_1 ).getStr());
+            DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__,
+                                "prop:  %s", OUStringToOString( rProp.Name , RTL_TEXTENCODING_ISO_8859_1 ).getStr());
 
             // Process standard UCB, DAV and HTTP properties.
             const uno::Any & rValue = rData.getValue( rProp.Name );
@@ -1471,7 +1472,7 @@ uno::Reference< sdbc::XRow > Content::getPropertyValues(
                     {
                         const rtl::OUString & rName = rProperties[ n ].Name;
 
-                        ::tools::addDebugLog("%s:%d\n - prop name '%s'", BOOST_CURRENT_FUNCTION,__LINE__,
+                        DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__, "prop name '%s'",
                             rtl::OUStringToOString( rName,
                                             RTL_TEXTENCODING_UTF8 ).getStr());
                         std::vector< rtl::OUString >::const_iterator it
@@ -3048,14 +3049,15 @@ void Content::lock(
     }
     catch ( DAVException const & e )
     {
-        ::tools::addDebugLog("%s:%d\n - Exception received: data: '%s' status: %d, code %s",BOOST_CURRENT_FUNCTION,__LINE__,
-                             rtl::OUStringToOString( e.getData(),
-                                                     RTL_TEXTENCODING_UTF8 ).getStr() ,e.getStatus(),
-                             rtl::OUStringToOString( e.getErrorString(),
-                                                     RTL_TEXTENCODING_UTF8 ).getStr());
+        DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__,
+                               "Exception received: data: '%s' status: %d, code %s",
+                               rtl::OUStringToOString( e.getData(),
+                                                       RTL_TEXTENCODING_UTF8 ).getStr() ,e.getStatus(),
+                               rtl::OUStringToOString( e.getErrorString(),
+                                                       RTL_TEXTENCODING_UTF8 ).getStr());
         if(e.getStatus() == SC_LOCKED)
         {
-            ::tools::addDebugLog("%s:%d\n - Already locked",BOOST_CURRENT_FUNCTION,__LINE__);
+            DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__,"Already locked" );
             rtl::OUString aURL;
             if ( m_bTransient )
             {
@@ -3069,7 +3071,7 @@ void Content::lock(
             {
                 aURL = m_xIdentifier->getContentIdentifier();
             }
-            
+
             throw(ucb::InteractiveLockingLockedException(
                       rtl::OUString::createFromAscii( "Locked!" ),
                       static_cast< cppu::OWeakObject * >( this ),
@@ -3517,10 +3519,12 @@ const Content::ResourceType & Content::getResourceType(
                 //debug:
                 {
                     std::vector< http_dav_ucp::DAVPropertyValue > aResponseProperties(resources[0].properties);
+                    DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__, " %d PropertyType returned:",aResponseProperties.size() );
+
                     for(unsigned int i = 0; i < aResponseProperties.size(); i++) {
-                        ::tools::addDebugLog("Content::getResourceType - returned: '%s'",
+                        DBGLOG_TRACE( " %d: '%s'", i,
                                   rtl::OUStringToOString( aResponseProperties[i].Name,
-                                                          RTL_TEXTENCODING_UTF8 ).getStr());
+                                                          RTL_TEXTENCODING_UTF8 ).getStr() );
                     }
                 }
 

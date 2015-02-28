@@ -166,7 +166,7 @@ class DAVException
     sal_uInt16 getStatus() const { return mStatusCode; }
 
     //only for debug, remove when done
-    inline const rtl::OUString& getErrorString() const {
+    inline const rtl::OUString getErrorString() const {
         rtl::OUString aError;
         switch(mExceptionCode) {
         case DAV_HTTP_ERROR:
