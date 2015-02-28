@@ -52,6 +52,7 @@
 #include <com/sun/star/ucb/XCommandInfo.hpp>
 #include <com/sun/star/ucb/Lock.hpp>
 #include <com/sun/star/ucb/InteractiveLockingLockedException.hpp>
+#include <com/sun/star/ucb/InteractiveNetworkReadException.hpp>
 #include <com/sun/star/util/XArchiver.hpp>
 #include <com/sun/star/io/XOutputStream.hpp>
 #include <com/sun/star/io/XInputStream.hpp>
@@ -1370,6 +1371,29 @@ sal_Bool SfxMedium::LockOrigFileOnDemand( sal_Bool bLoading, sal_Bool bNoUI )
                                 try {
                                     aContentToLock.lock();
                                     bResult = sal_True;
+                                }
+                                catch( ucb::InteractiveNetworkReadException )
+                                {
+                                    // signalled when the lock can not be done because the method is known but not allowed on the resourse
+                                    // that is resource available, can be worked upon, at your risk
+                                    // ask user whether he wants to open the document without any locking
+                                    uno::Reference< task::XInteractionHandler > xHandler = GetInteractionHandler();
+
+                                    if ( xHandler.is() )
+                                    {
+                                        ::rtl::Reference< ::ucbhelper::InteractionRequest > xIgnoreRequestImpl
+                                            = new ::ucbhelper::InteractionRequest( uno::makeAny( document::LockFileIgnoreRequest() ) );
+
+                                        uno::Sequence< uno::Reference< task::XInteractionContinuation > > aContinuations( 2 );
+                                        aContinuations[0] = new ::ucbhelper::InteractionAbort( xIgnoreRequestImpl.get() );
+                                        aContinuations[1] = new ::ucbhelper::InteractionApprove( xIgnoreRequestImpl.get() );
+                                        xIgnoreRequestImpl->setContinuations( aContinuations );
+
+                                        xHandler->handle( xIgnoreRequestImpl.get() );
+
+                                        ::rtl::Reference< ::ucbhelper::InteractionContinuation > xSelected = xIgnoreRequestImpl->getSelection();
+                                        bResult = (  uno::Reference< task::XInteractionApprove >( xSelected.get(), uno::UNO_QUERY ).is() );
+                                    }
                                 }
                                 catch( ucb::InteractiveLockingLockedException& e )
                                 {

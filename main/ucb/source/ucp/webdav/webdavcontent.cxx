@@ -3040,7 +3040,7 @@ void Content::lock(
             //-1, // infinite lock
             uno::Sequence< ::rtl::OUString >() );
 
-        xResAccess->LOCK( aLock, Environment, supportsExclusiveWriteLock( Environment ) );
+        xResAccess->LOCK( aLock, Environment , sal_False);
 
         {
             osl::Guard< osl::Mutex > aGuard( m_aMutex );
@@ -3055,10 +3055,51 @@ void Content::lock(
                                                        RTL_TEXTENCODING_UTF8 ).getStr() ,e.getStatus(),
                                rtl::OUStringToOString( e.getErrorString(),
                                                        RTL_TEXTENCODING_UTF8 ).getStr());
+        rtl::OUString aURL;
+        switch(e.getStatus())
+        {
+        case SC_LOCKED:
+            if ( m_bTransient )
+            {
+                aURL = getParentURL();
+                if ( aURL.lastIndexOf( '/' ) != ( aURL.getLength() - 1 ) )
+                    aURL += rtl::OUString::createFromAscii( "/" );
+
+                aURL += m_aEscapedTitle;
+            }
+            else
+            {
+                aURL = m_xIdentifier->getContentIdentifier();
+            }
+
+            DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__,"Already locked, Url: %s",
+                                   rtl::OUStringToOString( aURL,
+                                                           RTL_TEXTENCODING_UTF8 ).getStr());
+            throw(ucb::InteractiveLockingLockedException(
+                      rtl::OUString::createFromAscii( "Locked!" ),
+                      static_cast< cppu::OWeakObject * >( this ),
+                      task::InteractionClassification_ERROR,
+                      aURL,
+                      sal_False ));
+            break;
+        case SC_METHOD_NOT_ALLOWED:
+            // this it's not always received, but the RFC4918 (which supersed RFC2518)
+            // tells about this in:
+            // http://tools.ietf.org/html/rfc4918#appendix-D.1
+            // throw exception, will be interpreted by the lock request
+            // it is actually a info, not an error
+            throw ucb::InteractiveNetworkReadException( e.getData(),
+                                                        static_cast< cppu::OWeakObject * >( this ),
+                                                        task::InteractionClassification_INFO,
+                                                        aURL );
+            break;
+        default:
+            //fallthrou
+            ;
+        }
         if(e.getStatus() == SC_LOCKED)
         {
             DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__,"Already locked" );
-            rtl::OUString aURL;
             if ( m_bTransient )
             {
                 aURL = getParentURL();
