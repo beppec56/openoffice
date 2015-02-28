@@ -922,9 +922,7 @@ void DAVResourceAccess::DESTROY(
 // set new lock.
 void DAVResourceAccess::LOCK(
     ucb::Lock & inLock,
-    const uno::Reference< ucb::XCommandEnvironment > & xEnv,
-    const sal_Bool bForceNoResource ) //if true the lock will act as a 'lock resevation' if the resource is not there
-// if there is an exception of 'unsupported', the method will simply return
+    const uno::Reference< ucb::XCommandEnvironment > & xEnv )
   throw ( DAVException )
 {
     initialize();

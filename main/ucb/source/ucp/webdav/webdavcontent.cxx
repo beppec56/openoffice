@@ -3040,7 +3040,7 @@ void Content::lock(
             //-1, // infinite lock
             uno::Sequence< ::rtl::OUString >() );
 
-        xResAccess->LOCK( aLock, Environment , sal_False);
+        xResAccess->LOCK( aLock, Environment );
 
         {
             osl::Guard< osl::Mutex > aGuard( m_aMutex );
