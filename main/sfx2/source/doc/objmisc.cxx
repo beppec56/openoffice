@@ -2408,5 +2408,9 @@ void SfxObjectShell::StoreLog()
             {}
         }
     }
+    {//debug, remove when done
+        //Store the debuglogger data as well
+        DBGLOG_FLUSH("main_sfx2_source_doc_objmisc.log");
+    }
 }
 
