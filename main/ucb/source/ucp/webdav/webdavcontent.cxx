@@ -53,6 +53,7 @@
 #include <com/sun/star/ucb/InsertCommandArgument.hpp>
 #include <com/sun/star/ucb/InteractiveBadTransferURLException.hpp>
 #include <com/sun/star/ucb/InteractiveAugmentedIOException.hpp>
+#include <com/sun/star/ucb/InteractiveLockingLockNotAvailableException.hpp>
 #include <com/sun/star/ucb/InteractiveLockingLockedException.hpp>
 #include <com/sun/star/ucb/InteractiveLockingLockExpiredException.hpp>
 #include <com/sun/star/ucb/InteractiveLockingNotLockedException.hpp>
@@ -3020,8 +3021,8 @@ void Content::lock(
     throw( uno::Exception )
 {
     // TODO beppec56 add a check to see if this is really a DAV resource ?
-    // currently if the lock is not supported it's not a dav resorce
-    // we got an error from the serve
+    // currently if the lock is not supported
+    // we got an error from the server
     rtl::OUString aURL;
     if ( m_bTransient )
     {
@@ -3096,13 +3097,15 @@ void Content::lock(
             DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__,"Method not allowed, Url: %s  (resource is url mapped? %s)",
                                    rtl::OUStringToOString( aURL,
                                                            RTL_TEXTENCODING_UTF8 ).getStr(), m_bTransient ? "YES" : "NO");
-            throw ucb::InteractiveNetworkReadException( e.getData(),
+            throw ucb::InteractiveLockingLockNotAvailableException( e.getData(),
                                                         static_cast< cppu::OWeakObject * >( this ),
                                                         task::InteractionClassification_INFO,
                                                         aURL );
             break;
+            //TODO beppec56
             //see http://tools.ietf.org/html/rfc4918#section-9.10.6
-            // not sure how to handle them, for the time being a dialog box is shown, the file will be open read only
+            //not sure how to handle them, for the time being a dialog box is shown, the file will be open read only
+            //
         case SC_CONFLICT:
         case SC_PRECONDITION_FAILED:
         default:
@@ -3143,8 +3146,14 @@ void Content::unlock(
                                rtl::OUStringToOString( e.getErrorString(),
                                                        RTL_TEXTENCODING_UTF8 ).getStr());
 
-        cancelCommandExecution( e, Environment, sal_False );
+        //TODO beppec56 need to rise an exception of the rigth type ?
+        //meaning that the lock can not be released, since there is no such exception we use
+        throw ucb::InteractiveNetworkReadException( e.getData(),
+                                                    static_cast< cppu::OWeakObject * >( this ),
+                                                    task::InteractionClassification_INFO,
+                                                    e.getData() );//perhaps a more better should be used ?
         // Unreachable
+        cancelCommandExecution( e, Environment, sal_False );
     }
 }
 

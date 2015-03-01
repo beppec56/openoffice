@@ -51,6 +51,7 @@
 #include <com/sun/star/ucb/XProgressHandler.hpp>
 #include <com/sun/star/ucb/XCommandInfo.hpp>
 #include <com/sun/star/ucb/Lock.hpp>
+#include <com/sun/star/ucb/InteractiveLockingLockNotAvailableException.hpp>
 #include <com/sun/star/ucb/InteractiveLockingLockedException.hpp>
 #include <com/sun/star/ucb/InteractiveNetworkReadException.hpp>
 #include <com/sun/star/util/XArchiver.hpp>
@@ -1372,7 +1373,7 @@ sal_Bool SfxMedium::LockOrigFileOnDemand( sal_Bool bLoading, sal_Bool bNoUI )
                                     aContentToLock.lock();
                                     bResult = sal_True;
                                 }
-                                catch( ucb::InteractiveNetworkReadException )
+                                catch( ucb::InteractiveLockingLockNotAvailableException )
                                 {
                                     // signalled when the lock can not be done because the method is known but not allowed on the resourse
                                     // that is resource available, can be worked upon, at your risk
@@ -1381,6 +1382,7 @@ sal_Bool SfxMedium::LockOrigFileOnDemand( sal_Bool bLoading, sal_Bool bNoUI )
 
                                     if ( xHandler.is() )
                                     {
+                                        //TODO beppec56 this part should be better approached, by adapting it to the net locking not possible
                                         ::rtl::Reference< ::ucbhelper::InteractionRequest > xIgnoreRequestImpl
                                             = new ::ucbhelper::InteractionRequest( uno::makeAny( document::LockFileIgnoreRequest() ) );
 
@@ -3027,6 +3029,10 @@ void SfxMedium::UnlockFile( sal_Bool bReleaseLockStream )
                 ::ucbhelper::Content aContentToUnlock( GetURLObject().GetMainURL( INetURLObject::NO_DECODE ), xComEnv);        
                 pImp->m_bLocked = sal_False;                    
                 aContentToUnlock.unlock();
+            }
+            catch (ucb::InteractiveNetworkReadException& e)
+            {
+                //signalled when this resource can not be unlocked, for whatever reason
             }
             catch( uno::Exception& e )
             {
