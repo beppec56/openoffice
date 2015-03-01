@@ -80,6 +80,7 @@ SerfSession::SerfSession(
     , m_aUri( inUri )
     , m_aProxyName()
     , m_nProxyPort( 0 )
+    , m_aServerHeaderField()
     , m_pSerfConnection( 0 )
     , m_pSerfContext( 0 )
     , m_bIsHeadRequestInProgress( false )
@@ -1594,6 +1595,10 @@ bool containsLocktoken( const uno::Sequence< ucb::Lock > & rLocks,
 */
 
 // -------------------------------------------------------------------
+// This method doesn't seem to be used.
+// In any case the default behavior is to ask a lock whith a life of 3 minutes
+// it will then be refreshed automatically (see SerfLockStore class)
+// In case of AOO crash the lock will expire by itself
 bool SerfSession::removeExpiredLocktoken( const rtl::OUString & /*inURL*/,
                                           const DAVRequestEnvironment & /*rEnv*/ )
 {

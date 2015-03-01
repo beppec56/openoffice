@@ -55,6 +55,9 @@ private:
     
     rtl::OUString           m_aProxyName;
     sal_Int32               m_nProxyPort;
+    // The server, according RFC7231
+    // http://tools.ietf.org/html/rfc7231#section-7.4.2
+    rtl::OUString           m_aServerHeaderField;
     
     SerfConnection*         m_pSerfConnection;
     serf_context_t*         m_pSerfContext;
@@ -260,6 +263,10 @@ public:
     { return m_xFactory->getServiceFactory(); }
 
     sal_Bool isDomainMatch( rtl::OUString certHostName );
+
+    const rtl::OUString & getServerHeaderField() { return m_aServerHeaderField; };
+
+    void setServerHeaderField( rtl::OUString aServerHeaderField ) { m_aServerHeaderField = aServerHeaderField; };
 
 private:
     friend class SerfLockStore;

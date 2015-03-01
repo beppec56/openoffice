@@ -634,7 +634,7 @@ apr_status_t SerfRequestProcessor::handleSerfResponse( serf_request_t * inSerfRe
 
     // some general response handling and error handling
     {
-        if ( !inSerfResponseBucket ) 
+        if ( !inSerfResponseBucket )
         {
             /* A NULL response can come back if the request failed completely */
             mbProcessingDone = true;
@@ -643,11 +643,24 @@ apr_status_t SerfRequestProcessor::handleSerfResponse( serf_request_t * inSerfRe
 
         serf_status_line sl;
         apr_status_t status = serf_bucket_response_status( inSerfResponseBucket, &sl );
-        if ( status ) 
+        if ( status )
         {
             mbProcessingDone = false; // allow another try in order to get a response
             return status;
         }
+        serf_bucket_t *headers = serf_bucket_response_get_headers( inSerfResponseBucket );
+
+        // check header per:
+        // http://tools.ietf.org/html/rfc7231#section-7.4.2
+        // need to do this so we can adjust the protocol accordingly
+        const char* server = serf_bucket_headers_get( headers, "Server" );
+        if( server )
+        {
+            DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__, "Answering server type is: '%s'",server );
+            //update the server type on session
+            mrSerfSession.setServerHeaderField( ::rtl::OUString::createFromAscii( server ) );
+        }
+
         // TODO - check, if response status code handling is correct
         mnHTTPStatusCode = ( sl.version != 0 && sl.code >= 0 )
                            ? static_cast< sal_uInt16 >( sl.code )
@@ -656,7 +669,7 @@ apr_status_t SerfRequestProcessor::handleSerfResponse( serf_request_t * inSerfRe
         {
             mHTTPStatusCodeText = ::rtl::OUString::createFromAscii( sl.reason );
         }
-        if ( ( sl.version == 0 || sl.code < 0 ) || 
+        if ( ( sl.version == 0 || sl.code < 0 ) ||
              mnHTTPStatusCode >= 300 )
         {
             if ( mnHTTPStatusCode == 301 ||
@@ -665,7 +678,6 @@ apr_status_t SerfRequestProcessor::handleSerfResponse( serf_request_t * inSerfRe
                  mnHTTPStatusCode == 307 )
             {
                 // new location for certain redirections
-                serf_bucket_t *headers = serf_bucket_response_get_headers( inSerfResponseBucket );
                 const char* location = serf_bucket_headers_get( headers, "Location" );
                 if ( location )
                 {
