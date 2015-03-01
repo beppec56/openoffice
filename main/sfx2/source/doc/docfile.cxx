@@ -938,7 +938,7 @@ sal_Int8 SfxMedium::ShowLockedDAVDocumentDialog( const uno::Sequence< ::rtl::OUS
             // if ( aData.getLength() > LOCKFILE_EDITTIME_ID )
             //     aInfo = aData[LOCKFILE_EDITTIME_ID];
             aInfo = aData[0];
-
+//TODO beppec56 change the document OwnLockOnDocumentRequest in something else
             xInteractionRequestImpl = new ::ucbhelper::InteractionRequest( uno::makeAny(
                 document::OwnLockOnDocumentRequest( ::rtl::OUString(), uno::Reference< uno::XInterface >(), aDocumentURL, aInfo, !bIsLoading ) ) );
         }
@@ -1382,7 +1382,7 @@ sal_Bool SfxMedium::LockOrigFileOnDemand( sal_Bool bLoading, sal_Bool bNoUI )
 
                                     if ( xHandler.is() )
                                     {
-                                        //TODO beppec56 this part should be better approached, by adapting it to the net locking not possible
+                                        //TODO beppec56 this part should be better approached, by adapting it to the DAV locking not possible
                                         ::rtl::Reference< ::ucbhelper::InteractionRequest > xIgnoreRequestImpl
                                             = new ::ucbhelper::InteractionRequest( uno::makeAny( document::LockFileIgnoreRequest() ) );
 
