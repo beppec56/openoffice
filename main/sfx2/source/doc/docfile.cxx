@@ -1365,7 +1365,7 @@ sal_Bool SfxMedium::LockOrigFileOnDemand( sal_Bool bLoading, sal_Bool bNoUI )
                                     xComEnv = new ::ucbhelper::CommandEnvironment( xInteractionHandler,
                                                                                    Reference< ::com::sun::star::ucb::XProgressHandler >() );
                                 ::ucbhelper::Content aContentToLock( GetURLObject().GetMainURL( INetURLObject::NO_DECODE ), xComEnv);
-                                DBGLOG_TRACE("%s:%d\n - URL for lock '%s'", BOOST_CURRENT_FUNCTION, __LINE__,
+                                DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__, "URL for lock '%s'", 
                                              rtl::OUStringToOString( GetURLObject().GetMainURL(INetURLObject::NO_DECODE ), RTL_TEXTENCODING_UTF8 ).getStr());
                                 rtl::OUString   aOwner;
                                 try {
@@ -1404,7 +1404,7 @@ sal_Bool SfxMedium::LockOrigFileOnDemand( sal_Bool bLoading, sal_Bool bNoUI )
                                     uno::Sequence< ::com::sun::star::ucb::Lock >  aLocks;
                                     if(aContentToLock.getPropertyValue( ::rtl::OUString( RTL_CONSTASCII_USTRINGPARAM( "DAV:lockdiscovery" ) ) ) >>= aLocks)
                                     {
-                                        DBGLOG_TRACE("%s:%d\n - DAV:lockdiscovery returned %d locks",BOOST_CURRENT_FUNCTION, __LINE__, aLocks.getLength());
+                                        DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__, "DAV:lockdiscovery returned %d locks", aLocks.getLength());
                                         if(aLocks.getLength() > 0)
                                         {
                                             ucb::Lock aLock = aLocks[0];
@@ -1431,8 +1431,7 @@ sal_Bool SfxMedium::LockOrigFileOnDemand( sal_Bool bLoading, sal_Bool bNoUI )
                                                     break;
                                                 }
 
-                                                DBGLOG_TRACE("%s:%d\n - a Lock is present: Owner: %s, token: %s, depth: %s, timeout = %li",
-                                                             BOOST_CURRENT_FUNCTION, __LINE__,
+                                                DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__, "A Lock is present: Owner: %s, token: %s, depth: %s, timeout = %li",
                                                              rtl::OUStringToOString( aOwner,RTL_TEXTENCODING_UTF8 ).getStr(),
                                                              rtl::OUStringToOString( aToken,RTL_TEXTENCODING_UTF8 ).getStr(),
                                                              depth, aTimeout );
@@ -3019,7 +3018,7 @@ void SfxMedium::UnlockFile( sal_Bool bReleaseLockStream )
         {
             // an interaction handler should be used for authentication in case it is available
             try {
-                DBGLOG_TRACE("%s:%d",BOOST_CURRENT_FUNCTION,__LINE__);
+                DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__, "" );
                 Reference< ::com::sun::star::task::XInteractionHandler > xInteractionHandler = GetInteractionHandler();
                 Reference< ::com::sun::star::ucb::XCommandEnvironment > xComEnv;
                 if (xInteractionHandler.is())
