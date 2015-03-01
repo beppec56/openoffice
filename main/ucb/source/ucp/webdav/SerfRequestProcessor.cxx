@@ -660,6 +660,13 @@ apr_status_t SerfRequestProcessor::handleSerfResponse( serf_request_t * inSerfRe
             //update the server type on session
             mrSerfSession.setServerHeaderField( ::rtl::OUString::createFromAscii( server ) );
         }
+        const char* location = serf_bucket_headers_get( headers, "location" );
+        if( location )
+        {
+            DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__, "Location is: '%s'",location );
+            //update the server type on session
+            mrSerfSession.setServerHeaderField( ::rtl::OUString::createFromAscii( server ) );
+        }
 
         // TODO - check, if response status code handling is correct
         mnHTTPStatusCode = ( sl.version != 0 && sl.code >= 0 )
@@ -694,8 +701,8 @@ apr_status_t SerfRequestProcessor::handleSerfResponse( serf_request_t * inSerfRe
             }
             else if ( mnHTTPStatusCode == SC_LOCKED )
             {
-                DBGLOG_TRACE( "%s:%d\n - Locked received, may be implement a reading of response bucket ?\n - for the time being treat as an error, ignore load",
-                             BOOST_CURRENT_FUNCTION,__LINE__ );
+                DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__,
+                                       "Locked received, may be implement a reading of response bucket ?\n - for the time being treat as an error, ignore load");
 
                 mbProcessingDone = true;
                 return APR_EGENERAL;

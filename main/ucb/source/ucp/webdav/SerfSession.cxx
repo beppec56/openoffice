@@ -92,8 +92,10 @@ SerfSession::SerfSession(
     m_pSerfContext = serf_context_create( getAprPool() );
 
     m_pSerfBucket_Alloc = serf_bucket_allocator_create( getAprPool(), NULL, NULL );
-    DBGLOG_TRACE("%s:%d\n - Session created host: %s",BOOST_CURRENT_FUNCTION,__LINE__,
-              rtl::OUStringToOString( composeCurrentUri( rtl::OUString( RTL_CONSTASCII_USTRINGPARAM( "" ) ) ), RTL_TEXTENCODING_UTF8 ).getStr() );
+    DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__, "Session created host: %s",
+                           rtl::OUStringToOString(
+                               composeCurrentUri( rtl::OUString( RTL_CONSTASCII_USTRINGPARAM( "" ) ) ),
+                               RTL_TEXTENCODING_UTF8 ).getStr() );
 }
 
 // -------------------------------------------------------------------
@@ -101,7 +103,7 @@ SerfSession::SerfSession(
 // -------------------------------------------------------------------
 SerfSession::~SerfSession( )
 {
-    DBGLOG_TRACE("%s:%d\n - Session destroyed host: %s",BOOST_CURRENT_FUNCTION,__LINE__,
+    DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__, "Session destroyed host: %s",
         rtl::OUStringToOString( composeCurrentUri( rtl::OUString( RTL_CONSTASCII_USTRINGPARAM( "" ) ) ), RTL_TEXTENCODING_UTF8 ).getStr() );
 
     ::tools::flushDebugLog("main_ucb_source_ucp_webdav_SerfSession.cxx.log");
@@ -691,6 +693,9 @@ void SerfSession::PROPFIND( const rtl::OUString & inPath,
                             const DAVRequestEnvironment & rEnv )
     throw ( DAVException )
 {
+    DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__, "inPath: %s",
+                           rtl::OUStringToOString( inPath, RTL_TEXTENCODING_UTF8 ).getStr());
+
     osl::Guard< osl::Mutex > theGuard( m_aMutex );
 
     Init( rEnv );
@@ -721,6 +726,9 @@ void SerfSession::PROPFIND( const rtl::OUString & inPath,
                             const DAVRequestEnvironment & rEnv )
     throw( DAVException )
 {
+    DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__, "inPath: %s",
+                           rtl::OUStringToOString( inPath, RTL_TEXTENCODING_UTF8 ).getStr());
+
     osl::Guard< osl::Mutex > theGuard( m_aMutex );
 
     Init( rEnv );
@@ -749,6 +757,9 @@ void SerfSession::PROPPATCH( const rtl::OUString & inPath,
                              const DAVRequestEnvironment & rEnv )
     throw( DAVException )
 {
+    DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__, "inPath: %s",
+                           rtl::OUStringToOString( inPath, RTL_TEXTENCODING_UTF8 ).getStr());
+
     osl::Guard< osl::Mutex > theGuard( m_aMutex );
 
     Init( rEnv );
@@ -761,7 +772,7 @@ void SerfSession::PROPPATCH( const rtl::OUString & inPath,
     SerfLock * pLock = m_aSerfLockStore.findByUri( aUri );
     if ( pLock )
     {
-        DBGLOG_TRACE( "%s:%d\n - A lock for this resource is present, aURI %s, token: %s",BOOST_CURRENT_FUNCTION,__LINE__,
+        DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__, "A lock for this resource is present, aURI %s, token: %s",
                    rtl::OUStringToOString( aUri, RTL_TEXTENCODING_UTF8 ).getStr(),
                    rtl::OUStringToOString( pLock->getLock().LockTokens[0], RTL_TEXTENCODING_UTF8 ).getStr());
         inLock = pLock->getLock();
@@ -782,6 +793,9 @@ void SerfSession::HEAD( const ::rtl::OUString & inPath,
                         const DAVRequestEnvironment & rEnv )
     throw( DAVException )
 {
+    DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__, "inPath: %s",
+                           rtl::OUStringToOString( inPath, RTL_TEXTENCODING_UTF8 ).getStr());
+
     osl::Guard< osl::Mutex > theGuard( m_aMutex );
 
     Init( rEnv );
@@ -809,6 +823,9 @@ SerfSession::GET( const rtl::OUString & inPath,
                   const DAVRequestEnvironment & rEnv )
     throw ( DAVException )
 {
+    DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__, "inPath: %s",
+                           rtl::OUStringToOString( inPath, RTL_TEXTENCODING_UTF8 ).getStr());
+
     osl::Guard< osl::Mutex > theGuard( m_aMutex );
 
     Init( rEnv );
@@ -832,6 +849,9 @@ void SerfSession::GET( const rtl::OUString & inPath,
                        const DAVRequestEnvironment & rEnv )
     throw ( DAVException )
 {
+    DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__, "inPath: %s",
+                           rtl::OUStringToOString( inPath, RTL_TEXTENCODING_UTF8 ).getStr());
+
     osl::Guard< osl::Mutex > theGuard( m_aMutex );
 
     Init( rEnv );
@@ -854,6 +874,9 @@ SerfSession::GET( const rtl::OUString & inPath,
                   const DAVRequestEnvironment & rEnv )
     throw ( DAVException )
 {
+    DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__, "inPath: %s",
+                           rtl::OUStringToOString( inPath, RTL_TEXTENCODING_UTF8 ).getStr());
+
     osl::Guard< osl::Mutex > theGuard( m_aMutex );
 
     Init( rEnv );
@@ -884,6 +907,9 @@ void SerfSession::GET( const rtl::OUString & inPath,
                        const DAVRequestEnvironment & rEnv )
     throw ( DAVException )
 {
+    DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__, "inPath: %s",
+                           rtl::OUStringToOString( inPath, RTL_TEXTENCODING_UTF8 ).getStr());
+
     osl::Guard< osl::Mutex > theGuard( m_aMutex );
 
     Init( rEnv );
@@ -908,6 +934,9 @@ void SerfSession::PUT( const rtl::OUString & inPath,
                        const DAVRequestEnvironment & rEnv )
     throw ( DAVException )
 {
+    DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__, "inPath: %s",
+                           rtl::OUStringToOString( inPath, RTL_TEXTENCODING_UTF8 ).getStr());
+
     osl::Guard< osl::Mutex > theGuard( m_aMutex );
 
     Init( rEnv );
@@ -945,6 +974,9 @@ SerfSession::POST( const rtl::OUString & inPath,
                    const DAVRequestEnvironment & rEnv )
     throw ( DAVException )
 {
+    DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__, "inPath: %s",
+                           rtl::OUStringToOString( inPath, RTL_TEXTENCODING_UTF8 ).getStr());
+
     osl::Guard< osl::Mutex > theGuard( m_aMutex );
 
     uno::Sequence< sal_Int8 > aDataToSend;
@@ -964,7 +996,7 @@ SerfSession::POST( const rtl::OUString & inPath,
     SerfLock * pLock = m_aSerfLockStore.findByUri( aUri );
     if ( pLock )
     {
-        DBGLOG_TRACE( "%s:%d\n - A lock for this resource is present, aURI %s, token: %s",BOOST_CURRENT_FUNCTION,__LINE__,
+        DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__, "A lock for this resource is present, aURI %s, token: %s",
                    rtl::OUStringToOString( aUri, RTL_TEXTENCODING_UTF8 ).getStr(),
                    rtl::OUStringToOString( pLock->getLock().LockTokens[0], RTL_TEXTENCODING_UTF8 ).getStr());
         inLock = pLock->getLock();
@@ -992,6 +1024,9 @@ void SerfSession::POST( const rtl::OUString & inPath,
                         const DAVRequestEnvironment & rEnv )
     throw ( DAVException )
 {
+    DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__, "inPath: %s",
+                           rtl::OUStringToOString( inPath, RTL_TEXTENCODING_UTF8 ).getStr());
+
     osl::Guard< osl::Mutex > theGuard( m_aMutex );
 
     uno::Sequence< sal_Int8 > aDataToSend;
@@ -1010,7 +1045,7 @@ void SerfSession::POST( const rtl::OUString & inPath,
     SerfLock * pLock = m_aSerfLockStore.findByUri( aUri );
     if ( pLock )
     {
-        DBGLOG_TRACE( "%s:%d\n - A lock for this resource is present, aURI %s, token: %s",BOOST_CURRENT_FUNCTION,__LINE__,
+        DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__, "A lock for this resource is present, aURI %s, token: %s",
                    rtl::OUStringToOString( aUri, RTL_TEXTENCODING_UTF8 ).getStr(),
                    rtl::OUStringToOString( pLock->getLock().LockTokens[0], RTL_TEXTENCODING_UTF8 ).getStr());
         inLock = pLock->getLock();
@@ -1033,6 +1068,9 @@ void SerfSession::MKCOL( const rtl::OUString & inPath,
                          const DAVRequestEnvironment & rEnv )
     throw ( DAVException )
 {
+    DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__, "inPath: %s",
+                           rtl::OUStringToOString( inPath, RTL_TEXTENCODING_UTF8 ).getStr());
+
     osl::Guard< osl::Mutex > theGuard( m_aMutex );
 
     Init( rEnv );
@@ -1045,7 +1083,7 @@ void SerfSession::MKCOL( const rtl::OUString & inPath,
     SerfLock * pLock = m_aSerfLockStore.findByUri( aUri );
     if ( pLock )
     {
-        DBGLOG_TRACE("%s:%d\n - A lock for this resource is present, aURI %s, token: %s",BOOST_CURRENT_FUNCTION,__LINE__,
+        DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__, "A lock for this resource is present, aURI %s, token: %s",
                    rtl::OUStringToOString( aUri, RTL_TEXTENCODING_UTF8 ).getStr(),
                    rtl::OUStringToOString( pLock->getLock().LockTokens[0], RTL_TEXTENCODING_UTF8 ).getStr());
         inLock = pLock->getLock();
@@ -1064,6 +1102,10 @@ void SerfSession::COPY( const rtl::OUString & inSourceURL,
                         sal_Bool inOverWrite )
     throw ( DAVException )
 {
+    DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__, "inSourceURL: %s\n - inDestinationURL: %s",
+                           rtl::OUStringToOString( inSourceURL, RTL_TEXTENCODING_UTF8 ).getStr(),
+                           rtl::OUStringToOString( inDestinationURL, RTL_TEXTENCODING_UTF8 ).getStr() );
+
     osl::Guard< osl::Mutex > theGuard( m_aMutex );
 
     Init( rEnv );
@@ -1077,7 +1119,7 @@ void SerfSession::COPY( const rtl::OUString & inSourceURL,
     SerfLock * pLock = m_aSerfLockStore.findByUri( aUri );
     if ( pLock )
     {
-        DBGLOG_TRACE("%s:%d\n - A lock for the destination resource is present, aURI %s, token: %s",BOOST_CURRENT_FUNCTION,__LINE__,
+        DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__, "A lock for the destination resource is present, aURI %s, token: %s",
                    rtl::OUStringToOString( aUri, RTL_TEXTENCODING_UTF8 ).getStr(),
                    rtl::OUStringToOString( pLock->getLock().LockTokens[0], RTL_TEXTENCODING_UTF8 ).getStr());
         inLock = pLock->getLock();
@@ -1099,6 +1141,10 @@ void SerfSession::MOVE( const rtl::OUString & inSourceURL,
                         sal_Bool inOverWrite )
     throw ( DAVException )
 {
+    DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__, "inSourceURL: %s\n - inDestinationURL: %s",
+                           rtl::OUStringToOString( inSourceURL, RTL_TEXTENCODING_UTF8 ).getStr(),
+                           rtl::OUStringToOString( inDestinationURL, RTL_TEXTENCODING_UTF8 ).getStr() );
+
     osl::Guard< osl::Mutex > theGuard( m_aMutex );
 
     Init( rEnv );
@@ -1112,7 +1158,7 @@ void SerfSession::MOVE( const rtl::OUString & inSourceURL,
     SerfLock * pLock = m_aSerfLockStore.findByUri( aUri );
     if ( pLock )
     {
-        DBGLOG_TRACE("%s:%d\n - A lock for the destination resource is present, aURI %s, token: %s",BOOST_CURRENT_FUNCTION,__LINE__,
+        DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__, "A lock for the destination resource is present, aURI %s, token: %s",
                    rtl::OUStringToOString( aUri, RTL_TEXTENCODING_UTF8 ).getStr(),
                    rtl::OUStringToOString( pLock->getLock().LockTokens[0], RTL_TEXTENCODING_UTF8 ).getStr());
         inLock = pLock->getLock();
@@ -1132,6 +1178,9 @@ void SerfSession::DESTROY( const rtl::OUString & inPath,
                            const DAVRequestEnvironment & rEnv )
     throw ( DAVException )
 {
+    DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__, "inPath: %s",
+                           rtl::OUStringToOString( inPath, RTL_TEXTENCODING_UTF8 ).getStr());
+
     osl::Guard< osl::Mutex > theGuard( m_aMutex );
 
     Init( rEnv );
@@ -1144,7 +1193,7 @@ void SerfSession::DESTROY( const rtl::OUString & inPath,
     SerfLock * pLock = m_aSerfLockStore.findByUri( aUri );
     if ( pLock )
     {
-        DBGLOG_TRACE("%s:%d\n - A lock for this resource is present, aURI %s, token: %s",BOOST_CURRENT_FUNCTION,__LINE__,
+        DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__, "A lock for this resource is present, aURI %s, token: %s",
                    rtl::OUStringToOString( aUri, RTL_TEXTENCODING_UTF8 ).getStr(),
                    rtl::OUStringToOString( pLock->getLock().LockTokens[0], RTL_TEXTENCODING_UTF8 ).getStr());
         inLock = pLock->getLock();
@@ -1177,7 +1226,7 @@ namespace
             }
             else
             {
-                DBGLOG_TRACE("%s:%d\n No chance to refresh lock before timeout!",BOOST_CURRENT_FUNCTION,__LINE__ );
+                DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__, "No chance to refresh lock before timeout!");
             }
         }
         return lastChanceToSendRefreshRequest;
@@ -1198,16 +1247,15 @@ void SerfSession::LOCK( const ::rtl::OUString & inPath,
     //before locking, search in the lock store if we already own a lock for this resource
     //if present, return with exception DAV_LOCKED_SELF
     rtl::OUString   aUri( composeCurrentUri( inPath ) );
-    DBGLOG_TRACE("%s:%d\n - URI: %s",BOOST_CURRENT_FUNCTION,__LINE__,
+    DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__, "URI: %s",
               rtl::OUStringToOString( aUri,RTL_TEXTENCODING_UTF8 ).getStr());
     SerfLock * pLock = m_aSerfLockStore.findByUri( aUri );
     if ( pLock )
     {
-        DBGLOG_TRACE("%s:%d\n - lock for path: %s already in local store (SerfLockStore)",BOOST_CURRENT_FUNCTION,__LINE__,
+        DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__, "lock for path: %s already in local store (SerfLockStore)",
                   rtl::OUStringToOString( aUri, RTL_TEXTENCODING_UTF8 ).getStr());
 //already present, meaning already locked by the same AOO session and already in the lockstore
 //just return, nothing to do
-        DBGLOG_TRACE("%s:%d\n - Resource already locked by us, nothing to lock",BOOST_CURRENT_FUNCTION,__LINE__);
         return;
     }
 
@@ -1228,7 +1276,7 @@ void SerfSession::LOCK( const ::rtl::OUString & inPath,
     if ( aReqProc->mpDAVException )
     {
         DAVException* mpDAVExp( aReqProc->mpDAVException );
-        DBGLOG_TRACE("%s:%d\n - DAVException raised while locking: mExceptionCode: %s, mData '%s', mStatusCode %d",BOOST_CURRENT_FUNCTION,__LINE__,
+        DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__, "DAVException raised while locking: mExceptionCode: %s, mData '%s', mStatusCode %d",
                 rtl::OUStringToOString( mpDAVExp->getErrorString(),RTL_TEXTENCODING_UTF8 ).getStr(),
                 rtl::OUStringToOString( mpDAVExp->getData(),RTL_TEXTENCODING_UTF8 ).getStr(),
                 mpDAVExp->getStatus());
@@ -1271,7 +1319,7 @@ void SerfSession::LOCK( const ::rtl::OUString & inPath,
                 break;
             }
 
-            DBGLOG_TRACE("%s:%d\n - successful: Owner: %s, token: %s, depth: %s, timeout = %li",BOOST_CURRENT_FUNCTION,__LINE__,
+            DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__, "successful: Owner: %s, token: %s, depth: %s, timeout = %li",
                     rtl::OUStringToOString( aOwner,RTL_TEXTENCODING_UTF8 ).getStr(),
                     rtl::OUStringToOString( aToken,RTL_TEXTENCODING_UTF8 ).getStr(),
                     depth, aTimeout );
@@ -1414,7 +1462,7 @@ bool SerfSession::LOCK( SerfLock * pLock,
     osl::Guard< osl::Mutex > theGuard( m_aMutex );
     rtl::OUString inPath = pLock->getResourcePath();
 
-    DBGLOG_TRACE("%s:%d\n (SerfLockStore) - Lock refresh requested.",BOOST_CURRENT_FUNCTION,__LINE__ );
+    DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__, " (from SerfLockStore) Lock refresh requested.");
 
     boost::shared_ptr<SerfRequestProcessor> aReqProc( createReqProc( inPath ) );
     apr_status_t status = APR_SUCCESS;
@@ -1434,7 +1482,7 @@ bool SerfSession::LOCK( SerfLock * pLock,
     {
         DAVException* mpDAVExp( aReqProc->mpDAVException );
         //check the status returned
-        DBGLOG_TRACE("%s:%d\n - Lock not refreshed! Status: %d", BOOST_CURRENT_FUNCTION,__LINE__, mpDAVExp->getStatus() );
+        DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__, "Lock not refreshed! Status: %d", mpDAVExp->getStatus() );
     }
 //#endif
     //HandleError will handle the error and throw an exception, if needed
@@ -1448,7 +1496,7 @@ bool SerfSession::LOCK( SerfLock * pLock,
     rlastChanceToSendRefreshRequest
         = lastChanceToSendRefreshRequest( startCall, static_cast< sal_Int32 >(aLock.Timeout) );
 
-    DBGLOG_TRACE("%s:%d\n - Lock successfully refreshed.", BOOST_CURRENT_FUNCTION,__LINE__);
+    DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__, "Lock successfully refreshed.");
 
     return true;
 }
@@ -1466,12 +1514,12 @@ void SerfSession::UNLOCK( const ::rtl::OUString & inPath,
     SerfLock * pLock = m_aSerfLockStore.findByUri( aUri );
     if ( !pLock )
     {
-        DBGLOG_TRACE("%s:%d\n (DAVResourceAccess) - lock for path: %s is not in local store (SerfLockStore)",BOOST_CURRENT_FUNCTION,__LINE__,
+        DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__, "lock for path: %s is not in local store (SerfLockStore)",
                   rtl::OUStringToOString( aUri, RTL_TEXTENCODING_UTF8 ).getStr());
         throw DAVException( DAVException::DAV_NOT_LOCKED );
     }
 
-    DBGLOG_TRACE("%s:%d\n (DAVResourceAccess) - unlocking: %s (token: %s)",BOOST_CURRENT_FUNCTION,__LINE__,
+    DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__, "(DAVResourceAccess) - unlocking: %s (token: %s)",
               rtl::OUStringToOString( aUri, RTL_TEXTENCODING_UTF8 ).getStr(),
               rtl::OUStringToOString( pLock->getLock().LockTokens[0], RTL_TEXTENCODING_UTF8 ).getStr());
 
@@ -1493,7 +1541,7 @@ void SerfSession::UNLOCK( const ::rtl::OUString & inPath,
     {
         DAVException* mpDAVExp( aReqProc->mpDAVException );
         //check the status returned
-       DBGLOG_TRACE("%s:%d\n - unlocking %s (token: %s) failed Status: %d",BOOST_CURRENT_FUNCTION,__LINE__,
+       DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__, "unlocking %s (token: %s) failed Status: %d",
                    rtl::OUStringToOString( aUri, RTL_TEXTENCODING_UTF8 ).getStr(),
                    rtl::OUStringToOString( inLock.LockTokens[0], RTL_TEXTENCODING_UTF8 ).getStr(),
                    mpDAVExp->getStatus() );
@@ -1511,7 +1559,7 @@ bool SerfSession::UNLOCK( SerfLock * pLock )
     osl::Guard< osl::Mutex > theGuard( m_aMutex );
     rtl::OUString inPath = pLock->getResourcePath();
 
-    DBGLOG_TRACE("%s:%d\n (SerfLockStore) - URI: %s, token: %s",BOOST_CURRENT_FUNCTION,__LINE__,
+    DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__, "(SerfLockStore) - URI: %s, token: %s",
               rtl::OUStringToOString( pLock->getResourceUri(), RTL_TEXTENCODING_UTF8 ).getStr(),
               rtl::OUStringToOString( pLock->getLock().LockTokens[0], RTL_TEXTENCODING_UTF8 ).getStr());
 
@@ -1526,7 +1574,7 @@ bool SerfSession::UNLOCK( SerfLock * pLock )
     {
         DAVException* mpDAVExp( aReqProc->mpDAVException );
         //check the status returned
-        DBGLOG_TRACE("%s:%d\n - unlocking %s (token: %s) failed. Code: %d, data '%s', status: %d",BOOST_CURRENT_FUNCTION,__LINE__,
+        DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__, "unlocking %s (token: %s) failed. Code: %d, data '%s', status: %d",
                    rtl::OUStringToOString( m_aUri.GetURI(), RTL_TEXTENCODING_UTF8 ).getStr(),
                    rtl::OUStringToOString( pLock->getLock().LockTokens[0], RTL_TEXTENCODING_UTF8 ).getStr(),
                    mpDAVExp->getError(),

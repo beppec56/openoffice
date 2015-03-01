@@ -80,7 +80,7 @@ serf_bucket_t * SerfLockRefreshProcImpl::createSerfRequestBucket( serf_request_t
     }
     else
     {
-        ::tools::addDebugLog("%s Headers Bucket missing",BOOST_CURRENT_FUNCTION);
+        DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__, "Headers Bucket missing");
     }
 
     return req_bkt;

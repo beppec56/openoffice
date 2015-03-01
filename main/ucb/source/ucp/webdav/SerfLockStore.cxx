@@ -33,7 +33,6 @@
 
 //for debug logger printing remove when finalized
 #include <tools/debuglogger.hxx>
-#include <boost/current_function.hpp>
 
 using namespace http_dav_ucp;
 
@@ -61,7 +60,7 @@ protected:
 // -------------------------------------------------------------------
 void TickerThread::run()
 {
-    ::tools::addDebugLog( "TickerThread: start." );
+    DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__, "TickerThread: start." );
 
     // we have to go through the loop more often to be able to finish ~quickly
     const int nNth = 25;
@@ -81,7 +80,7 @@ void TickerThread::run()
         wait( aTV );
     }
 
-    ::tools::addDebugLog( "TickerThread: stop." );
+    DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__, "TickerThread: stop." );
 }
 
 // -------------------------------------------------------------------
@@ -190,7 +189,7 @@ void SerfLockStore::addLock( SerfLock * pLock,
         rtl::OUString   aToken;
         aToken = pLock->getLock().LockTokens[0];
 
-        ::tools::addDebugLog(">>>> SerfLockStore::addLock - a new lock was added: URI: %s, Owner: %s, token: %s, nLastChanceToSendRefreshRequest %d",
+        DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__, "a new lock was added: URI: %s, Owner: %s, token: %s, nLastChanceToSendRefreshRequest %d",
                   rtl::OUStringToOString( pLock->getResourceUri() ,RTL_TEXTENCODING_UTF8 ).getStr(),
                   rtl::OUStringToOString( aOwner,RTL_TEXTENCODING_UTF8 ).getStr(),
                   rtl::OUStringToOString( aToken,RTL_TEXTENCODING_UTF8 ).getStr(),
@@ -230,7 +229,7 @@ void SerfLockStore::removeLock( SerfLock * pLock )
         rInfo.xSession->release();
         m_aLockInfoMap.erase( pLock );
         //the caller should deallocate SerfLock class after the call!
-        ::tools::addDebugLog(">>>> SerfLockStore::removeLock - lock removed");
+        DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__, "lock removed");
         if ( m_aLockInfoMap.size() == 0 )
             stopTicker();
     }

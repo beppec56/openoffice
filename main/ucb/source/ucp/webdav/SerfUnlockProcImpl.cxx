@@ -85,7 +85,7 @@ void SerfUnlockProcImpl::processChunkOfResponseData( const char* data,
 {
     {//debug only, remove when done
         rtl::OUString aStr(data,len,RTL_TEXTENCODING_ASCII_US);
-        ::tools::addDebugLog(">>>> SerfLockReqProcImpl::processChunkOfResponseData - \n'\n%s\n'",
+        DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__, "'\n%s\n'",
             rtl::OUStringToOString( aStr, RTL_TEXTENCODING_UTF8 ).getStr());
     }
     if ( xInputStream.is() )

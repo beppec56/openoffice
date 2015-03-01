@@ -30,6 +30,8 @@
 #include <comphelper/seqstream.hxx>
 #include <rtl/ustrbuf.hxx>
 
+//for debug logger printing remove when finalized
+#include <tools/debuglogger.hxx>
 
 using namespace com::sun::star;
 
@@ -179,6 +181,11 @@ serf_bucket_t * SerfPropFindReqProcImpl::createSerfRequestBucket( serf_request_t
 void SerfPropFindReqProcImpl::processChunkOfResponseData( const char* data, 
                                                           apr_size_t len )
 {
+    {//debug only, remove when done
+        rtl::OUString aStr(data,len,RTL_TEXTENCODING_ASCII_US);
+        DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__, "\n%s\n",
+            rtl::OUStringToOString( aStr, RTL_TEXTENCODING_UTF8 ).getStr());
+    }
     if ( xInputStream.is() )
     {
         xInputStream->AddToStream( data, len );

@@ -3019,6 +3019,25 @@ void Content::lock(
         const uno::Reference< ucb::XCommandEnvironment >& Environment )
     throw( uno::Exception )
 {
+    // TODO beppec56 add a check to see if this is really a DAV resource ?
+    // currently if the lock is not supported it's not a dav resorce
+    // we got an error from the serve
+    rtl::OUString aURL;
+    if ( m_bTransient )
+    {
+        aURL = getParentURL();
+        if ( aURL.lastIndexOf( '/' ) != ( aURL.getLength() - 1 ) )
+            aURL += rtl::OUString::createFromAscii( "/" );
+
+        aURL += m_aEscapedTitle;
+        DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__, "resource is transient");
+    }
+    else
+    {
+        aURL = m_xIdentifier->getContentIdentifier();
+        DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__, "resource is NOT transient");
+    }
+
     try
     {
         std::auto_ptr< DAVResourceAccess > xResAccess;
@@ -3055,23 +3074,9 @@ void Content::lock(
                                                        RTL_TEXTENCODING_UTF8 ).getStr() ,e.getStatus(),
                                rtl::OUStringToOString( e.getErrorString(),
                                                        RTL_TEXTENCODING_UTF8 ).getStr());
-        rtl::OUString aURL;
         switch(e.getStatus())
         {
         case SC_LOCKED:
-            if ( m_bTransient )
-            {
-                aURL = getParentURL();
-                if ( aURL.lastIndexOf( '/' ) != ( aURL.getLength() - 1 ) )
-                    aURL += rtl::OUString::createFromAscii( "/" );
-
-                aURL += m_aEscapedTitle;
-            }
-            else
-            {
-                aURL = m_xIdentifier->getContentIdentifier();
-            }
-
             DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__,"Already locked, Url: %s",
                                    rtl::OUStringToOString( aURL,
                                                            RTL_TEXTENCODING_UTF8 ).getStr());
@@ -3088,37 +3093,21 @@ void Content::lock(
             // http://tools.ietf.org/html/rfc4918#appendix-D.1
             // throw exception, will be interpreted by the lock request
             // it is actually a info, not an error
+            DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__,"Method not allowed, Url: %s  (resource is url mapped? %s)",
+                                   rtl::OUStringToOString( aURL,
+                                                           RTL_TEXTENCODING_UTF8 ).getStr(), m_bTransient ? "YES" : "NO");
             throw ucb::InteractiveNetworkReadException( e.getData(),
                                                         static_cast< cppu::OWeakObject * >( this ),
                                                         task::InteractionClassification_INFO,
                                                         aURL );
             break;
+            //see http://tools.ietf.org/html/rfc4918#section-9.10.6
+            // not sure how to handle them, for the time being a dialog box is shown, the file will be open read only
+        case SC_CONFLICT:
+        case SC_PRECONDITION_FAILED:
         default:
             //fallthrou
             ;
-        }
-        if(e.getStatus() == SC_LOCKED)
-        {
-            DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__,"Already locked" );
-            if ( m_bTransient )
-            {
-                aURL = getParentURL();
-                if ( aURL.lastIndexOf( '/' ) != ( aURL.getLength() - 1 ) )
-                    aURL += rtl::OUString::createFromAscii( "/" );
-
-                aURL += m_aEscapedTitle;
-            }
-            else
-            {
-                aURL = m_xIdentifier->getContentIdentifier();
-            }
-
-            throw(ucb::InteractiveLockingLockedException(
-                      rtl::OUString::createFromAscii( "Locked!" ),
-                      static_cast< cppu::OWeakObject * >( this ),
-                      task::InteractionClassification_ERROR,
-                      aURL,
-                      sal_False ));
         }
         cancelCommandExecution( e, Environment, sal_False );
         // Unreachable
@@ -3147,6 +3136,13 @@ void Content::unlock(
     }
     catch ( DAVException const & e )
     {
+        DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__,
+                               "Exception received: data: '%s' status: %d, code %s",
+                               rtl::OUStringToOString( e.getData(),
+                                                       RTL_TEXTENCODING_UTF8 ).getStr() ,e.getStatus(),
+                               rtl::OUStringToOString( e.getErrorString(),
+                                                       RTL_TEXTENCODING_UTF8 ).getStr());
+
         cancelCommandExecution( e, Environment, sal_False );
         // Unreachable
     }

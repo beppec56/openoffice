@@ -83,6 +83,7 @@ class Content : public ::ucbhelper::ContentImplHelper,
     rtl::OUString     m_aEscapedTitle;
     ResourceType      m_eResourceType;
     ContentProvider*  m_pProvider; // No need for a ref, base class holds object
+    // True if the DEV resource is a 'unmapped URL' as it is named in RFC4918
     bool              m_bTransient;
     bool              m_bCollection;
     bool              m_bDidGetOrHead;
