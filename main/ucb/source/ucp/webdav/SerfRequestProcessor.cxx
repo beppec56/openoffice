@@ -653,6 +653,7 @@ apr_status_t SerfRequestProcessor::handleSerfResponse( serf_request_t * inSerfRe
         // check header per:
         // http://tools.ietf.org/html/rfc7231#section-7.4.2
         // need to do this so we can adjust the protocol accordingly
+        // serf_bucket_headers_get is case independent
         const char* server = serf_bucket_headers_get( headers, "Server" );
         if( server )
         {
@@ -660,12 +661,15 @@ apr_status_t SerfRequestProcessor::handleSerfResponse( serf_request_t * inSerfRe
             //update the server type on session
             mrSerfSession.setServerHeaderField( ::rtl::OUString::createFromAscii( server ) );
         }
-        const char* location = serf_bucket_headers_get( headers, "location" );
-        if( location )
+        const char* location1 = serf_bucket_headers_get( headers, "Location" );
+        if( location1 )
         {
-            DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__, "Location is: '%s'",location );
-            //update the server type on session
-            mrSerfSession.setServerHeaderField( ::rtl::OUString::createFromAscii( server ) );
+            DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__, "Location is: '%s'",location1 );
+        }
+        const char* msDavExtErr = serf_bucket_headers_get( headers, "X-MSDAVEXT_ERROR" );
+        if( msDavExtErr )
+        {
+            DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__, "X-MSDAVEXT_ERROR is: '%s'", msDavExtErr );
         }
 
         // TODO - check, if response status code handling is correct
