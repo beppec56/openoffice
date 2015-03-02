@@ -650,22 +650,25 @@ apr_status_t SerfRequestProcessor::handleSerfResponse( serf_request_t * inSerfRe
         }
         serf_bucket_t *headers = serf_bucket_response_get_headers( inSerfResponseBucket );
 
-        // check header per:
+        // check header according:
         // http://tools.ietf.org/html/rfc7231#section-7.4.2
         // need to do this so we can adjust the protocol accordingly
         // serf_bucket_headers_get is case independent
-        const char* server = serf_bucket_headers_get( headers, "Server" );
+        const char* server = serf_bucket_headers_get( headers, "server" );
         if( server )
         {
             DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__, "Answering server type is: '%s'",server );
             //update the server type on session
             mrSerfSession.setServerHeaderField( ::rtl::OUString::createFromAscii( server ) );
         }
-        const char* location1 = serf_bucket_headers_get( headers, "Location" );
+        const char* location1 = serf_bucket_headers_get( headers, "location" );
         if( location1 )
         {
-            DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__, "Location is: '%s'",location1 );
+            DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__, "location is: '%s'",location1 );
         }
+        //the following extension is MS IIS specific,
+        //see https://msdn.microsoft.com/en-us/library/cc250064.aspx
+        //site last checked on 2015-03-02
         const char* msDavExtErr = serf_bucket_headers_get( headers, "X-MSDAVEXT_ERROR" );
         if( msDavExtErr )
         {
