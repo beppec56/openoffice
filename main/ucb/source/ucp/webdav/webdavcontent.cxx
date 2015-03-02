@@ -3078,16 +3078,48 @@ void Content::lock(
         switch(e.getStatus())
         {
         case SC_LOCKED:
-            DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__,"Already locked, Url: %s",
-                                   rtl::OUStringToOString( aURL,
-                                                           RTL_TEXTENCODING_UTF8 ).getStr());
+        {
+            //obtain the DAV:lockdiscovery property, to have a owner 
+//            uno::Sequence< ::com::sun::star::ucb::Lock >  aLocks;
+            uno::Sequence< beans::Property > aProperties( 1 );
+            aProperties[ 0 ].Name   = DAVProperties::LOCKDISCOVERY; //rtl::OUString::createFromAscii( "IsFolder" );
+            aProperties[ 0 ].Handle = -1;
+
+            uno::Reference< sdbc::XRow > xRow( getPropertyValues( aProperties, Environment ) );
+            rtl::OUString aOwner;
+            if( xRow.is() )
+            {
+                try
+                {
+                    aOwner = xRow->getString( 1 );
+                }
+                catch ( sdbc::SQLException const & )
+                {
+                    DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__,"Lockdiscovery failed !" );
+                }
+            }
+                
+
+            // if ( m_xCachedProps->getValue( DAVProperties::LOCKDISCOVERY ) >>= aLocks )
+            // {
+            //     //fill the Owner field, only of the first lock returned
+            //     aLocks[0].Owner >>= aOwner;
+            // }
+            // else
+            //     DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__,"Lockdiscovery failed !" );
+
+            DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__,"Already locked, Url: '%s', Owner '%s'",
+                                   rtl::OUStringToOString( aURL, RTL_TEXTENCODING_UTF8 ).getStr(),
+                                   rtl::OUStringToOString( aOwner, RTL_TEXTENCODING_UTF8 ).getStr() );
             throw(ucb::InteractiveLockingLockedException(
                       rtl::OUString::createFromAscii( "Locked!" ),
                       static_cast< cppu::OWeakObject * >( this ),
                       task::InteractionClassification_ERROR,
                       aURL,
-                      sal_False ));
-            break;
+                      sal_False,
+                      aOwner ));
+        }
+        break;
         case SC_METHOD_NOT_ALLOWED:
             // this it's not always received, but the RFC4918 (which supersed RFC2518)
             // tells about this in:
@@ -3098,9 +3130,9 @@ void Content::lock(
                                    rtl::OUStringToOString( aURL,
                                                            RTL_TEXTENCODING_UTF8 ).getStr(), m_bTransient ? "YES" : "NO");
             throw ucb::InteractiveLockingLockNotAvailableException( e.getData(),
-                                                        static_cast< cppu::OWeakObject * >( this ),
-                                                        task::InteractionClassification_INFO,
-                                                        aURL );
+                                                                    static_cast< cppu::OWeakObject * >( this ),
+                                                                    task::InteractionClassification_INFO,
+                                                                    aURL );
             break;
             //TODO beppec56
             //see http://tools.ietf.org/html/rfc4918#section-9.10.6
@@ -3374,7 +3406,8 @@ uno::Any Content::MapDAVException( const DAVException & e, sal_Bool bWrite )
                 static_cast< cppu::OWeakObject * >( this ),
                 task::InteractionClassification_ERROR,
                 aURL,
-                sal_False ); // not SelfOwned
+                sal_False,  // not SelfOwned
+                rtl::OUString() );
 #else
         {
             uno::Sequence< uno::Any > aArgs( 1 );
@@ -3401,7 +3434,8 @@ uno::Any Content::MapDAVException( const DAVException & e, sal_Bool bWrite )
                 static_cast< cppu::OWeakObject * >( this ),
                 task::InteractionClassification_ERROR,
                 aURL,
-                sal_True ); // SelfOwned
+                sal_True,  // SelfOwned
+                rtl::OUString() );
         break;
 
     case DAVException::DAV_NOT_LOCKED:

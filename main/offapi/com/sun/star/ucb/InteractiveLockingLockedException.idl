@@ -46,6 +46,12 @@ module com { module sun { module star { module ucb {
         <false/> the lock has been obtained by another principal.
     */
     boolean SelfOwned;
+    //-------------------------------------------------------------------------
+    /** The owner of the lock.
+        
+        This field contains the nome of the lock owner.
+    */
+    string Owner;
 };
 
 //=============================================================================
