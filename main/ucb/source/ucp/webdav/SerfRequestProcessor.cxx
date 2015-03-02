@@ -703,14 +703,6 @@ apr_status_t SerfRequestProcessor::handleSerfResponse( serf_request_t * inSerfRe
                 // keep going as authentication is not required on HEAD request.
                 // the response already contains header fields.
             }
-            else if ( mnHTTPStatusCode == SC_LOCKED )
-            {
-                DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__,
-                                       "Locked received, may be implement a reading of response bucket ?\n - for the time being treat as an error, ignore load");
-
-                mbProcessingDone = true;
-                return APR_EGENERAL;
-            }
             else
             {
                 mbProcessingDone = true;
