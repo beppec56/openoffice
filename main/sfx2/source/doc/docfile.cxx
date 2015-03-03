@@ -1399,52 +1399,9 @@ sal_Bool SfxMedium::LockOrigFileOnDemand( sal_Bool bLoading, sal_Bool bNoUI )
                                 }
                                 catch( ucb::InteractiveLockingLockedException& e )
                                 {
-//                                    DBGLOG_UNHANDLED_EXCEPTION();
                                     DBGLOG_EXCEPTION_BRIEF();
-        
-                                    // in e.XInterface should be:  uno::Reference< ucb::XCommandEnvironment >, e.g. the one given above
-                                    // bContentReadonly = sal_True;
-                                    // here get the lock currently present, via lockdiscovery
+                                    // here get the lock owner currently active
                                     rtl::OUString aOwner = e.Owner;
-//                                     uno::Sequence< ::com::sun::star::ucb::Lock >  aLocks;
-//                                     if(aContentToLock.getPropertyValue( ::rtl::OUString( RTL_CONSTASCII_USTRINGPARAM( "DAV:lockdiscovery" ) ) ) >>= aLocks)
-//                                     {
-//                                         DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__, "DAV:lockdiscovery returned %d locks", aLocks.getLength());
-//                                         if(aLocks.getLength() > 0)
-//                                         {
-//                                             ucb::Lock aLock = aLocks[0];
-
-//                                             //for debug, prinmt first received lock
-//                                             { //============================
-// //            block of code for print/debug only, remove when done
-//                                                 rtl::OUString   aToken;
-//                                                 aLock.Owner >>= aOwner;
-//                                                 long    aTimeout = aLock.Timeout;
-
-//                                                 aToken = aLock.LockTokens[0];
-//                                                 const char *depth;
-//                                                 switch(aLock.Depth) {
-//                                                 default:
-//                                                 case ucb::LockDepth_ZERO:
-//                                                     depth =  "0";
-//                                                     break;
-//                                                 case ucb::LockDepth_ONE:
-//                                                     depth =  "1";
-//                                                     break;
-//                                                 case ucb::LockDepth_INFINITY:
-//                                                     depth = "infinity";
-//                                                     break;
-//                                                 }
-
-//                                                 DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__, "A Lock is present: Owner: %s, token: %s, depth: %s, timeout = %li",
-//                                                              rtl::OUStringToOString( aOwner,RTL_TEXTENCODING_UTF8 ).getStr(),
-//                                                              rtl::OUStringToOString( aToken,RTL_TEXTENCODING_UTF8 ).getStr(),
-//                                                              depth, aTimeout );
-//                                             }
-//                                         }
-//                                     }
-//                                     else
-//                                         ::tools::addDebugLog("%s:%d\n - DAV:lockdiscovery returned NO locks",BOOST_CURRENT_FUNCTION, __LINE__);
 
                                     DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__, "A Lock is present: Owner: %s",
                                                            rtl::OUStringToOString( aOwner,RTL_TEXTENCODING_UTF8 ).getStr() );
@@ -1458,7 +1415,7 @@ sal_Bool SfxMedium::LockOrigFileOnDemand( sal_Bool bLoading, sal_Bool bNoUI )
                                         if ( bUIStatus == LOCK_UI_SUCCEEDED )
                                         {
                                             // take the ownership over the lock file, accept the current lock (already there)
-                                            bResult = sal_True; //aLockFile.OverwriteOwnLockFile();
+                                            bResult = sal_True;
                                         }
                                     }
                                 }

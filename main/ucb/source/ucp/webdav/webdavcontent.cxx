@@ -3079,26 +3079,20 @@ void Content::lock(
         {
         case SC_LOCKED:
         {
-            rtl::OUString aOwner;
-
-            uno::Sequence< ::com::sun::star::ucb::Lock >  aLocks;
-            // uno::Any  aRet;
+            //DAVProperties::LOCKDISCOVERY is not cached, need to get it from the server
             uno::Sequence< beans::Property > aProperties( 1 );
-            aProperties[ 0 ].Name   = DAVProperties::LOCKDISCOVERY; //rtl::OUString::createFromAscii( "IsFolder" );
+            aProperties[ 0 ].Name   = DAVProperties::LOCKDISCOVERY;
             aProperties[ 0 ].Handle = -1;
 
             uno::Reference< sdbc::XRow > xRow( getPropertyValues( aProperties, Environment ) );
-            
+
             sal_Int32 nCount = aProperties.getLength();
             uno::Sequence< uno::Any > aValues( nCount );
+            uno::Any* pValues = aValues.getArray();
+            pValues[ 0 ] = xRow->getObject( 1, uno::Reference< container::XNameAccess >() );
 
-            if ( xRow.is() )
-            {
-                uno::Any* pValues = aValues.getArray();
-
-                for ( sal_Int32 n = 0; n < nCount; ++n )
-                    pValues[ n ] = xRow->getObject( n + 1, uno::Reference< container::XNameAccess >() );
-            }
+            rtl::OUString aOwner;
+            uno::Sequence< ::com::sun::star::ucb::Lock >  aLocks;
 
             if(aValues.getConstArray()[ 0 ] >>= aLocks)
                 if(aLocks.getLength() > 0)
@@ -3110,7 +3104,6 @@ void Content::lock(
                     DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__,"NO LOCKS PRESENT" );
             else
                 DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__,"NO OWNER SET" );
-
 
             DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__,"Already locked, Url: '%s', Owner '%s'",
                                    rtl::OUStringToOString( aURL, RTL_TEXTENCODING_UTF8 ).getStr(),
