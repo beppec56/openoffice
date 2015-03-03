@@ -3069,41 +3069,13 @@ void Content::lock(
     }
     catch ( DAVException const & e )
     {
-        DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__,
-                               "Exception received: data: '%s' status: %d, code %s",
-                               rtl::OUStringToOString( e.getData(),
-                                                       RTL_TEXTENCODING_UTF8 ).getStr() ,e.getStatus(),
-                               rtl::OUStringToOString( e.getErrorString(),
-                                                       RTL_TEXTENCODING_UTF8 ).getStr());
+        DBGLOG_EXCEPTION_BRIEF();
+
         switch(e.getStatus())
         {
         case SC_LOCKED:
         {
-            //DAVProperties::LOCKDISCOVERY is not cached, need to get it from the server
-            uno::Sequence< beans::Property > aProperties( 1 );
-            aProperties[ 0 ].Name   = DAVProperties::LOCKDISCOVERY;
-            aProperties[ 0 ].Handle = -1;
-
-            uno::Reference< sdbc::XRow > xRow( getPropertyValues( aProperties, Environment ) );
-
-            sal_Int32 nCount = aProperties.getLength();
-            uno::Sequence< uno::Any > aValues( nCount );
-            uno::Any* pValues = aValues.getArray();
-            pValues[ 0 ] = xRow->getObject( 1, uno::Reference< container::XNameAccess >() );
-
-            rtl::OUString aOwner;
-            uno::Sequence< ::com::sun::star::ucb::Lock >  aLocks;
-
-            if(aValues.getConstArray()[ 0 ] >>= aLocks)
-                if(aLocks.getLength() > 0)
-                {
-                    ucb::Lock aLock = aLocks[0];
-                    aLock.Owner >>= aOwner;
-                }
-                else
-                    DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__,"NO LOCKS PRESENT" );
-            else
-                DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__,"NO OWNER SET" );
+            rtl::OUString aOwner( getLockOwner( Environment ) );
 
             DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__,"Already locked, Url: '%s', Owner '%s'",
                                    rtl::OUStringToOString( aURL, RTL_TEXTENCODING_UTF8 ).getStr(),
@@ -3638,4 +3610,40 @@ const Content::ResourceType & Content::getResourceType(
     throw ( uno::Exception )
 {
     return getResourceType( xEnv, m_xResAccess );
+}
+
+rtl::OUString Content::getLockOwner( const uno::Reference< ucb::XCommandEnvironment >& Environment )
+{
+    rtl::OUString aOwner;
+    try
+    {
+        //DAVProperties::LOCKDISCOVERY is not cached, need to get it from the server
+        uno::Sequence< beans::Property > aProperties( 1 );
+        aProperties[ 0 ].Name   = DAVProperties::LOCKDISCOVERY;
+        aProperties[ 0 ].Handle = -1;
+
+        uno::Reference< sdbc::XRow > xRow( getPropertyValues( aProperties, Environment ) );
+
+        sal_Int32 nCount = aProperties.getLength();
+        uno::Sequence< uno::Any > aValues( nCount );
+        uno::Any* pValues = aValues.getArray();
+        pValues[ 0 ] = xRow->getObject( 1, uno::Reference< container::XNameAccess >() );
+
+        uno::Sequence< ::com::sun::star::ucb::Lock >  aLocks;
+
+        if(aValues.getConstArray()[ 0 ] >>= aLocks)
+            if(aLocks.getLength() > 0)
+            {
+                ucb::Lock aLock = aLocks[0];
+                aLock.Owner >>= aOwner;
+            }
+            else
+                DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__,"NO LOCKS PRESENT" );
+        else
+            DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__,"NO OWNER SET" );
+    }
+    catch ( uno::Exception&)
+    { }
+        
+    return aOwner;
 }

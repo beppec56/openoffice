@@ -306,6 +306,9 @@ public:
                        const rtl::Reference<
                            ::ucbhelper::ContentProviderImplHelper >& rProvider,
                        const ::rtl::OUString& rContentId );
+
+    /// returns the owner of current resource lock, and copy 
+    rtl::OUString getLockOwner( const uno::Reference< ucb::XCommandEnvironment >& Environment );
 };
 
 }
