@@ -139,6 +139,7 @@ class DAVException
         ExceptionCode   mExceptionCode;
         rtl::OUString   mData;
     //owner of the lock in case of DAV_LOCKED
+        rtl::OUString   mOwner;
     //extendend error information, if the server has a specific header
     //see in SerfRequestProcessor::handleSerfResponse for detail on how this is obtained
         rtl::OUString   mExtendedError;
@@ -148,6 +149,7 @@ class DAVException
          DAVException( ExceptionCode inExceptionCode ) 
              : mExceptionCode( inExceptionCode )
              , mData()
+             , mOwner()
              , mExtendedError()
              , mStatusCode( SC_NONE )
          {};
@@ -155,6 +157,7 @@ class DAVException
                        const rtl::OUString & rData ) 
              : mExceptionCode( inExceptionCode )
              , mData( rData )
+             , mOwner()
              , mExtendedError()
              , mStatusCode( SC_NONE )
          {};
@@ -163,6 +166,7 @@ class DAVException
                        sal_uInt16 nStatusCode )
             : mExceptionCode( inExceptionCode )
             , mData( rData )
+            , mOwner()
             , mExtendedError()
             , mStatusCode( nStatusCode )
          {};
@@ -172,6 +176,7 @@ class DAVException
                        sal_uInt16 nStatusCode = SC_NONE )
             : mExceptionCode( inExceptionCode )
             , mData( rData )
+            , mOwner()
             , mExtendedError( rExtendedError )
             , mStatusCode( nStatusCode )
          {};
@@ -181,6 +186,8 @@ class DAVException
     const rtl::OUString & getData() const  { return mData; }
     const rtl::OUString & getExtendedError() const { return  mExtendedError; }
     sal_uInt16 getStatus() const { return mStatusCode; }
+    const rtl::OUString & getOwner() const { return mOwner; }
+    void setOwner(const rtl::OUString & rOwner) { mOwner = rOwner; }
 
     //only for debug, remove when done
     inline const rtl::OUString getErrorString() const {
