@@ -48,8 +48,8 @@ module com { module sun { module star { module ucb {
     boolean SelfOwned;
     //-------------------------------------------------------------------------
     /** The owner of the lock.
-        
-        This field contains the nome of the lock owner.
+     *  
+     *  Used for WevDAV interface
     */
     string Owner;
 };
