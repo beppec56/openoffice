@@ -3079,34 +3079,38 @@ void Content::lock(
         {
         case SC_LOCKED:
         {
-            //obtain the DAV:lockdiscovery property, to have a owner 
-//            uno::Sequence< ::com::sun::star::ucb::Lock >  aLocks;
+            rtl::OUString aOwner;
+
+            uno::Sequence< ::com::sun::star::ucb::Lock >  aLocks;
+            // uno::Any  aRet;
             uno::Sequence< beans::Property > aProperties( 1 );
             aProperties[ 0 ].Name   = DAVProperties::LOCKDISCOVERY; //rtl::OUString::createFromAscii( "IsFolder" );
             aProperties[ 0 ].Handle = -1;
 
             uno::Reference< sdbc::XRow > xRow( getPropertyValues( aProperties, Environment ) );
-            rtl::OUString aOwner;
-            if( xRow.is() )
-            {
-                try
-                {
-                    aOwner = xRow->getString( 1 );
-                }
-                catch ( sdbc::SQLException const & )
-                {
-                    DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__,"Lockdiscovery failed !" );
-                }
-            }
-                
+            
+            sal_Int32 nCount = aProperties.getLength();
+            uno::Sequence< uno::Any > aValues( nCount );
 
-            // if ( m_xCachedProps->getValue( DAVProperties::LOCKDISCOVERY ) >>= aLocks )
-            // {
-            //     //fill the Owner field, only of the first lock returned
-            //     aLocks[0].Owner >>= aOwner;
-            // }
-            // else
-            //     DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__,"Lockdiscovery failed !" );
+            if ( xRow.is() )
+            {
+                uno::Any* pValues = aValues.getArray();
+
+                for ( sal_Int32 n = 0; n < nCount; ++n )
+                    pValues[ n ] = xRow->getObject( n + 1, uno::Reference< container::XNameAccess >() );
+            }
+
+            if(aValues.getConstArray()[ 0 ] >>= aLocks)
+                if(aLocks.getLength() > 0)
+                {
+                    ucb::Lock aLock = aLocks[0];
+                    aLock.Owner >>= aOwner;
+                }
+                else
+                    DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__,"NO LOCKS PRESENT" );
+            else
+                DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__,"NO OWNER SET" );
+
 
             DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__,"Already locked, Url: '%s', Owner '%s'",
                                    rtl::OUStringToOString( aURL, RTL_TEXTENCODING_UTF8 ).getStr(),

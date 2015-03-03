@@ -1399,7 +1399,9 @@ sal_Bool SfxMedium::LockOrigFileOnDemand( sal_Bool bLoading, sal_Bool bNoUI )
                                 }
                                 catch( ucb::InteractiveLockingLockedException& e )
                                 {
-                                    DBGLOG_UNHANDLED_EXCEPTION();
+//                                    DBGLOG_UNHANDLED_EXCEPTION();
+                                    DBGLOG_EXCEPTION_BRIEF();
+        
                                     // in e.XInterface should be:  uno::Reference< ucb::XCommandEnvironment >, e.g. the one given above
                                     // bContentReadonly = sal_True;
                                     // here get the lock currently present, via lockdiscovery
