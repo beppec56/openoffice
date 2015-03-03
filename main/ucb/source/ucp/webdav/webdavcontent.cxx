@@ -3090,6 +3090,7 @@ void Content::lock(
                       static_cast< cppu::OWeakObject * >( this ),
                       task::InteractionClassification_ERROR,
                       aURL,
+                      e.getExtendedError(),
                       sal_False,
                       aOwner ));
         }
@@ -3106,7 +3107,8 @@ void Content::lock(
             throw ucb::InteractiveLockingLockNotAvailableException( e.getData(),
                                                                     static_cast< cppu::OWeakObject * >( this ),
                                                                     task::InteractionClassification_INFO,
-                                                                    aURL );
+                                                                    aURL,
+                                                                    e.getExtendedError() );
             break;
             //TODO beppec56
             //see http://tools.ietf.org/html/rfc4918#section-9.10.6
@@ -3380,6 +3382,7 @@ uno::Any Content::MapDAVException( const DAVException & e, sal_Bool bWrite )
                 static_cast< cppu::OWeakObject * >( this ),
                 task::InteractionClassification_ERROR,
                 aURL,
+                e.getExtendedError(),
                 sal_False,  // not SelfOwned
                 rtl::OUString() );
 #else
@@ -3408,8 +3411,9 @@ uno::Any Content::MapDAVException( const DAVException & e, sal_Bool bWrite )
                 static_cast< cppu::OWeakObject * >( this ),
                 task::InteractionClassification_ERROR,
                 aURL,
+                e.getExtendedError(),
                 sal_True,  // SelfOwned
-                rtl::OUString() );
+                e.getOwner() );
         break;
 
     case DAVException::DAV_NOT_LOCKED:
@@ -3418,7 +3422,8 @@ uno::Any Content::MapDAVException( const DAVException & e, sal_Bool bWrite )
                 rtl::OUString::createFromAscii( "Not locked!" ),
                 static_cast< cppu::OWeakObject * >( this ),
                 task::InteractionClassification_ERROR,
-                aURL );
+                aURL,
+                rtl::OUString() );//no extended info here
         break;
 
     case DAVException::DAV_LOCK_EXPIRED:
@@ -3427,7 +3432,8 @@ uno::Any Content::MapDAVException( const DAVException & e, sal_Bool bWrite )
                 rtl::OUString::createFromAscii( "Lock expired!" ),
                 static_cast< cppu::OWeakObject * >( this ),
                 task::InteractionClassification_ERROR,
-                aURL );
+                aURL,
+                rtl::OUString() );//no extended info here
         break;
 
     default:
