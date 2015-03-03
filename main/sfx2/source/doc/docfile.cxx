@@ -1375,6 +1375,7 @@ sal_Bool SfxMedium::LockOrigFileOnDemand( sal_Bool bLoading, sal_Bool bNoUI )
                                 }
                                 catch( ucb::InteractiveLockingLockNotAvailableException )
                                 {
+                                    DBGLOG_EXCEPTION_BRIEF();
                                     // signalled when the lock can not be done because the method is known but not allowed on the resourse
                                     // that is resource available, can be worked upon, at your risk
                                     // ask user whether he wants to open the document without any locking

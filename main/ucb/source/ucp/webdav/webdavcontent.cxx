@@ -3069,7 +3069,12 @@ void Content::lock(
     }
     catch ( DAVException const & e )
     {
-        DBGLOG_EXCEPTION_BRIEF();
+        DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__,
+                               "Exception received: data: '%s' status: %d, code %s",
+                               rtl::OUStringToOString( e.getData(),
+                                                       RTL_TEXTENCODING_UTF8 ).getStr() ,e.getStatus(),
+                               rtl::OUStringToOString( e.getErrorString(),
+                                                       RTL_TEXTENCODING_UTF8 ).getStr());
 
         switch(e.getStatus())
         {
