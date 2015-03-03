@@ -138,20 +138,20 @@ private:
                      const std::auto_ptr< DAVResourceAccess > & rResAccess )
         throw ( ::com::sun::star::uno::Exception );
 
-    // Command "open"
+    /// Command "open"
     com::sun::star::uno::Any open(
                 const com::sun::star::ucb::OpenCommandArgument2 & rArg,
                 const com::sun::star::uno::Reference<
                     com::sun::star::ucb::XCommandEnvironment > & xEnv )
         throw( ::com::sun::star::uno::Exception );
 
-    // Command "post"
+    /// Command "post"
     void post( const com::sun::star::ucb::PostCommandArgument2 & rArg,
                const com::sun::star::uno::Reference<
                     com::sun::star::ucb::XCommandEnvironment > & xEnv )
         throw( ::com::sun::star::uno::Exception );
 
-    // Command "insert"
+    /// Command "insert"
     void insert( const ::com::sun::star::uno::Reference<
                      ::com::sun::star::io::XInputStream > & xInputStream,
                  sal_Bool bReplaceExisting,
@@ -159,7 +159,7 @@ private:
                      com::sun::star::ucb::XCommandEnvironment >& Environment )
         throw( ::com::sun::star::uno::Exception );
 
-    // Command "transfer"
+    /// Command "transfer"
     void transfer( const ::com::sun::star::ucb::TransferInfo & rArgs,
                    const com::sun::star::uno::Reference<
                        com::sun::star::ucb::XCommandEnvironment >& Environment )
@@ -194,7 +194,7 @@ private:
         const com::sun::star::uno::Reference<
             com::sun::star::ucb::XCommandEnvironment >& Environment );
 
-    // XPropertyContainer replacement
+    /// XPropertyContainer replacement
     void addProperty( const com::sun::star::ucb::PropertyCommandArgument &aCmdArg,
                       const com::sun::star::uno::Reference<
                       com::sun::star::ucb::XCommandEnvironment >& Environment )
@@ -227,10 +227,10 @@ public:
         throw ( ::com::sun::star::ucb::ContentCreationException );
     virtual ~Content();
 
-    // XInterface
+    /// XInterface
     XINTERFACE_DECL()
 
-    // XTypeProvider
+    /// XTypeProvider
     XTYPEPROVIDER_DECL()
 
     // XServiceInfo
@@ -296,7 +296,7 @@ public:
 
     DAVResourceAccess & getResourceAccess() { return *m_xResAccess; }
 
-    // Called from resultset data supplier.
+    /** Called from resultset data supplier. */
     static ::com::sun::star::uno::Reference< ::com::sun::star::sdbc::XRow >
     getPropertyValues( const ::com::sun::star::uno::Reference<
                            ::com::sun::star::lang::XMultiServiceFactory >& rSMgr,
@@ -307,7 +307,7 @@ public:
                            ::ucbhelper::ContentProviderImplHelper >& rProvider,
                        const ::rtl::OUString& rContentId );
 
-    /// returns the owner of current resource lock, and copy 
+    /** returns the owner of current resource lock */
     rtl::OUString getLockOwner( const uno::Reference< ucb::XCommandEnvironment >& Environment );
 };
 
