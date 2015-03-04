@@ -46,6 +46,9 @@
 
 #include <string.h>
 
+//to debug via log recorder, remove when done
+#include <tools/debuglogger.hxx>
+
 namespace unnamed_tools_urlobj {} using namespace unnamed_tools_urlobj;
 	// unnamed namespaces don't work well yet...
 
@@ -694,13 +697,22 @@ bool INetURLObject::setAbsURIRef(rtl::OUString const & rTheAbsURIRef,
 
 	sal_uInt32 nFragmentDelimiter = '#';
 
-	rtl::OUStringBuffer aSynAbsURIRef;
+    // DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__, "rTheAbsURIRef: %s,\n bSmart: %d",
+    //                        rtl::OUStringToOString( rTheAbsURIRef,
+    //                                                RTL_TEXTENCODING_UTF8 ).getStr(),bSmart);
 
+    // OSL_TRACE( "rTheAbsURIRef: %s,\n bSmart: %d",
+    //            rtl::OUStringToOString( rTheAbsURIRef,
+    //                                    RTL_TEXTENCODING_UTF8 ).getStr(), bSmart);
+    rtl::OUStringBuffer aSynAbsURIRef;
 	// Parse <scheme>:
 	sal_Unicode const * p = pPos;
 	PrefixInfo const * pPrefix = getPrefix(p, pEnd);
 	if (pPrefix)
 	{
+        // OSL_TRACE( "Prefix present m_pPrefix '%s',m_pTranslatedPrefix '%s'",
+        //            pPrefix->m_pPrefix,
+        //            pPrefix->m_pTranslatedPrefix );
 		pPos = p;
 		m_eScheme = pPrefix->m_eScheme;
 
@@ -715,7 +727,7 @@ bool INetURLObject::setAbsURIRef(rtl::OUString const & rTheAbsURIRef,
 	{
 		if (bSmart)
 		{
-			// For scheme detection, the first (if any) of the following
+            // For scheme detection, the first (if any) of the following
 			// productions that matches the input string (and for which the
 			// appropriate style bit is set in eStyle, if applicable)
 			// determines the scheme. The productions use the auxiliary rules
@@ -757,6 +769,9 @@ bool INetURLObject::setAbsURIRef(rtl::OUString const & rTheAbsURIRef,
 			//
 			// 9th Production (DOS file; FSYS_DOS only):
 			//	  ALPHA ":" ["\" *UCS4]
+			//
+			//new: temporary	  
+			//10th Production UNC file remapped to http://
 			//
 			// For the 'non URL' file productions 6--9, the interpretation of
 			// the input as a (degenerate) URI is turned off, i.e., escape
@@ -806,6 +821,11 @@ bool INetURLObject::setAbsURIRef(rtl::OUString const & rTheAbsURIRef,
 					m_eScheme = INET_PROT_FILE; // 7th
 					eMechanism = ENCODE_ALL;
 					nFragmentDelimiter = 0x80000000;
+// in case the HostName is as in configuration, change protocol scheme to http, probably later in code ??
+                    
+                    OSL_TRACE("found method to be converted: rTheAbsURIRef: %s",
+                           rtl::OUStringToOString( rTheAbsURIRef,
+                                                   RTL_TEXTENCODING_UTF8 ).getStr());
 				}
 			}
 			else
@@ -1101,6 +1121,12 @@ bool INetURLObject::setAbsURIRef(rtl::OUString const & rTheAbsURIRef,
 							pHostPortEnd = pe;
 							pPos = pe;
 							nSegmentDelimiter = '\\';
+                        rtl::OUString aDummy(aSynAbsURIRef);
+                        OSL_TRACE("6th remapping: rTheAbsURIRef: %s, aSynAbsURIRef: '%s'",
+                                  rtl::OUStringToOString( rTheAbsURIRef,
+                                                          RTL_TEXTENCODING_UTF8 ).getStr(),
+                                  rtl::OUStringToOString( aDummy,
+                                                          RTL_TEXTENCODING_UTF8 ).getStr());
 							break;
 						}
 					}
@@ -1128,6 +1154,7 @@ bool INetURLObject::setAbsURIRef(rtl::OUString const & rTheAbsURIRef,
                             appendAscii(RTL_CONSTASCII_STRINGPARAM("//"));
 						nAltSegmentDelimiter = '\\';
 						bSkippedInitialSlash = true;
+
 						break;
 					}
 
@@ -1373,8 +1400,31 @@ bool INetURLObject::setAbsURIRef(rtl::OUString const & rTheAbsURIRef,
 				setInvalid();
 				return false;
 			}
+            rtl::OUString aHostToForce(RTL_CONSTASCII_USTRINGPARAM( "dsklnx2" ));
+            rtl::OUString aCurrentHost(aSynHost.makeStringAndClear());
+            rtl::OUString aDummy2(aSynAbsURIRef);
+            if(aCurrentHost.compareTo(aHostToForce) == 0)
+            {
+                OSL_TRACE("\nneed to remap the scheme ... aCurrentHost '%s', current scheme '%s' \nrTheAbsURIRef: %s",
+                          rtl::OUStringToOString( aCurrentHost,
+                                                  RTL_TEXTENCODING_UTF8 ).getStr(),
+                          rtl::OUStringToOString( aSynAbsURIRef.makeStringAndClear(),
+                                                  RTL_TEXTENCODING_UTF8 ).getStr(),
+                          rtl::OUStringToOString( rTheAbsURIRef,
+                                                  RTL_TEXTENCODING_UTF8 ).getStr(), bSmart);
+    // OSL_TRACE( "rTheAbsURIRef: %s,\n bSmart: %d",
+    //            rtl::OUStringToOString( rTheAbsURIRef,
+    //                                    RTL_TEXTENCODING_UTF8 ).getStr(), bSmart);
+                
+            }
 			m_aHost.set(aSynAbsURIRef, aSynHost.makeStringAndClear(), 
 				aSynAbsURIRef.getLength());
+
+       rtl::OUString aDummy(aSynAbsURIRef);
+       OSL_TRACE("host set: aSynAbsURIRef: '%s', bNetBiosName %d",
+                 rtl::OUStringToOString( aDummy,
+                                         RTL_TEXTENCODING_UTF8 ).getStr(),bNetBiosName);
+
 			if (pPort != pHostPortEnd)
 			{
 				aSynAbsURIRef.append(sal_Unicode(':'));
@@ -1441,6 +1491,13 @@ bool INetURLObject::setAbsURIRef(rtl::OUString const & rTheAbsURIRef,
 
 	m_aAbsURIRef = aSynAbsURIRef;
 
+    rtl::OUString aDummYStr(m_aAbsURIRef);
+    // DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__, "m_aAbsURIRef: '%s'",
+    //                        rtl::OUStringToOString( aDummYStr,
+    //                                                RTL_TEXTENCODING_UTF8 ).getStr());
+    OSL_TRACE( "m_aAbsURIRef: '%s'",
+                           rtl::OUStringToOString( aDummYStr,
+                                                   RTL_TEXTENCODING_UTF8 ).getStr());
 	return true;
 }
 
