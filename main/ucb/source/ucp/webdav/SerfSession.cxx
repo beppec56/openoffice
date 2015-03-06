@@ -398,6 +398,8 @@ apr_status_t SerfSession::provideSerfCredentials( bool bGiveProvidedCredentialsA
     const bool bCanUseSystemCreds = ( ( strcasecmp( inAuthProtocol, "NTLM" ) == 0 ) ||
                                       ( strcasecmp( inAuthProtocol, "Negotiate" ) == 0 ) );
 
+    DBGLOG_TRACE_FUNCTION(BOOST_CURRENT_FUNCTION,__LINE__,"bCanUseSystemCreds: %d, inAuthProtocol: '%s'",bCanUseSystemCreds,inAuthProtocol);
+
     int theRetVal = pListener->authenticate( rtl::OUString::createFromAscii( inRealm ),
                                              getHostName(),
                                              theUserName,
@@ -410,6 +412,9 @@ apr_status_t SerfSession::provideSerfCredentials( bool bGiveProvidedCredentialsA
         *outUsername = apr_pstrdup( inAprPool, rtl::OUStringToOString( theUserName, RTL_TEXTENCODING_UTF8 ).getStr() );
         *outPassword = apr_pstrdup( inAprPool, rtl::OUStringToOString( thePassWord, RTL_TEXTENCODING_UTF8 ).getStr() );
     }
+
+    DBGLOG_TRACE_FUNCTION(BOOST_CURRENT_FUNCTION,__LINE__,"bCanUseSystemCreds: %d, inAuthProtocol: '%s',outUsername: '%s'",
+                          bCanUseSystemCreds,inAuthProtocol, *outUsername);
 
     return theRetVal != 0 ? SERF_ERROR_AUTHN_FAILED : APR_SUCCESS;
 }

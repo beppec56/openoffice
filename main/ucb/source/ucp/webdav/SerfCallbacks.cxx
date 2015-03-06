@@ -27,6 +27,9 @@
 #include "SerfSession.hxx"
 #include "SerfRequestProcessor.hxx"
 
+//for debug logger printing remove when finalized
+#include <tools/debuglogger.hxx>
+
 using namespace http_dav_ucp;
 
 extern "C" apr_status_t Serf_ConnectSetup( apr_socket_t *skt,
@@ -52,6 +55,8 @@ extern "C" apr_status_t Serf_Credentials( char **username,
                                           apr_pool_t *pool )
 {
     SerfRequestProcessor* pReqProc = static_cast< SerfRequestProcessor* >( baton );
+
+    DBGLOG_TRACE_FUNCTION(BOOST_CURRENT_FUNCTION,__LINE__,"authn_type: '%s'", authn_type);
     return pReqProc->provideSerfCredentials( username, 
                                              password,
                                              request,
