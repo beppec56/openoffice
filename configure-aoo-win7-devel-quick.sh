@@ -35,8 +35,11 @@
 ./configure \
 --with-epm-url=http://www.msweet.org/files/project2/epm-3.7-source.tar.gz \
 --with-dmake-url=http://dmake.apache-extras.org.codespot.com/files/dmake-4.12.tar.bz2 \
+--with-midl-path="/cygdrive/c/Program Files/Microsoft SDKs/Windows/v7.1A/Bin" \
+--with-mozilla-build="/cygdrive/c/Users/beppe/AOO/aoo-github-beppe/mozilla-build-1.11.0" \
+--with-ant-home="/cygdrive/c/apache-ant-1.9.4" \
+ -disable-directx \
 --enable-category-b \
---with-package-format="deb" \
 --without-junit \
 --without-stlport \
 --enable-bundled-dictionaries \
@@ -45,7 +48,6 @@
 \
 --enable-verbose \
 --with-build-version="$(date +"%Y-%m-%d %H:%M:%S (%a, %d %b %Y)") - Rev. $(git branch |grep "*" | sed 's/* //g') $(echo git_$(git log -n1 --format=%h))" \
---with-mingwin=i586-mingw32msvc-c++ \
 \
 
 
