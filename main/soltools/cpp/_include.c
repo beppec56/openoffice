@@ -27,11 +27,16 @@
 
 #ifdef _MSC_VER
 #	define _POSIX_
+#define PATH_MAX _MAX_PATH
 #endif
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <fcntl.h>
+
+#ifdef _MSC_VER
+#define PATH_MAX _MAX_PATH
+#endif
 
 
 #ifdef __hpux

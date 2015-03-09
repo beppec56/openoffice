@@ -25,6 +25,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#ifdef _MSC_VER
+#define PATH_MAX _MAX_PATH
+#endif
+
 #ifdef __hpux
 #	define _HPUX_SOURCE
 #endif
