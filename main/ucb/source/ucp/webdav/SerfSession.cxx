@@ -399,6 +399,7 @@ apr_status_t SerfSession::provideSerfCredentials( bool bGiveProvidedCredentialsA
                                       ( strcasecmp( inAuthProtocol, "Negotiate" ) == 0 ) );
 
     DBGLOG_TRACE_FUNCTION(BOOST_CURRENT_FUNCTION,__LINE__,"bCanUseSystemCreds: %d, inAuthProtocol: '%s'",bCanUseSystemCreds,inAuthProtocol);
+    DBGLOG_FLUSH("main_ucb_source_ucp_webdav_SerfSession.log");
 
     int theRetVal = pListener->authenticate( rtl::OUString::createFromAscii( inRealm ),
                                              getHostName(),

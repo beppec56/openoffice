@@ -49,14 +49,15 @@ extern "C" apr_status_t Serf_Credentials( char **username,
                                           char **password,
                                           serf_request_t *request,
                                           void *baton,
-                                          int code, 
+                                          int code,
                                           const char *authn_type,
                                           const char *realm,
                                           apr_pool_t *pool )
 {
     SerfRequestProcessor* pReqProc = static_cast< SerfRequestProcessor* >( baton );
 
-    DBGLOG_TRACE_FUNCTION(BOOST_CURRENT_FUNCTION,__LINE__,"authn_type: '%s'", authn_type);
+    DBGLOG_TRACE_FUNCTION(BOOST_CURRENT_FUNCTION,__LINE__,"code: %d, authn_type: '%s', realm: '%s'", code, authn_type, realm);
+    DBGLOG_FLUSH("main_ucb_source_ucp_webdav_SerfCallbacks.log");
     return pReqProc->provideSerfCredentials( username, 
                                              password,
                                              request,

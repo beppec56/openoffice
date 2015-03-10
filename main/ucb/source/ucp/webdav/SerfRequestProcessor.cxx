@@ -591,6 +591,8 @@ apr_status_t SerfRequestProcessor::provideSerfCredentials( char ** outUsername,
     else
     {
         ++mnSuccessfulCredentialAttempts;
+        DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__, "outUsername: '%s', outPassword: '%s', inCode %d, inAuthProtocol: '%s', inRealm: '%s'", *outUsername,*outPassword,inCode, inAuthProtocol,inRealm);
+        DBGLOG_FLUSH("main_ucb_source_ucp_webdav_SerfRequestProcessor.log");
     }
 
     return status;
