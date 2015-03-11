@@ -8,7 +8,7 @@ LOGFILE="make-aoo-$DATESET.log"
 date > ../../$LOGFILE
 
 echo 'Grab Environment'
-. ./*.Set.sh
+. ./winenv.set.sh
 
 echo "$SOLARENV"
 
@@ -19,6 +19,6 @@ echo "log file: "
 echo "grep \"Building\" ../$LOGFILE ; tail -f ../$LOGFILE | grep \"Building\""
 echo ""
 
-perl $SOLARENV/bin/build.pl --html -P1 --all -- -P1 >> ../../$LOGFILE 2>&1 &
+perl $SOLARENV/bin/build.pl --html -P2 --all -- -P2 >> ../../$LOGFILE 2>&1 &
 
 echo "see file at:  $SOLARSRC/../log/unxlngx6.pro.build.html"
