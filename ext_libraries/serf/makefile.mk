@@ -44,7 +44,7 @@ LIBSERFVERSION=$(SERF_MAJOR).$(SERF_MINOR).$(SERF_MICRO)
 TARFILE_NAME=$(PRJNAME)-$(LIBSERFVERSION)
 # This is the SHA1 checksum, not MD5 but tg_ext.mk does not now about this and,
 # thankfully, does not care.
-TARFILE_MD5=f65fbbd72926c8e7cf0dbd4ada03b0d226f461fd
+TARFILE_MD5=1d45425ca324336ce2f4ae7d7b4cfbc5567c5446
 
 PATCH_FILES=
 
@@ -68,17 +68,17 @@ BUILD_FLAGS+= -f ../../../../win/Makefile -j$(EXTMAXPROCESS)
 .IF "$(OS)"=="MACOSX" || "$(OS)"=="FREEBSD" || "$(OS)"=="LINUX"
 # Do not link against expat.  It is not necessary (apr-util is already linked against it)
 # and does not work (we use a different expat library schema.)
-PATCH_FILES+=$(TARFILE_NAME).libs.patch
+#PATCH_FILES+=$(TARFILE_NAME).libs.patch
 .ENDIF
 
 .IF "$(OS)"=="LINUX"
 # Add -ldl as last library so that the linker has no trouble resolving dependencies.
-PATCH_FILES+=$(TARFILE_NAME).ldl.patch
+#PATCH_FILES+=$(TARFILE_NAME).ldl.patch
 .ENDIF
 
 # Export ENABLE_SERF_LOGGING=YES to enable serf logging
 .IF "$(ENABLE_SERF_LOGGING)" == "YES"
-PATCH_FILES+=$(TARFILE_NAME).logging.patch
+#PATCH_FILES+=$(TARFILE_NAME).logging.patch
 CDEFS+=-DENABLE_SERF_VERBOSE -DSERF_VERBOSE
 .ENDIF
 
