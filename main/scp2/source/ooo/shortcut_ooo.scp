@@ -144,7 +144,7 @@ Shortcut gid_Shortcut_Lib_Serf
     #ifdef MACOSX
         Name = STRING(CONCAT2(libserf-1.0,UNXSUFFIX));
     #else
-        Name = STRING(CONCAT3(libserf-1,UNXSUFFIX,.0));
+        Name = STRING(CONCAT3(libserf-1,UNXSUFFIX,.1));
     #endif
     Styles = (NETWORK,RELATIVE,FORCE_INTO_UPDATE_PACKAGE);
 End

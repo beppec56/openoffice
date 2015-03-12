@@ -33,7 +33,7 @@ $(eval $(call gb_Library_set_include,serf,\
 
 $(eval $(call gb_Library_set_defs,serf,\
 	$$(DEFS) \
-	-DWIN32 -DNDEBUG -D_WINDOWS -D_USRDLL -DWIN32_EXPORTS \
+	-DWIN32 -DNDEBUG -D_WINDOWS -D_USRDLL -DWIN32_EXPORTS  -W4 -wd4100 -O2 -DWIN32_LEAN_AND_MEAN -DNOUSER -DNOGDI -DNONLS -DNOCRYPT -DSERF_HAVE_SSPI \
 ))
 
 ORIGINAL_DEF_FILE=build/serf.def
@@ -42,7 +42,6 @@ FIXED_DEF_FILE=build/fixed-serf.def
 $(call gb_LinkTarget_get_target,$(call gb_Library__get_linktargetname,serf)) : $(FIXED_DEF_FILE)
 $(FIXED_DEF_FILE) : $(ORIGINAL_DEF_FILE)
 	cp $< $@
-	echo serf_bucket_request_set_CL >> $@
 
 $(eval $(call gb_Library_set_ldflags,serf,\
 	$$(LDFLAGS) \
@@ -55,37 +54,45 @@ $(eval $(call gb_Library_add_linked_libs,serf,\
 	libeay32 \
 	ssleay32 \
 	zlib \
-    $(gb_STDLIBS) \
+	advapi32 \
+	user32 \
+	gdi32 \
+	secur32 \
+	crypt32 \
+	ws2_32 \
+	mswsock \
+	rpcrt4 \
+	$(gb_STDLIBS) \
 ))
 
 $(eval $(call gb_Library_add_cobjects,serf,\
-	serf/$(INPATH)/misc/build/serf-1.2.1/auth/auth \
-	serf/$(INPATH)/misc/build/serf-1.2.1/auth/auth_basic \
-	serf/$(INPATH)/misc/build/serf-1.2.1/auth/auth_digest \
-	serf/$(INPATH)/misc/build/serf-1.2.1/auth/auth_kerb \
-	serf/$(INPATH)/misc/build/serf-1.2.1/auth/auth_kerb_gss \
-	serf/$(INPATH)/misc/build/serf-1.2.1/auth/auth_kerb_sspi \
-	serf/$(INPATH)/misc/build/serf-1.2.1/buckets/aggregate_buckets \
-	serf/$(INPATH)/misc/build/serf-1.2.1/buckets/allocator \
-	serf/$(INPATH)/misc/build/serf-1.2.1/buckets/barrier_buckets \
-	serf/$(INPATH)/misc/build/serf-1.2.1/buckets/buckets \
-	serf/$(INPATH)/misc/build/serf-1.2.1/buckets/bwtp_buckets \
-	serf/$(INPATH)/misc/build/serf-1.2.1/buckets/chunk_buckets \
-	serf/$(INPATH)/misc/build/serf-1.2.1/buckets/dechunk_buckets \
-	serf/$(INPATH)/misc/build/serf-1.2.1/buckets/deflate_buckets \
-	serf/$(INPATH)/misc/build/serf-1.2.1/buckets/file_buckets \
-	serf/$(INPATH)/misc/build/serf-1.2.1/buckets/headers_buckets \
-	serf/$(INPATH)/misc/build/serf-1.2.1/buckets/iovec_buckets \
-	serf/$(INPATH)/misc/build/serf-1.2.1/buckets/limit_buckets \
-	serf/$(INPATH)/misc/build/serf-1.2.1/buckets/mmap_buckets \
-	serf/$(INPATH)/misc/build/serf-1.2.1/buckets/request_buckets \
-	serf/$(INPATH)/misc/build/serf-1.2.1/buckets/response_body_buckets \
-	serf/$(INPATH)/misc/build/serf-1.2.1/buckets/response_buckets \
-	serf/$(INPATH)/misc/build/serf-1.2.1/buckets/simple_buckets \
-	serf/$(INPATH)/misc/build/serf-1.2.1/buckets/socket_buckets \
-	serf/$(INPATH)/misc/build/serf-1.2.1/buckets/ssl_buckets \
-	serf/$(INPATH)/misc/build/serf-1.2.1/context \
-	serf/$(INPATH)/misc/build/serf-1.2.1/incoming \
-	serf/$(INPATH)/misc/build/serf-1.2.1/outgoing \
-	serf/$(INPATH)/misc/build/serf-1.2.1/ssltunnel \
+	serf/$(INPATH)/misc/build/serf-1.3.8/context \
+        serf/$(INPATH)/misc/build/serf-1.3.8/incoming \
+        serf/$(INPATH)/misc/build/serf-1.3.8/outgoing \
+        serf/$(INPATH)/misc/build/serf-1.3.8/ssltunnel \
+        serf/$(INPATH)/misc/build/serf-1.3.8/buckets/aggregate_buckets \
+        serf/$(INPATH)/misc/build/serf-1.3.8/buckets/allocator \
+        serf/$(INPATH)/misc/build/serf-1.3.8/buckets/barrier_buckets \
+        serf/$(INPATH)/misc/build/serf-1.3.8/buckets/buckets \
+        serf/$(INPATH)/misc/build/serf-1.3.8/buckets/bwtp_buckets \
+        serf/$(INPATH)/misc/build/serf-1.3.8/buckets/chunk_buckets \
+        serf/$(INPATH)/misc/build/serf-1.3.8/buckets/dechunk_buckets \
+        serf/$(INPATH)/misc/build/serf-1.3.8/buckets/deflate_buckets \
+        serf/$(INPATH)/misc/build/serf-1.3.8/buckets/file_buckets \
+        serf/$(INPATH)/misc/build/serf-1.3.8/buckets/headers_buckets \
+        serf/$(INPATH)/misc/build/serf-1.3.8/buckets/iovec_buckets \
+        serf/$(INPATH)/misc/build/serf-1.3.8/buckets/limit_buckets \
+        serf/$(INPATH)/misc/build/serf-1.3.8/buckets/mmap_buckets \
+        serf/$(INPATH)/misc/build/serf-1.3.8/buckets/request_buckets \
+        serf/$(INPATH)/misc/build/serf-1.3.8/buckets/response_body_buckets \
+        serf/$(INPATH)/misc/build/serf-1.3.8/buckets/response_buckets \
+        serf/$(INPATH)/misc/build/serf-1.3.8/buckets/simple_buckets \
+        serf/$(INPATH)/misc/build/serf-1.3.8/buckets/socket_buckets \
+        serf/$(INPATH)/misc/build/serf-1.3.8/buckets/ssl_buckets \
+        serf/$(INPATH)/misc/build/serf-1.3.8/auth/auth \
+        serf/$(INPATH)/misc/build/serf-1.3.8/auth/auth_basic \
+        serf/$(INPATH)/misc/build/serf-1.3.8/auth/auth_digest \
+        serf/$(INPATH)/misc/build/serf-1.3.8/auth/auth_spnego \
+        serf/$(INPATH)/misc/build/serf-1.3.8/auth/auth_spnego_gss \
+        serf/$(INPATH)/misc/build/serf-1.3.8/auth/auth_spnego_sspi \
 ))

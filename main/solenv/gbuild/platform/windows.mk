@@ -442,6 +442,7 @@ gb_Library_PLAINEXT := .lib
 
 gb_Library_PLAINLIBS_NONE += \
 	advapi32 \
+	crypt32 \
 	gdi32 \
 	gdiplus \
 	gnu_getopt \
@@ -450,14 +451,18 @@ gb_Library_PLAINLIBS_NONE += \
 	msimg32 \
 	msvcrt \
 	mpr \
+	mswsock \
 	oldnames \
 	ole32 \
 	oleaut32 \
+	rpcrt4 \
 	shell32 \
+	secur32 \
 	user32 \
 	uuid \
 	uwinapi \
 	winspool \
+	ws2_32 \
 	z \
 	cppunit
 

@@ -125,6 +125,7 @@ gb_Library_FILENAMES := $(patsubst stl:istl%,stl:msvcprt%,$(gb_Library_FILENAMES
 
 gb_Library_NOILIBFILENAMES:=\
 	advapi32 \
+	crypt32 \
 	gdi32 \
 	gdiplus \
 	gnu_getopt \
@@ -135,15 +136,19 @@ gb_Library_NOILIBFILENAMES:=\
 	msimg32 \
 	msvcrt \
 	mpr \
+	mswsock \
 	oldnames \
 	ole32 \
 	oleaut32 \
+	rpcrt4 \
+	secur32 \
 	shell32 \
 	sot \
 	user32 \
 	uuid \
 	uwinapi \
 	winspool \
+	ws2_32 \
 
 gb_Library_FILENAMES := $(filter-out $(foreach lib,$(gb_Library_NOILIBFILENAMES),$(lib):%),$(gb_Library_FILENAMES))
 gb_Library_FILENAMES += $(foreach lib,$(gb_Library_NOILIBFILENAMES),$(lib):$(lib)$(gb_Library_PLAINEXT))
