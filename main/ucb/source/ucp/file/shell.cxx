@@ -64,6 +64,9 @@
 #include "prov.hxx"
 #include "bc.hxx"
 
+//for debug logger printing remove when finalized
+#include <tools/debuglogger.hxx>
+
 
 using namespace fileaccess;
 using namespace com::sun::star;
@@ -678,21 +681,33 @@ shell::open( sal_Int32 CommandId,
              sal_Bool bLock )
     throw()
 {
-    XInputStream_impl* xInputStream = new XInputStream_impl( this, aUnqPath, bLock ); // from filinpstr.hxx
-
-    sal_Int32 ErrorCode = xInputStream->CtorSuccess();
-
-    if( ErrorCode != TASKHANDLER_NO_ERROR )
+    DBGLOG_TRACE_FUNCTION(BOOST_CURRENT_FUNCTION,__LINE__,"CommandId %d\n - aUnqPath: %s\n - bLock: %d",
+                          CommandId, rtl::OUStringToOString( aUnqPath, RTL_TEXTENCODING_UTF8 ).getStr(),bLock);
+    try
     {
-        installError( CommandId,
-                      ErrorCode,
-                      xInputStream->getMinorError() );
+        XInputStream_impl* xInputStream = new XInputStream_impl( this, aUnqPath, bLock ); // from filinpstr.hxx
 
-        delete xInputStream;
-        xInputStream = 0;
+        sal_Int32 ErrorCode = xInputStream->CtorSuccess();
+
+        if( ErrorCode != TASKHANDLER_NO_ERROR )
+        {
+            installError( CommandId,
+                          ErrorCode,
+                          xInputStream->getMinorError() );
+
+            delete xInputStream;
+            xInputStream = 0;
+        }
+
+        return uno::Reference< io::XInputStream >( xInputStream );
     }
-
-    return uno::Reference< io::XInputStream >( xInputStream );
+    catch (uno::Exception& e)
+    {
+        DBGLOG_TRACE_FUNCTION(BOOST_CURRENT_FUNCTION,__LINE__,"ERROR: EXCEPTION !\n - CommandId %d\n - aUnqPath: %s\n - bLock: %d",
+                              CommandId, rtl::OUStringToOString( aUnqPath, RTL_TEXTENCODING_UTF8 ).getStr(),bLock);
+        DBGLOG_FLUSH("main_ucb_source_ucp_file_shell.log");
+        throw;
+    }
 }
 
 
@@ -715,20 +730,32 @@ shell::open_rw( sal_Int32 CommandId,
                 sal_Bool bLock )
     throw()
 {
-    XStream_impl* xStream = new XStream_impl( this, aUnqPath, bLock );  // from filstr.hxx
-
-    sal_Int32 ErrorCode = xStream->CtorSuccess();
-
-    if( ErrorCode != TASKHANDLER_NO_ERROR )
+    DBGLOG_TRACE_FUNCTION(BOOST_CURRENT_FUNCTION,__LINE__,"CommandId %d\n - aUnqPath: %s\n - bLock: %d",
+                          CommandId, rtl::OUStringToOString( aUnqPath, RTL_TEXTENCODING_UTF8 ).getStr(),bLock);
+    try
     {
-        installError( CommandId,
-                      ErrorCode,
-                      xStream->getMinorError() );
+        XStream_impl* xStream = new XStream_impl( this, aUnqPath, bLock );  // from filstr.hxx
 
-        delete xStream;
-        xStream = 0;
+        sal_Int32 ErrorCode = xStream->CtorSuccess();
+
+        if( ErrorCode != TASKHANDLER_NO_ERROR )
+        {
+            installError( CommandId,
+                          ErrorCode,
+                          xStream->getMinorError() );
+
+            delete xStream;
+            xStream = 0;
+        }
+        return uno::Reference< io::XStream >( xStream );
     }
-    return uno::Reference< io::XStream >( xStream );
+    catch (uno::Exception& e)
+    {
+        DBGLOG_TRACE_FUNCTION(BOOST_CURRENT_FUNCTION,__LINE__,"ERROR: EXCEPTION !\n - CommandId %d\n - aUnqPath: %s\n - bLock: %d",
+                              CommandId, rtl::OUStringToOString( aUnqPath, RTL_TEXTENCODING_UTF8 ).getStr(),bLock);
+        DBGLOG_FLUSH("main_ucb_source_ucp_file_shell.log");
+        throw;
+    }
 }
 
 
@@ -801,6 +828,8 @@ uno::Reference< beans::XPropertySetInfo > SAL_CALL
 shell::info_p( const rtl::OUString& aUnqPath )
     throw()
 {
+    DBGLOG_TRACE_FUNCTION(BOOST_CURRENT_FUNCTION,__LINE__,"aUnqPath: %s",
+        rtl::OUStringToOString( aUnqPath, RTL_TEXTENCODING_UTF8 ).getStr());
     osl::MutexGuard aGuard( m_aMutex );
     XPropertySetInfo_impl* p = new XPropertySetInfo_impl( this,aUnqPath );
     return uno::Reference< beans::XPropertySetInfo >( p );
@@ -824,6 +853,8 @@ shell::setv( const rtl::OUString& aUnqPath,
              const uno::Sequence< beans::PropertyValue >& values )
     throw()
 {
+    DBGLOG_TRACE_FUNCTION(BOOST_CURRENT_FUNCTION,__LINE__,"aUnqPath: %s",
+        rtl::OUStringToOString( aUnqPath, RTL_TEXTENCODING_UTF8 ).getStr());
     osl::MutexGuard aGuard( m_aMutex );
 
     sal_Int32 propChanged = 0;
