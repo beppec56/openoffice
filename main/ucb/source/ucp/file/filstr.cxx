@@ -35,6 +35,9 @@ using namespace fileaccess;
 using namespace com::sun::star;
 using namespace com::sun::star::ucb;
 
+//for debug logger printing remove when finalized
+#include <tools/debuglogger.hxx>
+
 
 
 /******************************************************************************/
@@ -101,7 +104,8 @@ XStream_impl::XStream_impl( shell* pMyShell,const rtl::OUString& aUncPath, sal_B
       m_pMyShell( pMyShell ),
 	  m_xProvider( m_pMyShell->m_pProvider ),
       m_bLock( bLock ),
-	  m_aFile( aUncPath ),
+      m_aFile( aUncPath ),
+      m_aFilePath( aUncPath ), //<---------= debug only !
 	  m_nErrorCode( TASKHANDLER_NO_ERROR ),
 	  m_nMinorErrorCode( TASKHANDLER_NO_ERROR )
 {
@@ -292,19 +296,30 @@ XStream_impl::closeStream(
 		   io::IOException,
 		   uno::RuntimeException )
 {
-	if( m_nIsOpen )
-	{
-		osl::FileBase::RC err = m_aFile.close();
+    DBGLOG_TRACE_FUNCTION(BOOST_CURRENT_FUNCTION,__LINE__,"m_aFilePath: %s",
+                          rtl::OUStringToOString( m_aFilePath, RTL_TEXTENCODING_UTF8 ).getStr());
+    try
+    {
+        if( m_nIsOpen )
+        {
+            osl::FileBase::RC err = m_aFile.close();
         
-        if( err != osl::FileBase::E_None ) {
-            io::IOException ex;
-            ex.Message = rtl::OUString::createFromAscii(
-                "could not close file");
-			throw ex;
-        }
+            if( err != osl::FileBase::E_None ) {
+                io::IOException ex;
+                ex.Message = rtl::OUString::createFromAscii(
+                    "could not close file");
+                throw ex;
+            }
 		
-		m_nIsOpen = false;
-	}
+            m_nIsOpen = false;
+        }
+    }
+    catch ( ... )
+    {
+        DBGLOG_EXCEPTION_BRIEF();
+        DBGLOG_FLUSH("main_ucb_source_ucp_file_filstr.log");
+        throw;
+    }
 }
 
 void SAL_CALL

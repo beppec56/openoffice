@@ -109,6 +109,10 @@ const ::rtl::OUString aFilterFlagsString   = ::rtl::OUString::createFromAscii( "
 
 using namespace ::com::sun::star;
 
+//for debug logger printing remove when finalized
+#include <tools/debuglogger.hxx>
+
+
 namespace {
 //-------------------------------------------------------------------------
 static sal_uInt16 getSlotIDFromMode( sal_Int8 nStoreMode )
@@ -147,9 +151,12 @@ static sal_uInt8 getStoreModeFromSlotName( const ::rtl::OUString& aSlotName )
 	else if ( aSlotName.equalsAscii( "SaveAs" ) )
 		nResult = SAVEAS_REQUESTED;
 	else
+    {
+        DBGLOG_TRACE_FUNCTION(BOOST_CURRENT_FUNCTION,__LINE__,"ERRCODE_IO_INVALIDPARAMETER going to be thrown");
 		throw task::ErrorCodeIOException( ::rtl::OUString(),
 											uno::Reference< uno::XInterface >(),
 											ERRCODE_IO_INVALIDPARAMETER );
+    }
 
 	return nResult;
 }
@@ -597,6 +604,8 @@ sal_Bool ModelData_Impl::ExecuteFilterDialog_Impl( const ::rtl::OUString& aFilte
 	}
 	catch( container::NoSuchElementException& )
 	{
+        DBGLOG_TRACE_FUNCTION(BOOST_CURRENT_FUNCTION,__LINE__,"ERRCODE_IO_INVALIDPARAMETER going to be thrown");
+
 		// the filter name is unknown
 		throw task::ErrorCodeIOException( ::rtl::OUString(),
 											uno::Reference< uno::XInterface >(),
@@ -813,9 +822,12 @@ sal_Bool ModelData_Impl::OutputFileDialog( sal_Int8 nStoreMode,
 
 	// the file name must be specified if overwrite option is set
 	if ( aOverwriteIter != GetMediaDescr().end() )
+    {
+        DBGLOG_TRACE_FUNCTION(BOOST_CURRENT_FUNCTION,__LINE__,"ERRCODE_IO_INVALIDPARAMETER going to be thrown");
    		throw task::ErrorCodeIOException( ::rtl::OUString(),
 											uno::Reference< uno::XInterface >(),
-											ERRCODE_IO_INVALIDPARAMETER );
+                                          ERRCODE_IO_INVALIDPARAMETER );
+    }
 
 	// no target file name is specified
 	// we need to show the file dialog
@@ -1417,9 +1429,12 @@ sal_Bool SfxStoringHelper::GUIStoreModel( const uno::Reference< frame::XModel >&
 
 	DBG_ASSERT( aFilterProps.getLength(), "No filter for storing!\n" );
 	if ( !aFilterProps.getLength() )
+    {
+        DBGLOG_TRACE_FUNCTION(BOOST_CURRENT_FUNCTION,__LINE__,"ERRCODE_IO_INVALIDPARAMETER going to be thrown");        
 		throw task::ErrorCodeIOException( ::rtl::OUString(),
 											uno::Reference< uno::XInterface >(),
 											ERRCODE_IO_INVALIDPARAMETER );
+    }
 
 	::comphelper::SequenceAsHashMap aFilterPropsHM( aFilterProps );
 	::rtl::OUString aFilterName = aFilterPropsHM.getUnpackedValueOrDefault(
@@ -1563,6 +1578,7 @@ sal_Bool SfxStoringHelper::GUIStoreModel( const uno::Reference< frame::XModel >&
 	}
 	else
 	{
+        DBGLOG_TRACE_FUNCTION(BOOST_CURRENT_FUNCTION,__LINE__,"ERRCODE_IO_INVALIDPARAMETER going to be thrown");        
 		DBG_ASSERT( sal_False, "This code must be unreachable!\n" );
 		throw task::ErrorCodeIOException( ::rtl::OUString(),
 											uno::Reference< uno::XInterface >(),

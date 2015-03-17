@@ -26,6 +26,9 @@
 
 #include "filrec.hxx"
 
+//for debug logger printing remove when finalized
+#include <tools/debuglogger.hxx>
+
 namespace fileaccess {
 
 void ReconnectingFile::disconnect()
@@ -53,18 +56,28 @@ sal_Bool ReconnectingFile::reconnect()
 
 ::osl::FileBase::RC ReconnectingFile::open( sal_uInt32 uFlags )
 {
-    ::osl::FileBase::RC nResult = m_aFile.open( uFlags );
-    if ( nResult == ::osl::FileBase::E_None )
+    DBGLOG_TRACE_FUNCTION(BOOST_CURRENT_FUNCTION,__LINE__,"uFlags %08x",uFlags);
+    try
     {
-        if ( uFlags & OpenFlag_Create )
-            m_nFlags = (uFlags & ( ~OpenFlag_Create )) | OpenFlag_Write;
-        else
-            m_nFlags = uFlags;
+        ::osl::FileBase::RC nResult = m_aFile.open( uFlags );
+        if ( nResult == ::osl::FileBase::E_None )
+        {
+            if ( uFlags & OpenFlag_Create )
+                m_nFlags = (uFlags & ( ~OpenFlag_Create )) | OpenFlag_Write;
+            else
+                m_nFlags = uFlags;
     
-        m_bFlagsSet = sal_True;
-    }
+            m_bFlagsSet = sal_True;
+        }
 
-    return nResult;
+        return nResult;
+    }
+    catch ( ... )
+    {
+        DBGLOG_EXCEPTION_BRIEF();
+        DBGLOG_FLUSH("main_ucb_source_ucp_file_filrec.log");
+        throw;
+    }    
 }
 
 ::osl::FileBase::RC ReconnectingFile::close()

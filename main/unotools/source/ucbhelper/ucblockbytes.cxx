@@ -75,6 +75,9 @@ using namespace ::com::sun::star::lang;
 using namespace ::com::sun::star::beans;
 
 
+//for debug logger printing remove when finalized
+#include <tools/debuglogger.hxx>
+
 namespace utl
 {
 
@@ -1591,7 +1594,10 @@ ErrCode UcbLockBytes::Stat( SvLockBytesStat *pStat, SvLockBytesStatFlag) const
     }
 
 	if (!pStat)
+    {
+        DBGLOG_TRACE_FUNCTION(BOOST_CURRENT_FUNCTION,__LINE__,"ERRCODE_IO_INVALIDPARAMETER going to be thrown");        
 		return ERRCODE_IO_INVALIDPARAMETER;
+    }
 
     Reference <XInputStream> xStream = getInputStream_Impl();
     Reference <XSeekable> xSeekable = getSeekable_Impl();
