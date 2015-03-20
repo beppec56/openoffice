@@ -996,6 +996,7 @@ sal_uInt32 SfxObjectShell::HandleFilter( SfxMedium* pMedium, SfxObjectShell* pDo
             catch( NoSuchElementException& )
             {
                 // the filter name is unknown
+                DBGLOG_TRACE_FUNCTION(BOOST_CURRENT_FUNCTION,__LINE__,"ERRCODE_IO_INVALIDPARAMETER going to be set");
                 nError = ERRCODE_IO_INVALIDPARAMETER;
             }
             catch( Exception& )
@@ -2772,6 +2773,7 @@ sal_Bool SfxObjectShell::CommonSaveAs_Impl
 {
     if( aURL.HasError() )
     {
+        DBGLOG_TRACE_FUNCTION(BOOST_CURRENT_FUNCTION,__LINE__,"ERRCODE_IO_INVALIDPARAMETER going to be thrown");
         SetError( ERRCODE_IO_INVALIDPARAMETER, ::rtl::OUString( RTL_CONSTASCII_USTRINGPARAM( OSL_LOG_PREFIX ) ) );
         return sal_False;
     }
@@ -2810,6 +2812,7 @@ sal_Bool SfxObjectShell::CommonSaveAs_Impl
         || !pFilter->CanExport()
         || (!bSaveTo && !pFilter->CanImport()) )
     {
+        DBGLOG_TRACE_FUNCTION(BOOST_CURRENT_FUNCTION,__LINE__,"ERRCODE_IO_INVALIDPARAMETER going to be set");
         SetError( ERRCODE_IO_INVALIDPARAMETER, ::rtl::OUString( RTL_CONSTASCII_USTRINGPARAM( OSL_LOG_PREFIX ) ) );
         return sal_False;
     }
