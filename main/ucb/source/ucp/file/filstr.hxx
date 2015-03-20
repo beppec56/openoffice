@@ -222,6 +222,7 @@ namespace fileaccess {
         sal_Bool     m_bLock;
 
 		ReconnectingFile    m_aFile;
+        rtl::OUString      m_aFilePath;
 		
 		sal_Int32                                          m_nErrorCode;
 		sal_Int32                                          m_nMinorErrorCode;

@@ -701,10 +701,9 @@ shell::open( sal_Int32 CommandId,
 
         return uno::Reference< io::XInputStream >( xInputStream );
     }
-    catch (uno::Exception& e)
+    catch ( ... )
     {
-        DBGLOG_TRACE_FUNCTION(BOOST_CURRENT_FUNCTION,__LINE__,"ERROR: EXCEPTION !\n - CommandId %d\n - aUnqPath: %s\n - bLock: %d",
-                              CommandId, rtl::OUStringToOString( aUnqPath, RTL_TEXTENCODING_UTF8 ).getStr(),bLock);
+        DBGLOG_EXCEPTION_BRIEF();
         DBGLOG_FLUSH("main_ucb_source_ucp_file_shell.log");
         throw;
     }
@@ -740,6 +739,8 @@ shell::open_rw( sal_Int32 CommandId,
 
         if( ErrorCode != TASKHANDLER_NO_ERROR )
         {
+            DBGLOG_TRACE_FUNCTION(BOOST_CURRENT_FUNCTION,__LINE__,"ERROR: CommandId %d\n - aUnqPath: %s\n - bLock: %d, ErrorCode %d",
+                                  CommandId, rtl::OUStringToOString( aUnqPath, RTL_TEXTENCODING_UTF8 ).getStr(),bLock,ErrorCode);
             installError( CommandId,
                           ErrorCode,
                           xStream->getMinorError() );
@@ -749,10 +750,9 @@ shell::open_rw( sal_Int32 CommandId,
         }
         return uno::Reference< io::XStream >( xStream );
     }
-    catch (uno::Exception& e)
+    catch ( ... )
     {
-        DBGLOG_TRACE_FUNCTION(BOOST_CURRENT_FUNCTION,__LINE__,"ERROR: EXCEPTION !\n - CommandId %d\n - aUnqPath: %s\n - bLock: %d",
-                              CommandId, rtl::OUStringToOString( aUnqPath, RTL_TEXTENCODING_UTF8 ).getStr(),bLock);
+        DBGLOG_EXCEPTION_BRIEF();
         DBGLOG_FLUSH("main_ucb_source_ucp_file_shell.log");
         throw;
     }
