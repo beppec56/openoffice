@@ -5571,7 +5571,7 @@
 					<author>MAV</author>
 					<desc>Allows to specify whether the OOo document file locking mechanics should use the lock file for locking.</desc>
 				</info>
-				<value>true</value>
+				<value>false</value>
 			</prop>
 			<prop oor:name="UseSystemPrintDialog" oor:type="xs:boolean">
 				<info>
