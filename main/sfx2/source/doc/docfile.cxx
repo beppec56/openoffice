@@ -1113,6 +1113,14 @@ sal_Bool SfxMedium::LockOrigFileOnDemand( sal_Bool bLoading, sal_Bool bNoUI )
     // otherwise the document should be opened readonly
     // if user cancel the loading the ERROR_ABORT is set
 
+    /*
+     * NOTE:
+     * in win32 fs need to change behavior:
+     * - if the file can not be opened exclusive, then open readonly and set the IsReadonly prop and do not set as locked
+     *              return the prop IsReadonly as true
+     * - if the file can be opened in read/write mode, then IsReadonly to false, set as already locked
+     */
+
     if ( pImp->m_bLocked && bLoading && ::utl::LocalFileHelper::IsLocalFile( GetURLObject().GetMainURL( INetURLObject::NO_DECODE ) ) )
     {
         // if the document is already locked the system locking might be temporarely off after storing
@@ -1187,117 +1195,124 @@ sal_Bool SfxMedium::LockOrigFileOnDemand( sal_Bool bLoading, sal_Bool bNoUI )
                 // if system lock is used the writeable stream should be available
                 sal_Bool bHandleSysLocked = ( bLoading && bUseSystemLock && !pImp->xStream.is() && !pOutStream );
 
-                do
+                if(IsOOoLockFileUsed())
                 {
-                    try
+                    do
                     {
-                        ::svt::DocumentLockFile aLockFile( aLogicName );
-                        if ( !bHandleSysLocked )
+                        try
                         {
-                            try
-                            {
-                                bResult = aLockFile.CreateOwnLockFile();
-                            }
-                            catch ( ucb::InteractiveIOException& e )
-                            {
-                                // exception means that the lock file can not be successfuly accessed
-                                // in this case it should be ignored if system file locking is anyway active
-                                if ( bUseSystemLock || !IsOOoLockFileUsed() )
-                                {
-                                    bResult = sal_True;
-                                    // take the ownership over the lock file
-                                    aLockFile.OverwriteOwnLockFile();
-                                }
-                                else if ( e.Code == IOErrorCode_INVALID_PARAMETER )
-                                {
-                                    // system file locking is not active, ask user whether he wants to open the document without any locking
-                                    uno::Reference< task::XInteractionHandler > xHandler = GetInteractionHandler();
-
-                                    if ( xHandler.is() )
-                                    {
-                                        ::rtl::Reference< ::ucbhelper::InteractionRequest > xIgnoreRequestImpl
-                                            = new ::ucbhelper::InteractionRequest( uno::makeAny( document::LockFileIgnoreRequest() ) );
-
-                                        uno::Sequence< uno::Reference< task::XInteractionContinuation > > aContinuations( 2 );
-                                        aContinuations[0] = new ::ucbhelper::InteractionAbort( xIgnoreRequestImpl.get() );
-                                        aContinuations[1] = new ::ucbhelper::InteractionApprove( xIgnoreRequestImpl.get() );
-                                        xIgnoreRequestImpl->setContinuations( aContinuations );
-
-                                        xHandler->handle( xIgnoreRequestImpl.get() );
-
-                                        ::rtl::Reference< ::ucbhelper::InteractionContinuation > xSelected = xIgnoreRequestImpl->getSelection();
-                                        bResult = (  uno::Reference< task::XInteractionApprove >( xSelected.get(), uno::UNO_QUERY ).is() );
-                                    }
-                                }
-                            }
-                            catch ( uno::Exception& )
-                            {
-                                // exception means that the lock file can not be successfuly accessed
-                                // in this case it should be ignored if system file locking is anyway active
-                                if ( bUseSystemLock || !IsOOoLockFileUsed() )
-                                {
-                                    bResult = sal_True;
-                                    // take the ownership over the lock file
-                                    aLockFile.OverwriteOwnLockFile();
-                                }
-                            }
-
-                            // in case OOo locking is turned off the lock file is still written if possible
-                            // but it is ignored while deciding whether the document should be opened for editing or not
-                            if ( !bResult && !IsOOoLockFileUsed() )
-                            {
-                                bResult = sal_True;
-                                // take the ownership over the lock file
-                                aLockFile.OverwriteOwnLockFile();
-                            }
-                        }
-
-
-                        if ( !bResult )
-                        {
-                            uno::Sequence< ::rtl::OUString > aData;
-                            try
-                            {
-                                // impossibility to get data is no real problem
-                                aData = aLockFile.GetLockData();
-                            }
-                            catch( uno::Exception ) {}
-
-                            sal_Bool bOwnLock = sal_False;
-
+                            ::svt::DocumentLockFile aLockFile( aLogicName );
                             if ( !bHandleSysLocked )
                             {
-                                uno::Sequence< ::rtl::OUString > aOwnData = aLockFile.GenerateOwnEntry();
-                                bOwnLock = ( aData.getLength() > LOCKFILE_USERURL_ID
-                                          && aOwnData.getLength() > LOCKFILE_USERURL_ID
-                                          && aOwnData[LOCKFILE_SYSUSERNAME_ID].equals( aData[LOCKFILE_SYSUSERNAME_ID] ) );
-
-                                if ( bOwnLock
-                                  && aOwnData[LOCKFILE_LOCALHOST_ID].equals( aData[LOCKFILE_LOCALHOST_ID] )
-                                  && aOwnData[LOCKFILE_USERURL_ID].equals( aData[LOCKFILE_USERURL_ID] ) )
+                                try
                                 {
-                                    // this is own lock from the same installation, it could remain because of crash
+                                    bResult = aLockFile.CreateOwnLockFile();
+                                }
+                                catch ( ucb::InteractiveIOException& e )
+                                {
+                                    // exception means that the lock file can not be successfuly accessed
+                                    // in this case it should be ignored if system file locking is anyway active
+                                    if ( bUseSystemLock || !IsOOoLockFileUsed() )
+                                    {
+                                        bResult = sal_True;
+                                        // take the ownership over the lock file
+                                        aLockFile.OverwriteOwnLockFile();
+                                    }
+                                    else if ( e.Code == IOErrorCode_INVALID_PARAMETER )
+                                    {
+                                        // system file locking is not active, ask user whether he wants to open the document without any locking
+                                        uno::Reference< task::XInteractionHandler > xHandler = GetInteractionHandler();
+
+                                        if ( xHandler.is() )
+                                        {
+                                            ::rtl::Reference< ::ucbhelper::InteractionRequest > xIgnoreRequestImpl
+                                                = new ::ucbhelper::InteractionRequest( uno::makeAny( document::LockFileIgnoreRequest() ) );
+
+                                            uno::Sequence< uno::Reference< task::XInteractionContinuation > > aContinuations( 2 );
+                                            aContinuations[0] = new ::ucbhelper::InteractionAbort( xIgnoreRequestImpl.get() );
+                                            aContinuations[1] = new ::ucbhelper::InteractionApprove( xIgnoreRequestImpl.get() );
+                                            xIgnoreRequestImpl->setContinuations( aContinuations );
+
+                                            xHandler->handle( xIgnoreRequestImpl.get() );
+
+                                            ::rtl::Reference< ::ucbhelper::InteractionContinuation > xSelected = xIgnoreRequestImpl->getSelection();
+                                            bResult = (  uno::Reference< task::XInteractionApprove >( xSelected.get(), uno::UNO_QUERY ).is() );
+                                        }
+                                    }
+                                }
+                                catch ( uno::Exception& )
+                                {
+                                    // exception means that the lock file can not be successfuly accessed
+                                    // in this case it should be ignored if system file locking is anyway active
+                                    if ( bUseSystemLock || !IsOOoLockFileUsed() )
+                                    {
+                                        bResult = sal_True;
+                                        // take the ownership over the lock file
+                                        aLockFile.OverwriteOwnLockFile();
+                                    }
+                                }
+
+                                // in case OOo locking is turned off the lock file is still written if possible
+                                // but it is ignored while deciding whether the document should be opened for editing or not
+                                if ( !bResult && !IsOOoLockFileUsed() )
+                                {
                                     bResult = sal_True;
-                                }
-                            }
-
-                            if ( !bResult && !bNoUI )
-                            {
-                                bUIStatus = ShowLockedDocumentDialog( aData, bLoading, bOwnLock );
-                                if ( bUIStatus == LOCK_UI_SUCCEEDED )
-                                {
                                     // take the ownership over the lock file
-                                    bResult = aLockFile.OverwriteOwnLockFile();
+                                    aLockFile.OverwriteOwnLockFile();
                                 }
                             }
 
-                            bHandleSysLocked = sal_False;
+
+                            if ( !bResult )
+                            {
+                                uno::Sequence< ::rtl::OUString > aData;
+                                try
+                                {
+                                    // impossibility to get data is no real problem
+                                    aData = aLockFile.GetLockData();
+                                }
+                                catch( uno::Exception ) {}
+
+                                sal_Bool bOwnLock = sal_False;
+
+                                if ( !bHandleSysLocked )
+                                {
+                                    uno::Sequence< ::rtl::OUString > aOwnData = aLockFile.GenerateOwnEntry();
+                                    bOwnLock = ( aData.getLength() > LOCKFILE_USERURL_ID
+                                                 && aOwnData.getLength() > LOCKFILE_USERURL_ID
+                                                 && aOwnData[LOCKFILE_SYSUSERNAME_ID].equals( aData[LOCKFILE_SYSUSERNAME_ID] ) );
+
+                                    if ( bOwnLock
+                                         && aOwnData[LOCKFILE_LOCALHOST_ID].equals( aData[LOCKFILE_LOCALHOST_ID] )
+                                         && aOwnData[LOCKFILE_USERURL_ID].equals( aData[LOCKFILE_USERURL_ID] ) )
+                                    {
+                                        // this is own lock from the same installation, it could remain because of crash
+                                        bResult = sal_True;
+                                    }
+                                }
+
+                                if ( !bResult && !bNoUI )
+                                {
+                                    bUIStatus = ShowLockedDocumentDialog( aData, bLoading, bOwnLock );
+                                    if ( bUIStatus == LOCK_UI_SUCCEEDED )
+                                    {
+                                        // take the ownership over the lock file
+                                        bResult = aLockFile.OverwriteOwnLockFile();
+                                    }
+                                }
+
+                                bHandleSysLocked = sal_False;
+                            }
                         }
-                    }
-                    catch( uno::Exception& )
-                    {
-                    }
-                } while( !bResult && bUIStatus == LOCK_UI_TRY );
+                        catch( uno::Exception& )
+                        {
+                        }
+                    } while( !bResult && bUIStatus == LOCK_UI_TRY );
+                }
+                else
+                {
+                    bResult = sal_True;
+                }
 
                 pImp->m_bLocked = bResult;
             }
