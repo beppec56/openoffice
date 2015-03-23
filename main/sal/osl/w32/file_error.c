@@ -109,6 +109,7 @@ oslFileError oslTranslateFileError (/*DWORD*/ unsigned long dwError)
 	static const int n = sizeof(errtable)/sizeof(errtable[0]);
 
 	int i;
+    OSL_LOG_TRACE_FUNCTION( "oslTranslateFileError", __LINE__, "dwError 0x%08x ", dwError );
 	for (i = 0; i < n; ++i )
 	{
 		if (dwError == errtable[i].oscode)
@@ -119,6 +120,7 @@ oslFileError oslTranslateFileError (/*DWORD*/ unsigned long dwError)
 	   osl_File_E_ACCES errors or exec failure errors (ENOEXEC).  
 	   Otherwise osl_File_E_INVAL is returned.
 	*/
+    OSL_LOG_TRACE_FUNCTION( "oslTranslateFileError", __LINE__, "The error code wasn't in the table: dwError 0x%08x ", dwError );
 	if ( (dwError >= MIN_EACCES_RANGE) && (dwError <= MAX_EACCES_RANGE) )
 		return osl_File_E_ACCES;
 	else if ( (dwError >= MIN_EXEC_ERROR) && (dwError <= MAX_EXEC_ERROR) )

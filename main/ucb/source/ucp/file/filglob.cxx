@@ -57,6 +57,9 @@
 #include <rtl/ustring.hxx>
 #include "sal/types.h"
 
+//for debug logger printing remove when finalized
+#include <tools/debuglogger.hxx>
+
 using namespace ucbhelper;
 using namespace osl;
 using namespace ::com::sun::star;
@@ -359,17 +362,21 @@ namespace fileaccess {
                 case FileBase::E_BUSY:
                     // Text file busy
                     ioErrorCode = IOErrorCode_LOCKING_VIOLATION;
+                    DBGLOG_TRACE_FUNCTION(BOOST_CURRENT_FUNCTION,__LINE__,"ERROR: error IOErrorCode_LOCKING_VIOLATION WAS SET!");
                     break;
                 case FileBase::E_AGAIN:
                     // Operation would block
                     ioErrorCode = IOErrorCode_LOCKING_VIOLATION;
+                    DBGLOG_TRACE_FUNCTION(BOOST_CURRENT_FUNCTION,__LINE__,"ERROR: error IOErrorCode_LOCKING_VIOLATION WAS SET!");
                     break;
                 case FileBase::E_NOLCK:  // No record locks available
                     ioErrorCode = IOErrorCode_LOCKING_VIOLATION;
+                    DBGLOG_TRACE_FUNCTION(BOOST_CURRENT_FUNCTION,__LINE__,"ERROR: error IOErrorCode_LOCKING_VIOLATION WAS SET!");
                     break;
 
                 case FileBase::E_LOCKED:  // file is locked by another user
                     ioErrorCode = IOErrorCode_LOCKING_VIOLATION;
+                    DBGLOG_TRACE_FUNCTION(BOOST_CURRENT_FUNCTION,__LINE__,"ERROR: error IOErrorCode_LOCKING_VIOLATION WAS SET!");
                     break;
 
                 case FileBase::E_FAULT: // Bad address
@@ -507,12 +514,14 @@ namespace fileaccess {
                 case FileBase::E_AGAIN:
                     // Operation would block
                     ioErrorCode = IOErrorCode_LOCKING_VIOLATION;
+                    DBGLOG_TRACE_FUNCTION(BOOST_CURRENT_FUNCTION,__LINE__,"ERROR: error IOErrorCode_LOCKING_VIOLATION WAS SET!");
                     break;
                 case FileBase::E_TIMEDOUT:
                     ioErrorCode = IOErrorCode_DEVICE_NOT_READY;
                     break;
                 case FileBase::E_NOLCK:  // No record locks available
                     ioErrorCode = IOErrorCode_LOCKING_VIOLATION;
+                    DBGLOG_TRACE_FUNCTION(BOOST_CURRENT_FUNCTION,__LINE__,"ERROR: error IOErrorCode_LOCKING_VIOLATION WAS SET!");
                     break;
                 case FileBase::E_IO:	 // I/O error
                 case FileBase::E_BADF:	 // Bad file
@@ -774,6 +783,7 @@ namespace fileaccess {
                     break;
                 case FileBase::E_BUSY:			// Device or resource busy
                     ioErrorCode = IOErrorCode_LOCKING_VIOLATION;
+                    DBGLOG_TRACE_FUNCTION(BOOST_CURRENT_FUNCTION,__LINE__,"ERROR: error IOErrorCode_LOCKING_VIOLATION WAS SET!");
                     break;
                 case FileBase::E_FAULT:		    // Bad address
                 case FileBase::E_LOOP:			// Too many symbolic links encountered

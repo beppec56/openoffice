@@ -1831,6 +1831,7 @@ static ExecuteGlobals* pExecGlobals = NULL;
 
 void Desktop::Main()
 {
+    DBGLOG_TRACE("%s:%d - enter Desktop::Main()",OSL_THIS_FILE,__LINE__);
     pExecGlobals = new ExecuteGlobals();
     
     RTL_LOGFILE_CONTEXT( aLog, "desktop (cd100003) ::Desktop::Main" );

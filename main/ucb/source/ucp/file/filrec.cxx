@@ -56,7 +56,7 @@ sal_Bool ReconnectingFile::reconnect()
 
 ::osl::FileBase::RC ReconnectingFile::open( sal_uInt32 uFlags )
 {
-    DBGLOG_TRACE_FUNCTION(BOOST_CURRENT_FUNCTION,__LINE__,"uFlags %08x",uFlags);
+    DBGLOG_TRACE_FUNCTION(BOOST_CURRENT_FUNCTION,__LINE__,"uFlags 0x%08x",uFlags);
     try
     {
         ::osl::FileBase::RC nResult = m_aFile.open( uFlags );
