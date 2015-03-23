@@ -728,7 +728,7 @@ shell::open_rw( sal_Int32 CommandId,
                 const rtl::OUString& aUnqPath,
                 sal_Bool bLock )
     throw()
-{
+{    
     DBGLOG_TRACE_FUNCTION(BOOST_CURRENT_FUNCTION,__LINE__,"CommandId %d\n - aUnqPath: %s\n - bLock: %d",
                           CommandId, rtl::OUStringToOString( aUnqPath, RTL_TEXTENCODING_UTF8 ).getStr(),bLock);
     try

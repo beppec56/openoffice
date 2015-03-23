@@ -54,6 +54,10 @@
 
 #include <rtl/ustrbuf.hxx>
 
+//for debug logger printing remove when finalized
+#include <osl/diagnose.h>
+#include <boost/current_function.hpp>
+
 //_______________________________________________
 // namespace
 
@@ -702,7 +706,9 @@ sal_Bool MediaDescriptor::impl_openStreamWithPostData( const css::uno::Reference
 sal_Bool MediaDescriptor::impl_openStreamWithURL( const ::rtl::OUString& sURL, sal_Bool bLockFile )
     throw(::com::sun::star::uno::RuntimeException)
 {
-    // prepare the environment
+    OSL_LOG_TRACE_FUNCTION(BOOST_CURRENT_FUNCTION,__LINE__,"sURL: %s",
+                           rtl::OUStringToOString( sURL, RTL_TEXTENCODING_UTF8 ).getStr()); 
+// prepare the environment
 	css::uno::Reference< css::task::XInteractionHandler > xOrgInteraction = getUnpackedValueOrDefault(
 		MediaDescriptor::PROP_INTERACTIONHANDLER(),
 		css::uno::Reference< css::task::XInteractionHandler >());
@@ -724,11 +730,13 @@ sal_Bool MediaDescriptor::impl_openStreamWithURL( const ::rtl::OUString& sURL, s
         xContent = aContent.get();
     }
     catch(const css::uno::RuntimeException&)
-        { throw; }
+    {   OSL_LOG_TRACE_FUNCTION(BOOST_CURRENT_FUNCTION,__LINE__,"css::uno::RuntimeException"); throw; }
     catch(const css::ucb::ContentCreationException&)
-        { return sal_False; } // TODO error handling
+        { OSL_LOG_TRACE_FUNCTION(BOOST_CURRENT_FUNCTION,__LINE__,"css::uno::ContentCreationException: TODO error handling"); return sal_False; } // TODO error handling
 	catch(const css::uno::Exception&)
-        { return sal_False; } // TODO error handling
+        {  OSL_LOG_TRACE_FUNCTION(BOOST_CURRENT_FUNCTION,__LINE__,"css::uno::Exception: TODO error handling"); return sal_False; } // TODO error handling
+    catch( ... )
+    { OSL_LOG_TRACE_FUNCTION(BOOST_CURRENT_FUNCTION,__LINE__,"UNKNOWN exception !"); throw; }
 
     // try to open the file in read/write mode
     // (if its allowed to do so).
@@ -752,11 +760,15 @@ sal_Bool MediaDescriptor::impl_openStreamWithURL( const ::rtl::OUString& sURL, s
         {
             // TODO: use "special" still interaction to supress error messages
             xStream = aContent.openWriteableStream();
+            OSL_LOG_TRACE_FUNCTION(BOOST_CURRENT_FUNCTION,__LINE__,"aContent.openWriteableStream() DONE!" ); 
             if (xStream.is())
+            {
                 xInputStream = xStream->getInputStream();
+                OSL_LOG_TRACE_FUNCTION(BOOST_CURRENT_FUNCTION,__LINE__,"xStream->getInputStream() DONE!" ); 
+            }
         }
         catch(const css::uno::RuntimeException&)
-            { throw; }
+            { OSL_LOG_TRACE_FUNCTION(BOOST_CURRENT_FUNCTION,__LINE__,"css::uno::RuntimeException" ); throw; }
         catch(const css::uno::Exception&)
             {
                 // ignore exception, if reason was problem reasoned on
@@ -764,17 +776,26 @@ sal_Bool MediaDescriptor::impl_openStreamWithURL( const ::rtl::OUString& sURL, s
                 // later a second time.
                 // All other errors must be handled as real error an
                 // break this method.
+                OSL_LOG_TRACE_FUNCTION(BOOST_CURRENT_FUNCTION,__LINE__,"css::uno::Exception: ignore exception, if reason was problem reasoned on\nopen it in WRITEABLE mode! Then we try it READONLY\nlater a second time.\nAll other errors must be handled as real error an\nbreak this method" ); 
                 if (!pInteraction->wasWriteError() || bModeRequestedExplicitly)
+                {
+                    OSL_LOG_TRACE_FUNCTION(BOOST_CURRENT_FUNCTION,__LINE__,"pInteraction->wasWriteError(): %s, bModeRequestedExplicitly: %s - sal_False is returned",
+                                           pInteraction->wasWriteError() ? "true":"false", bModeRequestedExplicitly ? "true":"false" );
                     return sal_False;
+                }
+                OSL_LOG_TRACE_FUNCTION(BOOST_CURRENT_FUNCTION,__LINE__,"execute: xStream.clear() and xInputStream.clear()" );
                 xStream.clear();
                 xInputStream.clear();
             }
+        catch( ... )
+        { OSL_LOG_TRACE_FUNCTION(BOOST_CURRENT_FUNCTION,__LINE__,"got a general exception" ); throw; }
     }
 
     // If opening of the stream in read/write mode wasnt allowed
     // or failed by an error - we must try it in readonly mode.
     if (!xInputStream.is())
     {
+        OSL_LOG_TRACE_FUNCTION(BOOST_CURRENT_FUNCTION,__LINE__,"If opening of the stream in read/write mode wasnt allowed\n - or failed by an error - we must try it in readonly mode");
         rtl::OUString aScheme;
 
 		try
@@ -795,13 +816,18 @@ sal_Bool MediaDescriptor::impl_openStreamWithURL( const ::rtl::OUString& sURL, s
                 sal_Bool bRequestReadOnly = bReadOnly;
 				aContent.getPropertyValue( ::rtl::OUString( RTL_CONSTASCII_USTRINGPARAM( "IsReadOnly" ) ) ) >>= bReadOnly;
                 if ( bReadOnly && !bRequestReadOnly && bModeRequestedExplicitly )
-                        return sal_False; // the document is explicitly requested with WRITEABLE mode
+                {
+                    OSL_LOG_TRACE_FUNCTION(BOOST_CURRENT_FUNCTION,__LINE__,"the document is explicitly requested with WRITEABLE mode" );
+                    return sal_False; // the document is explicitly requested with WRITEABLE mode
+                }
             }
 		}
         catch(const css::uno::RuntimeException&)
-            { throw; }
+            { OSL_LOG_TRACE_FUNCTION(BOOST_CURRENT_FUNCTION,__LINE__,"css::uno::RuntimeException" ); throw; }
         catch(const css::uno::Exception&)
-            { /* no error handling if IsReadOnly property does not exist for UCP */ }
+            { OSL_LOG_TRACE_FUNCTION(BOOST_CURRENT_FUNCTION,__LINE__,"css::uno::Exception: no error handling if IsReadOnly property does not exist for UCP" );  /* no error handling if IsReadOnly property does not exist for UCP */ }
+        catch( ... )
+        { OSL_LOG_TRACE_FUNCTION(BOOST_CURRENT_FUNCTION,__LINE__,"UNKNOWN exception !"); throw; }
 
 		if ( bReadOnly )
        		(*this)[MediaDescriptor::PROP_READONLY()] <<= bReadOnly;
@@ -817,9 +843,11 @@ sal_Bool MediaDescriptor::impl_openStreamWithURL( const ::rtl::OUString& sURL, s
                 xInputStream = aContent.openStreamNoLock();
         }
         catch(const css::uno::RuntimeException&)
-            { throw; }
+            { OSL_LOG_TRACE_FUNCTION(BOOST_CURRENT_FUNCTION,__LINE__,"css::uno::RuntimeException" ); throw; }
         catch(const css::uno::Exception&)
-            { return sal_False; }
+            { OSL_LOG_TRACE_FUNCTION(BOOST_CURRENT_FUNCTION,__LINE__,"css::uno::Exception" ); return sal_False; }
+        catch( ... )
+        { OSL_LOG_TRACE_FUNCTION(BOOST_CURRENT_FUNCTION,__LINE__,"UNKNOWN exception !"); throw; }
     }
 
     // add streams to the descriptor
