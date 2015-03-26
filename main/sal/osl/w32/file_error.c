@@ -87,7 +87,9 @@ static const struct osl_file_error_entry errtable[] = {
   {  ERROR_NESTING_NOT_ALLOWED,    osl_File_E_AGAIN    },  /* 215 */
   {  ERROR_DIRECTORY,              osl_File_E_NOENT    },  /* 267 */
   {  ERROR_NOT_ENOUGH_QUOTA,       osl_File_E_NOMEM    },  /* 1816 */
-  {  ERROR_UNEXP_NET_ERR,          osl_File_E_NETWORK  }   /* 59 */
+  {  ERROR_UNEXP_NET_ERR,          osl_File_E_NETWORK  },   /* 59 */
+  {  ERROR_FILE_CHECKED_OUT,       osl_File_E_LOCKED   },   /* 220 The file is locked or checked out by another user. */
+  {  ERROR_INVALID_NAME,           osl_File_E_NOENT    }   /*  123 One or more of the names composing the file path has a wrong syntax. */
 };
     
 /* The following two constants must be the minimum and maximum
@@ -107,7 +109,7 @@ oslFileError oslTranslateFileError (/*DWORD*/ unsigned long dwError)
 	static const int n = sizeof(errtable)/sizeof(errtable[0]);
 
 	int i;
-    OSL_LOG_TRACE_FUNCTION( "oslTranslateFileError", __LINE__, "dwError %08x ", dwError );
+    OSL_LOG_TRACE_FUNCTION( "oslTranslateFileError", __LINE__, "dwError 0x%08x ", dwError );
 	for (i = 0; i < n; ++i )
 	{
 		if (dwError == errtable[i].oscode)
@@ -118,7 +120,7 @@ oslFileError oslTranslateFileError (/*DWORD*/ unsigned long dwError)
 	   osl_File_E_ACCES errors or exec failure errors (ENOEXEC).  
 	   Otherwise osl_File_E_INVAL is returned.
 	*/
-    OSL_LOG_TRACE_FUNCTION( "oslTranslateFileError", __LINE__, "The error code wasn't in the table: dwError %08x ", dwError );
+    OSL_LOG_TRACE_FUNCTION( "oslTranslateFileError", __LINE__, "The error code wasn't in the table: dwError 0x%08x ", dwError );
 	if ( (dwError >= MIN_EACCES_RANGE) && (dwError <= MAX_EACCES_RANGE) )
 		return osl_File_E_ACCES;
 	else if ( (dwError >= MIN_EXEC_ERROR) && (dwError <= MAX_EXEC_ERROR) )
