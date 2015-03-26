@@ -1129,6 +1129,7 @@ sal_Bool SfxMedium::LockOrigFileOnDemand( sal_Bool bLoading, sal_Bool bNoUI )
         bResult = ( bLoading && pTemplateItem && pTemplateItem->GetValue() );
     }
 
+    DBGLOG_TRACE_FUNCTION(BOOST_CURRENT_FUNCTION,__LINE__,"bResult: %s, IsReadOnly(): %s",bResult?"true":"false",IsReadOnly()? "true":"false");
     if ( !bResult && !IsReadOnly() )
     {
         sal_Bool bContentReadonly = sal_False;
@@ -1186,6 +1187,12 @@ sal_Bool SfxMedium::LockOrigFileOnDemand( sal_Bool bLoading, sal_Bool bNoUI )
                 // TODO/LATER: This implementation does not allow to detect the system lock on saving here, actually this is no big problem
                 // if system lock is used the writeable stream should be available
                 sal_Bool bHandleSysLocked = ( bLoading && bUseSystemLock && !pImp->xStream.is() && !pOutStream );
+
+                DBGLOG_TRACE_FUNCTION(BOOST_CURRENT_FUNCTION,__LINE__,"bLoading %s, bUseSystemLock %s, pImp->xStream.is() %s, pOutStream %s, bHandleSysLocked %s, IsOOoLockFileUsed %s",
+                                      bLoading? "true":"false", bUseSystemLock? "true":"false",
+                                      pImp->xStream.is()? "true":"false",pOutStream? "true":"false",
+                                      bHandleSysLocked? "true":"false",
+                                      IsOOoLockFileUsed? "true":"false");
 
                 do
                 {

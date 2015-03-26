@@ -810,7 +810,10 @@ sal_Bool MediaDescriptor::impl_openStreamWithURL( const ::rtl::OUString& sURL, s
 			// so for this content impossibility to create XStream triggers
 			// switch to readonly mode in case of opening with locking on
     		if( bLockFile && aScheme.equalsIgnoreAsciiCaseAscii( "file" ) )
+            {
+                OSL_LOG_TRACE_FUNCTION(BOOST_CURRENT_FUNCTION,__LINE__,"SET: bReadOnly = sal_True" );
         		bReadOnly = sal_True;
+            }
 			else
             {
                 sal_Bool bRequestReadOnly = bReadOnly;
@@ -830,7 +833,10 @@ sal_Bool MediaDescriptor::impl_openStreamWithURL( const ::rtl::OUString& sURL, s
         { OSL_LOG_TRACE_FUNCTION(BOOST_CURRENT_FUNCTION,__LINE__,"UNKNOWN exception !"); throw; }
 
 		if ( bReadOnly )
+        {
+            OSL_LOG_TRACE_FUNCTION(BOOST_CURRENT_FUNCTION,__LINE__,"DONE: (*this)[MediaDescriptor::PROP_READONLY()] <<= bReadOnly" );            
        		(*this)[MediaDescriptor::PROP_READONLY()] <<= bReadOnly;
+        }
 
         pInteraction->resetInterceptions();
         pInteraction->resetErrorStates();
