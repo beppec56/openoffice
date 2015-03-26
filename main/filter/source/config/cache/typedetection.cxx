@@ -1146,14 +1146,14 @@ void TypeDetection::impl_openStream(::comphelper::MediaDescriptor& rDescriptor)
     if ( !bSuccess )
         throw css::uno::Exception(_FILTER_CONFIG_FROM_ASCII_("Could not open stream."), static_cast< css::document::XTypeDetection* >(this));
 
-    if ( !bRequestedReadOnly )
-    {
-        // The MediaDescriptor implementation adds ReadOnly argument if the file can not be opened for writing
-        // this argument should be either removed or an additional argument should be added so that application
-        // can separate the case when the user explicitly requests readonly document.
-        // The current solution is to remove it here.
-        rDescriptor.erase( ::comphelper::MediaDescriptor::PROP_READONLY() );
-    }
+    // if ( !bRequestedReadOnly )
+    // {
+    //     // The MediaDescriptor implementation adds ReadOnly argument if the file can not be opened for writing
+    //     // this argument should be either removed or an additional argument should be added so that application
+    //     // can separate the case when the user explicitly requests readonly document.
+    //     // The current solution is to remove it here.
+    //     rDescriptor.erase( ::comphelper::MediaDescriptor::PROP_READONLY() );
+    // }
 }
 
 /*-----------------------------------------------
