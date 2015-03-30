@@ -3248,6 +3248,7 @@ SfxMedium::SfxMedium( const ::com::sun::star::uno::Sequence< ::com::sun::star::b
     if ( pReadOnlyItem && pReadOnlyItem->GetValue() )
         bReadOnly = sal_True;
 
+    DBGLOG_TRACE_FUNCTION(BOOST_CURRENT_FUNCTION,__LINE__,"bReadOnly: %s",bReadOnly?"true":"false");
     SFX_ITEMSET_ARG( pSet, pFileNameItem, SfxStringItem, SID_FILE_NAME, sal_False );
     if (!pFileNameItem) throw uno::RuntimeException();
     aLogicName = pFileNameItem->GetValue();

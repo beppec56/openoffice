@@ -58,6 +58,9 @@
 #include <osl/diagnose.h>
 #include <boost/current_function.hpp>
 
+//for debug logger printing remove when finalized
+#include <tools/debuglogger.hxx>
+
 //_______________________________________________
 // namespace
 
@@ -425,6 +428,8 @@ MediaDescriptor::MediaDescriptor(const css::uno::Sequence< css::beans::NamedValu
 -----------------------------------------------*/
 sal_Bool MediaDescriptor::isStreamReadOnly() const
 {
+    OSL_LOG_TRACE_FUNCTION(BOOST_CURRENT_FUNCTION,__LINE__,"entering method");
+
     static ::rtl::OUString CONTENTSCHEME_FILE     = ::rtl::OUString::createFromAscii("file");
     static ::rtl::OUString CONTENTPROP_ISREADONLY = ::rtl::OUString::createFromAscii("IsReadOnly");
     static sal_Bool        READONLY_FALLBACK      = sal_False;
@@ -436,6 +441,7 @@ sal_Bool MediaDescriptor::isStreamReadOnly() const
     if (pIt != end())
     {
 		pIt->second >>= bReadOnly;
+        OSL_LOG_TRACE_FUNCTION(BOOST_CURRENT_FUNCTION,__LINE__,"return: bReadOnly: %s", bReadOnly?"true":"false");
         return bReadOnly;
     }
 
@@ -448,7 +454,10 @@ sal_Bool MediaDescriptor::isStreamReadOnly() const
     // If it exists - the file must be open in read/write mode!
     pIt = find(MediaDescriptor::PROP_STREAM());
     if (pIt != end())
+    {
+        OSL_LOG_TRACE_FUNCTION(BOOST_CURRENT_FUNCTION,__LINE__,"return: bReadOnly: false");
         return sal_False;
+    }
 
     // Only file system content provider is able to provide XStream
     // so for this content impossibility to create XStream triggers
@@ -477,6 +486,7 @@ sal_Bool MediaDescriptor::isStreamReadOnly() const
     catch(const css::uno::Exception&)
         {}
 
+    OSL_LOG_TRACE_FUNCTION(BOOST_CURRENT_FUNCTION,__LINE__,"return: bReadOnly: %s", bReadOnly?"true":"false");
     return bReadOnly;
 }
 

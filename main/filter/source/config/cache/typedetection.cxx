@@ -42,6 +42,9 @@
 #include <tools/urlobj.hxx>
 #include <unotools/localfilehelper.hxx>
 
+//for debug logger printing remove when finalized
+#include <tools/debuglogger.hxx>
+
 //_______________________________________________
 // namespace
 
@@ -1135,6 +1138,7 @@ void TypeDetection::impl_openStream(::comphelper::MediaDescriptor& rDescriptor)
     sal_Bool bSuccess = sal_False;
     ::rtl::OUString sURL = rDescriptor.getUnpackedValueOrDefault( ::comphelper::MediaDescriptor::PROP_URL(), ::rtl::OUString() );
     sal_Bool bRequestedReadOnly = rDescriptor.getUnpackedValueOrDefault( ::comphelper::MediaDescriptor::PROP_READONLY(), sal_False );
+    DBGLOG_TRACE_FUNCTION(BOOST_CURRENT_FUNCTION,__LINE__,"entering method. bRequestedReadOnly %s", bRequestedReadOnly? "true" : "false");
     if ( sURL.getLength() && ::utl::LocalFileHelper::IsLocalFile( INetURLObject( sURL ).GetMainURL( INetURLObject::NO_DECODE ) ) )
     {
         // OOo uses own file locking mechanics in case of local file
@@ -1145,6 +1149,10 @@ void TypeDetection::impl_openStream(::comphelper::MediaDescriptor& rDescriptor)
 
     if ( !bSuccess )
         throw css::uno::Exception(_FILTER_CONFIG_FROM_ASCII_("Could not open stream."), static_cast< css::document::XTypeDetection* >(this));
+
+    
+    sal_Bool bStatusReadOnly = rDescriptor.getUnpackedValueOrDefault( ::comphelper::MediaDescriptor::PROP_READONLY(), sal_False );
+    DBGLOG_TRACE_FUNCTION(BOOST_CURRENT_FUNCTION,__LINE__,"bRequestedReadOnly %s, bStatusReadOnly %s", bRequestedReadOnly? "true" : "false", bStatusReadOnly? "true" : "false" );
 
     if ( !bRequestedReadOnly )
     {
