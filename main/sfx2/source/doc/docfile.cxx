@@ -1147,10 +1147,12 @@ sal_Bool SfxMedium::LockOrigFileOnDemand( sal_Bool bLoading, sal_Bool bNoUI )
         {
             try
             {
-                // MediaDescriptor does this check also, the duplication should be avoided in future
+                // MediaDescriptor does this check also (see in comphelper::MediaDescriptor::isStreamReadOnly() ),
+                // the duplication should be avoided in future
                 Reference< ::com::sun::star::ucb::XCommandEnvironment > xDummyEnv;
                 ::ucbhelper::Content aContent( GetURLObject().GetMainURL( INetURLObject::NO_DECODE ), xDummyEnv );
                 aContent.getPropertyValue( ::rtl::OUString( RTL_CONSTASCII_USTRINGPARAM( "IsReadOnly" ) ) ) >>= bContentReadonly;
+                DBGLOG_TRACE_FUNCTION(BOOST_CURRENT_FUNCTION,__LINE__,"bContentReadonly %s",bContentReadonly?"true":"false");
             }
             catch( uno::Exception )
             {}
@@ -3652,11 +3654,16 @@ sal_Bool SfxMedium::IsReadOnly()
                     ((pFilter->GetFilterFlags() & SFX_FILTER_OPENREADONLY) == SFX_FILTER_OPENREADONLY)
                 );
 
+    DBGLOG_TRACE_FUNCTION(BOOST_CURRENT_FUNCTION,__LINE__,"AFTER: a) ReadOnly filter cant produce read/write contents! - bReadOnly: %s",
+                           bReadOnly?"true":"false");
     // b) if filter allow read/write contents .. check open mode of the storage
     if (!bReadOnly)
         bReadOnly = !( GetOpenMode() & STREAM_WRITE );
 
+    DBGLOG_TRACE_FUNCTION(BOOST_CURRENT_FUNCTION,__LINE__,"AFTER: b) if filter allow read/write contents .. check open mode of the storage - bReadOnly: %s",
+                           bReadOnly?"true":"false");
     // c) the API can force the readonly state!
+    // this is set when the system is readonly in the file system
     if (!bReadOnly)
     {
         SFX_ITEMSET_ARG( GetItemSet(), pItem, SfxBoolItem, SID_DOC_READONLY, sal_False);
@@ -3664,6 +3671,8 @@ sal_Bool SfxMedium::IsReadOnly()
             bReadOnly = pItem->GetValue();
     }
 
+    DBGLOG_TRACE_FUNCTION(BOOST_CURRENT_FUNCTION,__LINE__,"AFTER: c) the API can force the readonly state! - bReadOnly: %s",
+                           bReadOnly?"true":"false");
     return bReadOnly;
 }
 

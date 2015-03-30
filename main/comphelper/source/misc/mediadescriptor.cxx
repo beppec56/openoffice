@@ -58,9 +58,6 @@
 #include <osl/diagnose.h>
 #include <boost/current_function.hpp>
 
-//for debug logger printing remove when finalized
-#include <tools/debuglogger.hxx>
-
 //_______________________________________________
 // namespace
 
@@ -769,7 +766,9 @@ sal_Bool MediaDescriptor::impl_openStreamWithURL( const ::rtl::OUString& sURL, s
 		pIt->second >>= bReadOnly;
 		bModeRequestedExplicitly = sal_True;
 	}
-
+    
+    OSL_LOG_TRACE_FUNCTION(BOOST_CURRENT_FUNCTION,__LINE__,"bReadOnly: %s, bModeRequestedExplicitly: %s",
+                           bReadOnly?"true":"false",bModeRequestedExplicitly?"true":"false");
     if ( !bReadOnly && bLockFile )
     {
         try

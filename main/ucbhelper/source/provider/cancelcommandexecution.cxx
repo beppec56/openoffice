@@ -41,6 +41,10 @@
 
 using namespace com::sun::star;
 
+//for debug logger printing remove when finalized
+#include <osl/diagnose.h>
+#include <boost/current_function.hpp>
+
 namespace ucbhelper
 {
 
@@ -101,22 +105,28 @@ void cancelCommandExecution( const ucb::IOErrorCode eError,
                                     eError, rArgs, rMessage, xContext );
     if ( xEnv.is() )
     {
+        OSL_LOG_TRACE_FUNCTION(BOOST_CURRENT_FUNCTION,__LINE__,"ERROR: %d",eError);
         uno::Reference<
             task::XInteractionHandler > xIH = xEnv->getInteractionHandler();
         if ( xIH.is() )
         {
+            OSL_LOG_TRACE_FUNCTION(BOOST_CURRENT_FUNCTION,__LINE__,"ERROR: %d",eError);
             xIH->handle( xRequest.get() );
 
             rtl::Reference< ucbhelper::InteractionContinuation > xSelection
 				= xRequest->getSelection();
 
             if ( xSelection.is() )
+            {
+                OSL_LOG_TRACE_FUNCTION(BOOST_CURRENT_FUNCTION,__LINE__,"ERROR: %d",eError);
                 throw ucb::CommandFailedException( rtl::OUString(),
                                                    xContext,
                                                    xRequest->getRequest() );
+            }
         }
     }
 
+    OSL_LOG_TRACE_FUNCTION(BOOST_CURRENT_FUNCTION,__LINE__,"ERROR: %d",eError);
     cppu::throwException( xRequest->getRequest() );
 
     OSL_ENSURE( sal_False, "Return from cppu::throwException call!!!" );
