@@ -86,6 +86,8 @@ class COMPHELPER_DLLPUBLIC MediaDescriptor : public SequenceAsHashMap
         static const ::rtl::OUString& PROP_INPUTSTREAM();
         static const ::rtl::OUString& PROP_INTERACTIONHANDLER();
         static const ::rtl::OUString& PROP_JUMPMARK();
+        //this property is present and set if the stream was locked by another user
+        static const ::rtl::OUString& PROP_LOCKED();
         static const ::rtl::OUString& PROP_MACROEXECUTIONMODE();
         static const ::rtl::OUString& PROP_MEDIATYPE();
         static const ::rtl::OUString& PROP_MINIMIZED();

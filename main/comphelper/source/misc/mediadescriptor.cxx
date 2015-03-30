@@ -188,6 +188,12 @@ const ::rtl::OUString& MediaDescriptor::PROP_JUMPMARK()
     return sProp;
 }
 
+const ::rtl::OUString& MediaDescriptor::PROP_LOCKED()
+{
+    static const ::rtl::OUString sProp(RTL_CONSTASCII_USTRINGPARAM("Locked"));
+    return sProp;
+}
+
 const ::rtl::OUString& MediaDescriptor::PROP_MACROEXECUTIONMODE()
 {
     static const ::rtl::OUString sProp(RTL_CONSTASCII_USTRINGPARAM("MacroExecutionMode"));
