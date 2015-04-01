@@ -376,6 +376,7 @@ namespace fileaccess {
 
                 case FileBase::E_LOCKED:  // file is locked by another user
                     ioErrorCode = IOErrorCode_LOCKING_VIOLATION;
+                    //TODO beppec56: add here a long message to describe locking?
                     DBGLOG_TRACE_FUNCTION(BOOST_CURRENT_FUNCTION,__LINE__,"ERROR: error IOErrorCode_LOCKING_VIOLATION WAS SET!");
                     break;
 

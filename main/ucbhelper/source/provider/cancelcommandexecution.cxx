@@ -121,7 +121,9 @@ void cancelCommandExecution( const ucb::IOErrorCode eError,
                 OSL_LOG_TRACE_FUNCTION(BOOST_CURRENT_FUNCTION,__LINE__,"ERROR: %d",eError);
                 throw ucb::CommandFailedException( rtl::OUString(),
                                                    xContext,
-                                                   xRequest->getRequest() );
+                                                   xRequest->getRequest() );// this appears to be a ucb::InteractiveAugmentedIOException
+                                                                            // see ucbhelper/source/provider/simpleioerrorrequest.cxx:33
+                                                                            // for detail on the elements contained
             }
         }
     }
