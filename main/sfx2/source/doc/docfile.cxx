@@ -1194,7 +1194,7 @@ sal_Bool SfxMedium::LockOrigFileOnDemand( sal_Bool bLoading, sal_Bool bNoUI )
                                       bLoading? "true":"false", bUseSystemLock? "true":"false",
                                       pImp->xStream.is()? "true":"false",pOutStream? "true":"false",
                                       bHandleSysLocked? "true":"false",
-                                      IsOOoLockFileUsed? "true":"false");
+                                      IsOOoLockFileUsed()? "true":"false");
 
                 do
                 {
@@ -1215,11 +1215,13 @@ sal_Bool SfxMedium::LockOrigFileOnDemand( sal_Bool bLoading, sal_Bool bNoUI )
                                 {
                                     bResult = sal_True;
                                     // take the ownership over the lock file
+                                    DBGLOG_TRACE_FUNCTION(BOOST_CURRENT_FUNCTION,__LINE__,"take the ownership over the lock file");
                                     aLockFile.OverwriteOwnLockFile();
                                 }
                                 else if ( e.Code == IOErrorCode_INVALID_PARAMETER )
                                 {
                                     // system file locking is not active, ask user whether he wants to open the document without any locking
+                                    DBGLOG_TRACE_FUNCTION(BOOST_CURRENT_FUNCTION,__LINE__,"system file locking is not active, ask user whether he wants to open the document without any locking");
                                     uno::Reference< task::XInteractionHandler > xHandler = GetInteractionHandler();
 
                                     if ( xHandler.is() )
@@ -1243,22 +1245,30 @@ sal_Bool SfxMedium::LockOrigFileOnDemand( sal_Bool bLoading, sal_Bool bNoUI )
                             {
                                 // exception means that the lock file can not be successfuly accessed
                                 // in this case it should be ignored if system file locking is anyway active
+                                DBGLOG_TRACE_FUNCTION(BOOST_CURRENT_FUNCTION,__LINE__,"exception means that the lock file can not be successfuly accessed\n - in this case it should be ignored if system file locking is anyway active");
                                 if ( bUseSystemLock || !IsOOoLockFileUsed() )
                                 {
                                     bResult = sal_True;
                                     // take the ownership over the lock file
+                                    DBGLOG_TRACE_FUNCTION(BOOST_CURRENT_FUNCTION,__LINE__,"take the ownership over the lock file");
                                     aLockFile.OverwriteOwnLockFile();
                                 }
+                                else
+                                    DBGLOG_TRACE_FUNCTION(BOOST_CURRENT_FUNCTION,__LINE__,"DO NOT take the ownership over the lock file");
                             }
 
                             // in case OOo locking is turned off the lock file is still written if possible
                             // but it is ignored while deciding whether the document should be opened for editing or not
+                            DBGLOG_TRACE_FUNCTION(BOOST_CURRENT_FUNCTION,__LINE__,"in case OOo locking is turned off the lock file is still written if possible\n - but it is ignored while deciding whether the document should be opened for editing or not");
                             if ( !bResult && !IsOOoLockFileUsed() )
                             {
                                 bResult = sal_True;
                                 // take the ownership over the lock file
+                                DBGLOG_TRACE_FUNCTION(BOOST_CURRENT_FUNCTION,__LINE__,"take the ownership over the lock file");
                                 aLockFile.OverwriteOwnLockFile();
                             }
+                            else
+                                DBGLOG_TRACE_FUNCTION(BOOST_CURRENT_FUNCTION,__LINE__,"DO NOT take the ownership over the lock file");
                         }
 
 
@@ -1379,17 +1389,17 @@ sal_Bool SfxMedium::LockOrigFileOnDemand( sal_Bool bLoading, sal_Bool bNoUI )
                                 {
                                     DBGLOG_EXCEPTION_BRIEF();
                                     // here get the lock owner currently active
-                                    rtl::OUString aOwner = e.Owner;
+                                    rtl::OUString aLockOwner = e.Owner;
                                     rtl::OUString aExtendedError;
 
-                                    DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__, "A Lock is present: Owner: '%s', ExtendedError: '%s'",
-                                                           rtl::OUStringToOString( aOwner,RTL_TEXTENCODING_UTF8 ).getStr(),
+                                    DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__, "A Lock is present: LockOwner: '%s', ExtendedError: '%s'",
+                                                           rtl::OUStringToOString( aLockOwner,RTL_TEXTENCODING_UTF8 ).getStr(),
                                                            rtl::OUStringToOString( aExtendedError,RTL_TEXTENCODING_UTF8 ).getStr() );
                                     if ( !bResult && !bNoUI )
                                     {
                                         uno::Sequence< ::rtl::OUString > aData( 2 );
 
-                                        aData[0] = aOwner;
+                                        aData[0] = aLockOwner;
                                         aData[1] = aExtendedError;
                                         bUIStatus = ShowLockedDAVDocumentDialog( aData, bLoading );
                                         if ( bUIStatus == LOCK_UI_SUCCEEDED )
