@@ -37,6 +37,7 @@
 #include <com/sun/star/lang/IllegalArgumentException.hpp>
 #include <com/sun/star/util/XURLTransformer.hpp>
 #include <com/sun/star/ucb/InteractiveIOException.hpp>
+#include <com/sun/star/ucb/InteractiveAugmentedIOException.hpp>
 #include <com/sun/star/ucb/UnsupportedDataSinkException.hpp>
 #include <com/sun/star/ucb/CommandFailedException.hpp>
 #include <com/sun/star/task/XInteractionAbort.hpp>
@@ -778,6 +779,28 @@ sal_Bool MediaDescriptor::impl_openStreamWithURL( const ::rtl::OUString& sURL, s
         }
         catch(const css::uno::RuntimeException&)
             { OSL_LOG_TRACE_FUNCTION(BOOST_CURRENT_FUNCTION,__LINE__,"css::uno::RuntimeException" ); throw; }
+        catch(const com::sun::star::ucb::CommandFailedException& e)
+        {
+            OSL_LOG_TRACE_FUNCTION(BOOST_CURRENT_FUNCTION,__LINE__,
+                                       "RISED: com::sun::star::ucb::CommandFailedException");
+            //this exception is rised if the command failed, see if the reason was a ucb::InteractiveAugmentedIOException
+            com::sun::star::ucb::InteractiveAugmentedIOException aReason;
+            if( e.Reason >>= aReason )
+            {
+                OSL_LOG_TRACE_FUNCTION(BOOST_CURRENT_FUNCTION,__LINE__,
+                                       "ucb::InteractiveAugmentedIOException: error was %d", aReason.Code );
+                if(aReason.Code ==  com::sun::star::ucb::IOErrorCode_LOCKING_VIOLATION)
+                {
+                    OSL_LOG_TRACE_FUNCTION(BOOST_CURRENT_FUNCTION,__LINE__,
+                                       "GOT: com::sun::star::ucb::IOErrorCode_LOCKING_VIOLATION <--================");
+                }
+            }
+            if (!pInteraction->wasWriteError() || bModeRequestedExplicitly)
+                return sal_False;
+
+            xStream.clear();
+            xInputStream.clear();            
+        }
         catch(const css::uno::Exception&)
             {
                 // ignore exception, if reason was problem reasoned on
