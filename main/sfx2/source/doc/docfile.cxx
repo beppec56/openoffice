@@ -1200,7 +1200,9 @@ sal_Bool SfxMedium::LockOrigFileOnDemand( sal_Bool bLoading, sal_Bool bNoUI )
                 {
                     try
                     {
+                        DBGLOG_TRACE_FUNCTION(BOOST_CURRENT_FUNCTION,__LINE__,"try to instantiate aLockFile");
                         ::svt::DocumentLockFile aLockFile( aLogicName );
+                        DBGLOG_TRACE_FUNCTION(BOOST_CURRENT_FUNCTION,__LINE__,"aLockFile instantiated");
                         if ( !bHandleSysLocked )
                         {
                             try
@@ -1278,14 +1280,16 @@ sal_Bool SfxMedium::LockOrigFileOnDemand( sal_Bool bLoading, sal_Bool bNoUI )
                             try
                             {
                                 // impossibility to get data is no real problem
+                                DBGLOG_TRACE_FUNCTION(BOOST_CURRENT_FUNCTION,__LINE__,"impossibility to get data is no real problem");
                                 aData = aLockFile.GetLockData();
                             }
-                            catch( uno::Exception ) {}
+                            catch( uno::Exception ) { DBGLOG_TRACE_FUNCTION(BOOST_CURRENT_FUNCTION,__LINE__,"EXCEPTION! impossibility to get data is no real problem"); }
 
                             sal_Bool bOwnLock = sal_False;
 
                             if ( !bHandleSysLocked )
                             {
+                                DBGLOG_TRACE_FUNCTION(BOOST_CURRENT_FUNCTION,__LINE__,"dialog ONE");
                                 uno::Sequence< ::rtl::OUString > aOwnData = aLockFile.GenerateOwnEntry();
                                 bOwnLock = ( aData.getLength() > LOCKFILE_USERURL_ID
                                           && aOwnData.getLength() > LOCKFILE_USERURL_ID
@@ -1302,6 +1306,9 @@ sal_Bool SfxMedium::LockOrigFileOnDemand( sal_Bool bLoading, sal_Bool bNoUI )
 
                             if ( !bResult && !bNoUI )
                             {
+                                //TODO add here the check of the user holding the lock, if its available from the
+                                //mediadescriptor
+                                DBGLOG_TRACE_FUNCTION(BOOST_CURRENT_FUNCTION,__LINE__,"dialog TWO");
                                 bUIStatus = ShowLockedDocumentDialog( aData, bLoading, bOwnLock );
                                 if ( bUIStatus == LOCK_UI_SUCCEEDED )
                                 {
@@ -1315,6 +1322,7 @@ sal_Bool SfxMedium::LockOrigFileOnDemand( sal_Bool bLoading, sal_Bool bNoUI )
                     }
                     catch( uno::Exception& )
                     {
+                        DBGLOG_TRACE_FUNCTION(BOOST_CURRENT_FUNCTION,__LINE__,"DAMN! Not managed Exception!");
                     }
                 } while( !bResult && bUIStatus == LOCK_UI_TRY );
 
@@ -3658,20 +3666,17 @@ sal_Bool SfxMedium::IsReadOnly()
 {
     sal_Bool bReadOnly = sal_False;
 
+    DBGLOG_TRACE_FUNCTION(BOOST_CURRENT_FUNCTION,__LINE__,"ENTERING method");
     // a) ReadOnly filter cant produce read/write contents!
     bReadOnly = (
                     (pFilter                                                                         ) &&
                     ((pFilter->GetFilterFlags() & SFX_FILTER_OPENREADONLY) == SFX_FILTER_OPENREADONLY)
                 );
 
-    DBGLOG_TRACE_FUNCTION(BOOST_CURRENT_FUNCTION,__LINE__,"AFTER: a) ReadOnly filter cant produce read/write contents! - bReadOnly: %s",
-                           bReadOnly?"true":"false");
     // b) if filter allow read/write contents .. check open mode of the storage
     if (!bReadOnly)
         bReadOnly = !( GetOpenMode() & STREAM_WRITE );
 
-    DBGLOG_TRACE_FUNCTION(BOOST_CURRENT_FUNCTION,__LINE__,"AFTER: b) if filter allow read/write contents .. check open mode of the storage - bReadOnly: %s",
-                           bReadOnly?"true":"false");
     // c) the API can force the readonly state!
     // this is set when the system is readonly in the file system
     if (!bReadOnly)
@@ -3681,8 +3686,6 @@ sal_Bool SfxMedium::IsReadOnly()
             bReadOnly = pItem->GetValue();
     }
 
-    DBGLOG_TRACE_FUNCTION(BOOST_CURRENT_FUNCTION,__LINE__,"AFTER: c) the API can force the readonly state! - bReadOnly: %s",
-                           bReadOnly?"true":"false");
     return bReadOnly;
 }
 
