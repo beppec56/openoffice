@@ -40,7 +40,7 @@
 --without-junit \
 --without-stlport \
 --enable-bundled-dictionaries \
---with-lang='en-US' \
+--with-lang='en-US it' \
 --enable-dbus  \
 \
 --enable-verbose \
