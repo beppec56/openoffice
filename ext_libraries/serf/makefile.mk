@@ -57,7 +57,7 @@ CONFIGURE_FLAGS=
 CONFIGURE_SCONS='CFLAGS=$(CDEFS)'
 
 BUILD_DIR=$(CONFIGURE_DIR)
-BUILD_ACTION=scons $(CONFIGURE_SCONS) APR=$(SOLARVERSION)/$(INPATH) APU=$(SOLARVERSION)/$(INPATH) $(CONFOSSL)
+BUILD_ACTION=/usr/bin/python /usr/bin/scons $(CONFIGURE_SCONS) APR=$(SOLARVERSION)/$(INPATH) APU=$(SOLARVERSION)/$(INPATH) $(CONFOSSL)
 BUILD_FLAGS+= -j$(EXTMAXPROCESS)
 
 .ELIF "$(GUI)" == "OS2"
@@ -190,7 +190,7 @@ OUT2LIB+=libserf-1.*dylib
 OUT2LIB=libserf-1.so*
 .ENDIF
 
-.ENDIF
+.ENDIF # .IF "$(OS)"=="WNT"
 
 
 # --- Targets ------------------------------------------------------
@@ -201,4 +201,4 @@ OUT2LIB=libserf-1.so*
 #build target
 .INCLUDE : tg_ext.mk
 
-.ENDIF # .IF "$(OS)"=="WNT"
+.ENDIF # "$(SYSTEM_SERF)"=="YES"
