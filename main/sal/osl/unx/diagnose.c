@@ -67,9 +67,6 @@ static oslDebugMessageFunc volatile g_pDebugMessageFunc = 0;
 typedef pfunc_osl_printDetailedDebugMessage oslDetailedDebugMessageFunc;
 static oslDetailedDebugMessageFunc volatile g_pDetailedDebugMessageFunc = 0;
 
-typedef pfunc_osl_log_TraceMessage osl_log_TraceMessage;
-static osl_log_TraceMessage volatile g_pTraceMessage = 0;
-
 static void osl_diagnose_backtrace_Impl (
 	oslDebugMessageFunc f);
 
@@ -304,22 +301,6 @@ pfunc_osl_printDetailedDebugMessage SAL_CALL osl_setDetailedDebugMessageFunc (
     return pOldFunc;
 }
 
-pfunc_osl_log_TraceMessage SAL_CALL osl_setLogMessageFunc( pfunc_osl_log_TraceMessage pNewFunc )
-{
-    osl_log_TraceMessage pOldFunc = g_pTraceMessage;
-    g_pTraceMessage = pNewFunc;
-    return pOldFunc;
-}
-
-void osl_log_trace(const sal_Char* pszFunOrFileName, sal_Int32 nLine, const sal_Char* pszFormat, ...)
-{
-    va_list args;
-    va_start(args, pszFormat);
-    if(g_pTraceMessage != NULL)
-        g_pTraceMessage(pszFunOrFileName, nLine, pszFormat, args);
-    va_end(args);
-}
-
 /************************************************************************/
 /* osl_trace */
 /************************************************************************/
@@ -328,73 +309,4 @@ void osl_trace(char const * pszFormat, ...) {
     va_start(args, pszFormat);
     printTrace((unsigned long) getpid(), pszFormat, args);
     va_end(args);
-}
-
-/************************************************************************/
-/************************************************************************/
-/* code added for debug logger */
-/************************************************************************/
-static pthread_mutex_t g_mutexDebugLog = PTHREAD_MUTEX_INITIALIZER;
-static oslDebugMessageFunc volatile g_pDebugMessageFuncDebugLog = 0;
-
-/************************************************************************/
-/* osl_setDebugMessageFuncDebugLog */
-/************************************************************************/
-oslDebugMessageFunc SAL_CALL osl_setDebugMessageFuncDebugLog (
-	oslDebugMessageFunc pNewFunc)
-{
-	oslDebugMessageFunc pOldFunc = g_pDebugMessageFuncDebugLog;
-	g_pDebugMessageFuncDebugLog = pNewFunc;
-	return pOldFunc;
-}
-
-/************************************************************************/
-/* osl_assertFailedLineDebugLog */
-/************************************************************************/
-void SAL_CALL osl_assertFailedLineDebugLog (
-	const sal_Char* pszFileName,
-	sal_Int32       nLine,
-	const sal_Char* pszMessage)
-{
-	oslDebugMessageFunc f = g_pDebugMessageFuncDebugLog;
-	char                szMessage[1024];
-    char* starting="\n======vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv========\nError: ";
-    char* closing= "========^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^========\n";
-
-	/* format message into buffer */
-	if (pszMessage != 0)
-	{
-		snprintf(szMessage, sizeof(szMessage),
-				 "%sFile %s, Line %" SAL_PRIdINT32 ": %s\n%s",
-                 starting,
-				 pszFileName, nLine, pszMessage, closing);
-	}
-	else
-	{
-		snprintf(szMessage, sizeof(szMessage),
-				 "%sFile %s, Line %" SAL_PRIdINT32 "\n%s",
-                 starting,
-				 pszFileName, nLine, closing);
-	}
-
-	/* acquire lock to serialize output message(s) */
-	pthread_mutex_lock(&g_mutexDebugLog);
-
-	/* output message buffer */
-    if(f)
-        (*(f))((szMessage));
-
-	/* output backtrace */
-    if(f)
-        osl_diagnose_backtrace_Impl(f);
-
-	/* release lock and leave */
-	pthread_mutex_unlock(&g_mutexDebugLog);
-}
-
-/************************************************************************/
-/* osl_getpid */
-/************************************************************************/
-sal_uInt32 SAL_CALL osl_getpidDebugLog() {
-    return (sal_uInt32) getpid();
 }

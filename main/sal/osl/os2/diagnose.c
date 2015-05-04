@@ -41,30 +41,11 @@ static oslDebugMessageFunc volatile g_pDebugMessageFunc = 0;
 typedef pfunc_osl_printDetailedDebugMessage oslDetailedDebugMessageFunc;
 static oslDetailedDebugMessageFunc volatile g_pDetailedDebugMessageFunc = 0;
 
-typedef pfunc_osl_log_TraceMessage osl_log_TraceMessage;
-static osl_log_TraceMessage volatile g_pTraceMessage = 0;
-
 /*----------------------------------------------------------------------------*/
 
 void SAL_CALL osl_breakDebug()
 {
 	__asm__("int $3\n");
-}
-
-pfunc_osl_log_TraceMessage SAL_CALL osl_setLogMessageFunc( pfunc_osl_log_TraceMessage pNewFunc )
-{
-    osl_log_TraceMessage pOldFunc = g_pTraceMessage;
-    g_pTraceMessage = pNewFunc;
-    return pOldFunc;
-}
-
-void osl_log_trace(const sal_Char* pszFunOrFileName, sal_Int32 nLine, const sal_Char* pszFormat, ...)
-{
-    va_list args;
-    va_start(args, pszFormat);
-    if(g_pTraceMessage != NULL)
-        g_pTraceMessage(pszFunOrFileName, nLine, pszFormat, args);
-    va_end(args);
 }
 
 /************************************************************************/

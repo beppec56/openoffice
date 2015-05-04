@@ -29,7 +29,7 @@
 
 #include <com/sun/star/uno/RuntimeException.hpp>
 #include <com/sun/star/lang/IllegalArgumentException.hpp>
-#include <cppuhelper/exc_hlp.hxx>
+
 #include <boost/current_function.hpp>
 
 

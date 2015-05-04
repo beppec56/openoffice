@@ -39,7 +39,6 @@ extern void createRegistryInfo_OInstanceLocker();
 extern void createRegistryInfo_Map();
 extern void createRegistryInfo_OSimpleLogRing();
 extern void createRegistryInfo_OOfficeRestartManager();
-extern void createRegistryInfo_DebugLogRing();
 
 //........................................................................
 namespace comphelper { namespace module
@@ -66,7 +65,6 @@ namespace comphelper { namespace module
                 createRegistryInfo_Map();
                 createRegistryInfo_OSimpleLogRing();
                 createRegistryInfo_OOfficeRestartManager();
-                createRegistryInfo_DebugLogRing();
             }
         }
     }

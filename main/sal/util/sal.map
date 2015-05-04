@@ -129,7 +129,6 @@ UDK_3_0_0 {
         osl_joinWithThread;
         osl_listenOnSocket;
         osl_loadModule;
-        osl_log_trace;
         osl_loginUser;
         osl_loginUserOnFileServer;
         osl_openDirectory;
@@ -471,7 +470,6 @@ UDK_3_0_0 {
 
         osl_setDebugMessageFunc;
         osl_setDetailedDebugMessageFunc;
-	osl_setLogMessageFunc;
         osl_readLine;
         osl_getGlobalTimer;
         osl_getCanonicalName;
@@ -631,11 +629,6 @@ UDK_3.12 { # AOO 3.5
     global:
         osl_loadAsciiModule;
         osl_loadAsciiModuleRelative;
-
-	osl_assertFailedLineDebugLog;
-	osl_getpidDebugLog;
-	osl_setDebugMessageFuncDebugLog;
-
 } UDK_3.11;
 
 PRIVATE_1.0 {

@@ -93,7 +93,6 @@ $(eval $(call gb_Library_add_exception_objects,tl,\
 	tools/source/memtools/table \
 	tools/source/memtools/unqidx \
 	tools/source/misc/appendunixshellword \
-	tools/source/misc/debuglogger \
 	tools/source/misc/extendapplicationenvironment \
 	tools/source/misc/getprocessworkingdir \
 	tools/source/misc/solarmutex \

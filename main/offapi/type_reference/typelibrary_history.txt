@@ -208,6 +208,3 @@
 
 23/03/2013 (arielch): TaskID=121946
   css::ucb::XWebDAVCommandEnvironment: use enums to identify WebDAV/HTTP methods
-
-26/02/2015 (cst gpp): TaskID=???
-  Added new logging component com.sun.star.logging.XDebugLogRing

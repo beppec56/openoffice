@@ -25,7 +25,6 @@
 #ifndef _OSL_DIAGNOSE_H_
 #define _OSL_DIAGNOSE_H_
 
-#include <stdarg.h>
 #include <sal/types.h>
 
 #ifdef __cplusplus
@@ -36,18 +35,15 @@ extern "C" {
 	Diagnostic support
 */
 
-void        SAL_CALL osl_breakDebug(void);
-sal_Bool    SAL_CALL osl_assertFailedLine(const sal_Char* pszFileName, sal_Int32 nLine, const sal_Char* pszMessage);
-void        SAL_CALL osl_trace(const sal_Char* pszFormat, ...);
-void        SAL_CALL osl_log_trace(const sal_Char* pszFunOrFileName, sal_Int32 nLine, const sal_Char* pszFormat, ...);
+void    	SAL_CALL osl_breakDebug(void);
+sal_Bool 	SAL_CALL osl_assertFailedLine(const sal_Char* pszFileName, sal_Int32 nLine, const sal_Char* pszMessage);
+void    	SAL_CALL osl_trace(const sal_Char* pszFormat, ...);
 sal_Int32	SAL_CALL osl_reportError(sal_uInt32 nType, const sal_Char* pszErrorMessage);
-
-void        SAL_CALL osl_assertFailedLineDebugLog(const sal_Char* pszFileName, sal_Int32 nLine, const sal_Char* pszMessage);
-sal_uInt32  SAL_CALL osl_getpidDebugLog();
 
 /*
 	For message delivery
 */
+
 /** a message delivery function which receives a pre-formatted message string
 */
 typedef void (SAL_CALL *pfunc_osl_printDebugMessage)( const sal_Char * pszMessage );
@@ -56,13 +52,6 @@ typedef void (SAL_CALL *pfunc_osl_printDebugMessage)( const sal_Char * pszMessag
 */
 typedef void (SAL_CALL *pfunc_osl_printDetailedDebugMessage)( const sal_Char * pszFileName, sal_Int32 nLine, const sal_Char* pszMessage );
 
-
-/** a message delivery function which receives detailed information about where the message was triggered ad expects parameters
-*/
-typedef void (SAL_CALL *pfunc_osl_log_TraceMessage)( const sal_Char * pszFileName, sal_Int32 nLine, const sal_Char* pszMessage, va_list args );
-
-pfunc_osl_log_TraceMessage SAL_CALL osl_setLogMessageFunc( pfunc_osl_log_TraceMessage pNewFunc );
-    
 /** sets a message delivery function
 
     The function set here is ignored if a function for detailed message information
@@ -71,11 +60,6 @@ pfunc_osl_log_TraceMessage SAL_CALL osl_setLogMessageFunc( pfunc_osl_log_TraceMe
     The given message handler must be able to cope with a <NULL/> message.
 */
 pfunc_osl_printDebugMessage SAL_CALL osl_setDebugMessageFunc( pfunc_osl_printDebugMessage pNewFunc );
-/**
- * same as osl_setDebugMessageFunc for debug logger
- */
-pfunc_osl_printDebugMessage SAL_CALL osl_setDebugMessageFuncDebugLog( pfunc_osl_printDebugMessage pNewFunc );
-
 
 /** sets a delivery function for detailed message information.
 
@@ -107,10 +91,9 @@ pfunc_osl_printDetailedDebugMessage SAL_CALL osl_setDetailedDebugMessageFunc( pf
 #define OSL_ENSURE(c, m)   _OSL_ENSURE(c, OSL_THIS_FILE, __LINE__, m)
 
 #define OSL_VERIFY(c) do { if (!(c)) OSL_ASSERT(0); } while (0)
-#define OSL_PRECOND(c, m)       OSL_ENSURE(c, m)
-#define OSL_POSTCOND(c, m)      OSL_ENSURE(c, m)
+#define OSL_PRECOND(c, m)  	OSL_ENSURE(c, m)
+#define OSL_POSTCOND(c, m) 	OSL_ENSURE(c, m)
 
-#define OSL_LOG_TRACE_FUNCTION        osl_log_trace   
 
 #ifdef __cplusplus
 #define _OSL_GLOBAL	::
@@ -131,24 +114,24 @@ pfunc_osl_printDetailedDebugMessage SAL_CALL osl_setDetailedDebugMessageFunc( pf
 
 #define _OSL_DEBUG_ONLY(f)	(f)
 #define _OSL_ASSERT(c, f, l) \
-    do \
-    {  \
-        if (!(c) && _OSL_GLOBAL osl_assertFailedLine(f, l, 0)) \
-            _OSL_GLOBAL osl_breakDebug(); \
-    } while (0)
+	do \
+	{  \
+	    if (!(c) && _OSL_GLOBAL osl_assertFailedLine(f, l, 0)) \
+		    _OSL_GLOBAL osl_breakDebug(); \
+	} while (0)
 
 #define _OSL_ENSURE(c, f, l, m) \
-    do \
-    {  \
-        if (!(c) && _OSL_GLOBAL osl_assertFailedLine(f, l, m)) \
-            _OSL_GLOBAL osl_breakDebug(); \
-    } while (0)
+	do \
+	{  \
+	    if (!(c) && _OSL_GLOBAL osl_assertFailedLine(f, l, m)) \
+		    _OSL_GLOBAL osl_breakDebug(); \
+	} while (0)
 
 #else
 
 #define _OSL_DEBUG_ONLY(f)			((void)0)
 #define _OSL_ASSERT(c, f, l)		((void)0)
-#define _OSL_ENSURE(c, f, l, m)         ((void)0)
+#define _OSL_ENSURE(c, f, l, m)	    ((void)0)
 
 #endif /* OSL_DEBUG_LEVEL */
 
