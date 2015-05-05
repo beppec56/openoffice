@@ -30,10 +30,6 @@
 
 #include <apr_strings.h>
 
-//for debug logger printing remove when finalized
-#include <tools/debuglogger.hxx>
-#include <boost/current_function.hpp>
-
 //to examine returned http code
 #include "DAVException.hxx"
 
@@ -657,23 +653,14 @@ apr_status_t SerfRequestProcessor::handleSerfResponse( serf_request_t * inSerfRe
         const char* server = serf_bucket_headers_get( headers, "server" );
         if( server )
         {
-            DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__, "Answering server type is: '%s'",server );
             //update the server type on session
             mrSerfSession.setServerHeaderField( ::rtl::OUString::createFromAscii( server ) );
         }
         const char* location1 = serf_bucket_headers_get( headers, "location" );
-        if( location1 )
-        {
-            DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__, "location is: '%s'",location1 );
-        }
         //the following extension is MS IIS specific,
         //see https://msdn.microsoft.com/en-us/library/cc250064.aspx
         //site last checked on 2015-03-02
         const char* msDavExtErr = serf_bucket_headers_get( headers, "X-MSDAVEXT_ERROR" );
-        if( msDavExtErr )
-        {
-            DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__, "X-MSDAVEXT_ERROR is: '%s'", msDavExtErr );
-        }
 
         // TODO - check, if response status code handling is correct
         mnHTTPStatusCode = ( sl.version != 0 && sl.code >= 0 )

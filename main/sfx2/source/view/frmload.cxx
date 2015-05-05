@@ -72,9 +72,6 @@
 #include <ucbhelper/simpleinteractionrequest.hxx>
 #include <vos/mutex.hxx>
 
-//for debug logger printing remove when finalized
-#include <tools/debuglogger.hxx>
-
 /** === begin UNO using === **/
 using ::com::sun::star::beans::PropertyValue;
 using ::com::sun::star::container::XContainerQuery;

@@ -69,9 +69,6 @@
 #include <sfx2/docfile.hxx>
 #include "doc.hrc"
 
-//for debug logger printing remove when finalized
-#include <tools/debuglogger.hxx>
-
 //-----------------------------------------------------------------------------
 
 //=============================================================================

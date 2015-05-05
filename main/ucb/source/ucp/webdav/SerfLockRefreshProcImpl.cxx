@@ -31,10 +31,6 @@
 #include <rtl/ustrbuf.hxx>
 #include <apr/apr_strings.h>
 
-//to debug via log recorder, remove when done
-#include <tools/debuglogger.hxx>
-#include <boost/current_function.hpp>
-
 namespace http_dav_ucp
 {
 
@@ -78,11 +74,6 @@ serf_bucket_t * SerfLockRefreshProcImpl::createSerfRequestBucket( serf_request_t
             serf_bucket_headers_set( hdrs_bkt, "if", mpLockToken );
         }
     }
-    else
-    {
-        DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__, "Headers Bucket missing");
-    }
-
     return req_bkt;
 }
 

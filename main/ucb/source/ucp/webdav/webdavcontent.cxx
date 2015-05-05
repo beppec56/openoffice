@@ -86,10 +86,6 @@
 #include "SerfUri.hxx"
 #include "UCBDeadPropertyValue.hxx"
 
-//to debug via log recorder, remove when done
-#include <tools/debuglogger.hxx>
-#include <boost/current_function.hpp>
-
 using namespace com::sun::star;
 using namespace http_dav_ucp;
 
@@ -1319,9 +1315,6 @@ uno::Reference< sdbc::XRow > Content::getPropertyValues(
         {
             const beans::Property& rProp = pProps[ n ];
 
-            DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__,
-                                "prop:  %s", OUStringToOString( rProp.Name , RTL_TEXTENCODING_ISO_8859_1 ).getStr());
-
             // Process standard UCB, DAV and HTTP properties.
             const uno::Any & rValue = rData.getValue( rProp.Name );
             if ( rValue.hasValue() )
@@ -1473,9 +1466,6 @@ uno::Reference< sdbc::XRow > Content::getPropertyValues(
                     {
                         const rtl::OUString & rName = rProperties[ n ].Name;
 
-                        DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__, "prop name '%s'",
-                            rtl::OUStringToOString( rName,
-                                            RTL_TEXTENCODING_UTF8 ).getStr());
                         std::vector< rtl::OUString >::const_iterator it
                             = m_aFailedPropNames.begin();
                         std::vector< rtl::OUString >::const_iterator end
@@ -3031,12 +3021,10 @@ void Content::lock(
             aURL += rtl::OUString::createFromAscii( "/" );
 
         aURL += m_aEscapedTitle;
-        DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__, "resource is transient");
     }
     else
     {
         aURL = m_xIdentifier->getContentIdentifier();
-        DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__, "resource is NOT transient");
     }
 
     try
@@ -3069,22 +3057,12 @@ void Content::lock(
     }
     catch ( DAVException const & e )
     {
-        DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__,
-                               "Exception received: data: '%s' status: %d, code %s",
-                               rtl::OUStringToOString( e.getData(),
-                                                       RTL_TEXTENCODING_UTF8 ).getStr() ,e.getStatus(),
-                               rtl::OUStringToOString( e.getErrorString(),
-                                                       RTL_TEXTENCODING_UTF8 ).getStr());
-
         switch(e.getStatus())
         {
         case SC_LOCKED:
         {
             rtl::OUString aOwner( getLockOwner( Environment ) );
 
-            DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__,"Already locked, Url: '%s', Owner '%s'",
-                                   rtl::OUStringToOString( aURL, RTL_TEXTENCODING_UTF8 ).getStr(),
-                                   rtl::OUStringToOString( aOwner, RTL_TEXTENCODING_UTF8 ).getStr() );
             throw(ucb::InteractiveLockingLockedException(
                       rtl::OUString::createFromAscii( "Locked!" ),
                       static_cast< cppu::OWeakObject * >( this ),
@@ -3101,9 +3079,6 @@ void Content::lock(
             // http://tools.ietf.org/html/rfc4918#appendix-D.1
             // throw exception, will be interpreted by the lock request
             // it is actually a info, not an error
-            DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__,"Method not allowed, Url: %s  (resource is url mapped? %s)",
-                                   rtl::OUStringToOString( aURL,
-                                                           RTL_TEXTENCODING_UTF8 ).getStr(), m_bTransient ? "YES" : "NO");
             throw ucb::InteractiveLockingLockNotAvailableException( e.getData(),
                                                                     static_cast< cppu::OWeakObject * >( this ),
                                                                     task::InteractionClassification_INFO,
@@ -3147,14 +3122,7 @@ void Content::unlock(
     }
     catch ( DAVException const & e )
     {
-        DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__,
-                               "Exception received: data: '%s' status: %d, code %s",
-                               rtl::OUStringToOString( e.getData(),
-                                                       RTL_TEXTENCODING_UTF8 ).getStr() ,e.getStatus(),
-                               rtl::OUStringToOString( e.getErrorString(),
-                                                       RTL_TEXTENCODING_UTF8 ).getStr());
-
-        //TODO beppec56 need to rise an exception of the rigth type ?
+        //TODO beppec56 need to rise an exception of the right type ?
         //meaning that the lock can not be released, since there is no such exception we use
         throw ucb::InteractiveNetworkReadException( e.getData(),
                                                     static_cast< cppu::OWeakObject * >( this ),
@@ -3574,20 +3542,7 @@ const Content::ResourceType & Content::getResourceType(
             //in file: ucb/source/ucp/webdav/webdavresponseparser.cxx:
             if ( resources.size() == 1 )
             {
-                //first print resources received ready for cache
                 // there is a single resource
-                //debug:
-                {
-                    std::vector< http_dav_ucp::DAVPropertyValue > aResponseProperties(resources[0].properties);
-                    DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__, " %d PropertyType returned:",aResponseProperties.size() );
-
-                    for(unsigned int i = 0; i < aResponseProperties.size(); i++) {
-                        DBGLOG_TRACE( " %d: '%s'", i,
-                                  rtl::OUStringToOString( aResponseProperties[i].Name,
-                                                          RTL_TEXTENCODING_UTF8 ).getStr() );
-                    }
-                }
-
                 m_xCachedProps.reset(
                     new CachableContentProperties( resources[ 0 ] ) );
                 m_xCachedProps->containsAllNames(
@@ -3648,10 +3603,6 @@ rtl::OUString Content::getLockOwner( const uno::Reference< ucb::XCommandEnvironm
                 ucb::Lock aLock = aLocks[0];
                 aLock.Owner >>= aOwner;
             }
-            else
-                DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__,"NO LOCKS PRESENT" );
-        else
-            DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__,"NO OWNER SET" );
     }
     catch ( uno::Exception&)
     { }

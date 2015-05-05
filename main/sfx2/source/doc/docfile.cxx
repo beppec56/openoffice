@@ -108,9 +108,6 @@
 #include <rtl/logfile.hxx>
 #include <osl/file.hxx>
 
-//for debug logger printing remove when finalized
-#include <tools/debuglogger.hxx>
-
 using namespace ::com::sun::star;
 using namespace ::com::sun::star::uno;
 using namespace ::com::sun::star::ucb;
@@ -1326,15 +1323,11 @@ sal_Bool SfxMedium::LockOrigFileOnDemand( sal_Bool bLoading, sal_Bool bNoUI )
                     {
                         if( !bResult )
                         {
-                            try
-                            {
                                 Reference< ::com::sun::star::ucb::XCommandEnvironment > xComEnv;
                                 if (xInteractionHandler.is())
                                     xComEnv = new ::ucbhelper::CommandEnvironment( xInteractionHandler,
                                                                                    Reference< ::com::sun::star::ucb::XProgressHandler >() );
                                 ::ucbhelper::Content aContentToLock( GetURLObject().GetMainURL( INetURLObject::NO_DECODE ), xComEnv);
-                                DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__, "URL for lock '%s'", 
-                                             rtl::OUStringToOString( GetURLObject().GetMainURL(INetURLObject::NO_DECODE ), RTL_TEXTENCODING_UTF8 ).getStr());
                                 rtl::OUString   aOwner;
                                 try {
                                     aContentToLock.lock();
@@ -1342,7 +1335,6 @@ sal_Bool SfxMedium::LockOrigFileOnDemand( sal_Bool bLoading, sal_Bool bNoUI )
                                 }
                                 catch( ucb::InteractiveLockingLockNotAvailableException )
                                 {
-                                    DBGLOG_EXCEPTION_BRIEF();
                                     // signalled when the lock can not be done because the method is known but not allowed on the resourse
                                     // that is resource available, can be worked upon, at your risk
                                     // ask user whether he wants to open the document without any locking
@@ -1368,14 +1360,10 @@ sal_Bool SfxMedium::LockOrigFileOnDemand( sal_Bool bLoading, sal_Bool bNoUI )
                                 }
                                 catch( ucb::InteractiveLockingLockedException& e )
                                 {
-                                    DBGLOG_EXCEPTION_BRIEF();
                                     // here get the lock owner currently active
-                                    rtl::OUString aOwner = e.Owner;
+                                    aOwner = e.Owner;
                                     rtl::OUString aExtendedError;
 
-                                    DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__, "A Lock is present: Owner: '%s', ExtendedError: '%s'",
-                                                           rtl::OUStringToOString( aOwner,RTL_TEXTENCODING_UTF8 ).getStr(),
-                                                           rtl::OUStringToOString( aExtendedError,RTL_TEXTENCODING_UTF8 ).getStr() );
                                     if ( !bResult && !bNoUI )
                                     {
                                         uno::Sequence< ::rtl::OUString > aData( 2 );
@@ -1390,15 +1378,6 @@ sal_Bool SfxMedium::LockOrigFileOnDemand( sal_Bool bLoading, sal_Bool bNoUI )
                                         }
                                     }
                                 }
-                                catch( uno::Exception & e )
-                                {
-                                    DBGLOG_UNHANDLED_EXCEPTION();
-                                }
-                            }
-                            catch( uno::Exception & e )
-                            {
-                                DBGLOG_UNHANDLED_EXCEPTION();
-                            }
                         }
                     } while( !bResult && bUIStatus == LOCK_UI_TRY );
                 }
@@ -2953,7 +2932,6 @@ void SfxMedium::UnlockFile( sal_Bool bReleaseLockStream )
         {
             // an interaction handler should be used for authentication in case it is available
             try {
-                DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__, "" );
                 Reference< ::com::sun::star::task::XInteractionHandler > xInteractionHandler = GetInteractionHandler();
                 Reference< ::com::sun::star::ucb::XCommandEnvironment > xComEnv;
                 if (xInteractionHandler.is())
@@ -2966,10 +2944,6 @@ void SfxMedium::UnlockFile( sal_Bool bReleaseLockStream )
             catch (ucb::InteractiveNetworkReadException& e)
             {
                 //signalled when this resource can not be unlocked, for whatever reason
-            }
-            catch( uno::Exception& e )
-            {
-                DBGLOG_UNHANDLED_EXCEPTION();
             }
         }
     }

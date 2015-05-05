@@ -31,9 +31,6 @@
 #include "SerfSession.hxx"
 #include "SerfLockStore.hxx"
 
-//for debug logger printing remove when finalized
-#include <tools/debuglogger.hxx>
-
 using namespace http_dav_ucp;
 
 namespace http_dav_ucp {
@@ -60,8 +57,6 @@ protected:
 // -------------------------------------------------------------------
 void TickerThread::run()
 {
-    DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__, "TickerThread: start." );
-
     // we have to go through the loop more often to be able to finish ~quickly
     const int nNth = 25;
 
@@ -79,8 +74,6 @@ void TickerThread::run()
         aTV.Nanosec = 1000000000 / nNth;
         wait( aTV );
     }
-
-    DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__, "TickerThread: stop." );
 }
 
 // -------------------------------------------------------------------
@@ -188,12 +181,6 @@ void SerfLockStore::addLock( SerfLock * pLock,
 
         rtl::OUString   aToken;
         aToken = pLock->getLock().LockTokens[0];
-
-        DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__, "a new lock was added: URI: %s, Owner: %s, token: %s, nLastChanceToSendRefreshRequest %d",
-                  rtl::OUStringToOString( pLock->getResourceUri() ,RTL_TEXTENCODING_UTF8 ).getStr(),
-                  rtl::OUStringToOString( aOwner,RTL_TEXTENCODING_UTF8 ).getStr(),
-                  rtl::OUStringToOString( aToken,RTL_TEXTENCODING_UTF8 ).getStr(),
-                      nLastChanceToSendRefreshRequest );
     }
     startTicker();
 }
@@ -229,7 +216,6 @@ void SerfLockStore::removeLock( SerfLock * pLock )
         rInfo.xSession->release();
         m_aLockInfoMap.erase( pLock );
         //the caller should deallocate SerfLock class after the call!
-        DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__, "lock removed");
         if ( m_aLockInfoMap.size() == 0 )
             stopTicker();
     }

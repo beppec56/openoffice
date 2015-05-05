@@ -148,9 +148,6 @@ using namespace ::com::sun::star::container;
 #include "appbaslib.hxx"
 #include <openflag.hxx>                 // SFX_STREAM_READWRITE
 
-//for debug logger printing remove when finalized
-#include <tools/debuglogger.hxx>
-
 using namespace ::com::sun::star;
 
 // class SfxHeaderAttributes_Impl ----------------------------------------
@@ -2407,10 +2404,6 @@ void SfxObjectShell::StoreLog()
             catch( uno::Exception& )
             {}
         }
-    }
-    {//debug, remove when done
-        //Store the debuglogger data as well
-        DBGLOG_FLUSH("main_sfx2_source_doc_objmisc.log");
     }
 }
 

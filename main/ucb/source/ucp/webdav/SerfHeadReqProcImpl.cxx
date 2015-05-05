@@ -24,9 +24,6 @@
 
 #include "SerfHeadReqProcImpl.hxx"
 
-//for debug logger printing remove when finalized
-#include <tools/debuglogger.hxx>
-
 using namespace com::sun::star;
 
 namespace http_dav_ucp
@@ -105,10 +102,6 @@ void SerfHeadReqProcImpl::processSingleResponseHeader( const char* inHeaderName,
 
     bool bStoreHeaderField = false;
 
-    {//debug only, remove when done
-        DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__, "inHeaderName: '%s'\n - inHeaderValue: '%s'",
-                               inHeaderName,inHeaderValue);
-    }
     if ( mpHeaderNames->size() == 0 )
     {
         // store all header fields

@@ -31,10 +31,6 @@
 #include <rtl/ustrbuf.hxx>
 #include <apr/apr_strings.h>
 
-//for debug logger printing remove when finalized
-#include <tools/debuglogger.hxx>
-#include <boost/current_function.hpp>
-
 namespace http_dav_ucp
 {
 
@@ -83,11 +79,6 @@ serf_bucket_t * SerfUnlockProcImpl::createSerfRequestBucket( serf_request_t * in
 void SerfUnlockProcImpl::processChunkOfResponseData( const char* data, 
                                                       apr_size_t len )
 {
-    {//debug only, remove when done
-        rtl::OUString aStr(data,len,RTL_TEXTENCODING_ASCII_US);
-        DBGLOG_TRACE_FUNCTION( BOOST_CURRENT_FUNCTION, __LINE__, "'\n%s\n'",
-            rtl::OUStringToOString( aStr, RTL_TEXTENCODING_UTF8 ).getStr());
-    }
     if ( xInputStream.is() )
     {
         xInputStream->AddToStream( data, len );
