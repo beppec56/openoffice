@@ -79,6 +79,7 @@ namespace tools
             rtl::OUString aMessage(pszMessage, std::strlen(pszMessage), RTL_TEXTENCODING_ASCII_US);
             m_xDebugLogRing->logString( aMessage );
         }
+        fprintf(stdout,"%s",pszMessage);
     }
 
     static void vaListLogFunction( const sal_Char * funcName, sal_Int32 lineNumber, const sal_Char* pszFormat, va_list args)
