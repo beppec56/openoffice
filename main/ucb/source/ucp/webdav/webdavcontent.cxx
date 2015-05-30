@@ -3049,7 +3049,7 @@ void Content::lock(
         // and how to manage it in webdav protocol, this was not checked while solving i126305.
         uno::Any aOwnerAny;
         aOwnerAny
-            <<= rtl::OUString::createFromAscii( "Apache OpenOffice - https://www.openoffice.org" );
+            <<= rtl::OUString::createFromAscii( "AOOHs Home Acca Esse private version of Apache OpenOffice - http://www.acca-esse.it, https://www.openoffice.org" );
 
         // TODO i126305 to discuss:
         // on some webdav server, the 180 time formerly used appears to be too long,
