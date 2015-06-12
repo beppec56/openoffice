@@ -54,6 +54,8 @@ CONFIGURE_DIR=
 CONFIGURE_ACTION=
 CONFIGURE_FLAGS=
 
+PATCH_FILES+=serf-1.3.8-force-win32-target.patch
+
 CONFIGURE_SCONS='CFLAGS=$(CDEFS)'
 
 BUILD_DIR=$(CONFIGURE_DIR)
@@ -78,6 +80,7 @@ PATCH_FILES+=$(TARFILE_NAME).libs.patch
 .IF "$(OS)"=="LINUX"
 # Add -ldl as last library so that the linker has no trouble resolving dependencies.
 #PATCH_FILES+=$(TARFILE_NAME).ldl.patch
+PATCH_FILES+=serf-1.3.8-force-linux-target.patch
 .ENDIF
 
 # Export ENABLE_SERF_LOGGING=YES to enable serf logging
@@ -92,7 +95,7 @@ CONFIGURE_FLAGS=
 
 .IF "$(OS)"=="LINUX"
 .IF "$(SYSTEM_OPENSSL)"=="YES"
-#scons will retrive the right openssl installation
+#scons will retrieve the right openssl installation
 CONFOSSL=
 .ELSE
 OPENSSLINCDIR=external
