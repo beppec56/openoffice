@@ -73,6 +73,16 @@ SerfLockReqProcImpl::SerfLockReqProcImpl( const char* inSourcePath,
         mLockScope = "<lockscope><shared/></lockscope>";
         break;
     }
+
+    switch ( inLock.Type )
+    {
+    case ucb::LockType_WRITE:
+        mLockType = "<locktype><write/></locktype>";
+        break;
+    case ucb::LockType_READ:
+        mLockType = "<locktype><read/></locktype>";
+        break;
+    }
 }
 
 SerfLockReqProcImpl::~SerfLockReqProcImpl()
@@ -93,7 +103,7 @@ serf_bucket_t * SerfLockReqProcImpl::createSerfRequestBucket( serf_request_t * i
        rtl::OUStringBuffer aBuffer;
         aBuffer.appendAscii( RTL_CONSTASCII_STRINGPARAM( LOCK_HEADER ));
         aBuffer.appendAscii( mLockScope );
-        aBuffer.appendAscii( RTL_CONSTASCII_STRINGPARAM( LOCK_TYPE ));
+        aBuffer.appendAscii( mLockType );
         aBuffer.appendAscii( RTL_CONSTASCII_STRINGPARAM( "<owner>" ));
         rtl::OUString aStr;
         mLock.Owner >>= aStr;

@@ -44,6 +44,7 @@ namespace http_dav_ucp
         const ucb::Lock     mLock;
         const char*         mDepthStr;
         const char*         mLockScope;
+        const char*         mLockType;
         const char*         mTimeout;
         DAVPropertyValue*   mLockObtained;
         com::sun::star::uno::Reference< SerfInputStream > xInputStream;

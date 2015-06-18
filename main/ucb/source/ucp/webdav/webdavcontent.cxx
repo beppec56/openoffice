@@ -3058,8 +3058,8 @@ void Content::lock(
         // For now drop the defaul time to 120 seconds, seems better.
         // In the future, another way of keeping the connection alive should be devised.
         ucb::Lock aLock(
-            ucb::LockScope_EXCLUSIVE,
-            ucb::LockType_WRITE,
+            ucb::LockScope_SHARED,
+            ucb::LockType_READ,
             ucb::LockDepth_ZERO,
             aOwnerAny,
             120, // lock timeout in secs
