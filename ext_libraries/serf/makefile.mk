@@ -59,7 +59,7 @@ BUILD_ACTION=$(GNUMAKE)
 #BUILD_ACTION=/usr/bin/python /usr/bin/scons $(CONFIGURE_SCONS) APR=$(SOLARVERSION)/$(INPATH) APU=$(SOLARVERSION)/$(INPATH) $(CONFOSSL)
 BUILD_FLAGS+= -f ../../../../win/Makefile -j$(EXTMAXPROCESS)
 
-PATCH_FILES+=serf-1.3.8-force-win32-target.patch
+PATCH_FILES+=serf-1.3.8-create-def.patch
 
 
 .ELIF "$(GUI)" == "OS2"

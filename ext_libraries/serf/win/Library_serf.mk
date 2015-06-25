@@ -42,7 +42,6 @@ FIXED_DEF_FILE=build/fixed-serf.def
 $(call gb_LinkTarget_get_target,$(call gb_Library__get_linktargetname,serf)) : $(FIXED_DEF_FILE)
 $(FIXED_DEF_FILE) : $(ORIGINAL_DEF_FILE)
 	cp $< $@
-	echo serf_bucket_request_set_CL >> $@
 
 $(eval $(call gb_Library_set_ldflags,serf,\
 	$$(LDFLAGS) \
