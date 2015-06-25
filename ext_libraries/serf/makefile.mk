@@ -80,7 +80,7 @@ PATCH_FILES+=$(TARFILE_NAME).libs.patch
 .IF "$(OS)"=="LINUX"
 # Add -ldl as last library so that the linker has no trouble resolving dependencies.
 #PATCH_FILES+=$(TARFILE_NAME).ldl.patch
-PATCH_FILES+=$(TARFILE_NAME).force-linux-target.patch
+#PATCH_FILES+=$(TARFILE_NAME).force-linux-target.patch
 .ENDIF
 
 # Export ENABLE_SERF_LOGGING=YES to enable serf logging
