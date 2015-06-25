@@ -59,7 +59,7 @@ BUILD_ACTION=$(GNUMAKE)
 #BUILD_ACTION=/usr/bin/python /usr/bin/scons $(CONFIGURE_SCONS) APR=$(SOLARVERSION)/$(INPATH) APU=$(SOLARVERSION)/$(INPATH) $(CONFOSSL)
 BUILD_FLAGS+= -f ../../../../win/Makefile -j$(EXTMAXPROCESS)
 
-PATCH_FILES+=serf-1.3.8-create-def.patch
+PATCH_FILES+=$(TARFILE_NAME).create-def.patch
 
 
 .ELIF "$(GUI)" == "OS2"
@@ -80,7 +80,7 @@ PATCH_FILES+=$(TARFILE_NAME).libs.patch
 .IF "$(OS)"=="LINUX"
 # Add -ldl as last library so that the linker has no trouble resolving dependencies.
 #PATCH_FILES+=$(TARFILE_NAME).ldl.patch
-PATCH_FILES+=serf-1.3.8-force-linux-target.patch
+PATCH_FILES+=$(TARFILE_NAME).force-linux-target.patch
 .ENDIF
 
 # Export ENABLE_SERF_LOGGING=YES to enable serf logging
