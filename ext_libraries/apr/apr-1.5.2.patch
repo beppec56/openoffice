@@ -1,5 +1,5 @@
---- misc/build/apr-1.4.5/configure.orig	2011-05-19 17:09:22.000000000 -0700
-+++ misc/build/apr-1.4.5/configure	2012-05-21 23:51:51.000000000 -0700
+--- misc/build/apr-1.5.2/configure.orig	2011-05-19 17:09:22.000000000 -0700
++++ misc/build/apr-1.5.2/configure	2012-05-21 23:51:51.000000000 -0700
 @@ -13468,7 +13468,7 @@
        hardcode_shlibpath_var=no
        ;;
