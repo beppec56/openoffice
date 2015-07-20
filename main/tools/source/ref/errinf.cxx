@@ -30,6 +30,9 @@
 #include <tools/errinf.hxx>
 #include <tools/string.hxx>
 
+
+#include <tools/debuglogger.hxx>
+
 class ErrorHandler;
 
 namespace {
@@ -294,7 +297,9 @@ sal_uInt16 ErrorHandler::HandleError_Impl(
 
 	*/
 
-    String aErr;
+  DBGLOG_TRACE_FUNCTION(BOOST_CURRENT_FUNCTION,__LINE__,"lId %u - nFlags %u",lId,nFlags);
+
+  String aErr;
     String aAction;
     if(!lId || lId == ERRCODE_ABORT)
         return 0;

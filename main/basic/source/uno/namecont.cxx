@@ -63,6 +63,9 @@
 #include <cppuhelper/exc_hlp.hxx>
 #include <basic/sbmod.hxx>
 
+//debug only, remove when not needed
+#include <tools/debuglogger.hxx>
+
 namespace basic
 {
 
@@ -1518,11 +1521,12 @@ void SfxLibraryContainer::implStoreLibrary( SfxLibrary* pLib,
 				    writeLibraryElement( xLib, aElementName, xOutput );
 				    xOutput->closeOutput();
                 }
-        		catch( Exception& )
+        		catch( Exception& e)
                 {
 					if( bExport )
 						throw;
-
+					DBGLOG_TRACE_FUNCTION(BOOST_CURRENT_FUNCTION,__LINE__,"Error saving doc: %s",
+							      rtl::OUStringToOString( e.Message, RTL_TEXTENCODING_UTF8 ).getStr());
 		            SfxErrorContext aEc( ERRCTX_SFX_SAVEDOC, aElementPath );
                     sal_uIntPtr nErrorCode = ERRCODE_IO_GENERAL;
             	    ErrorHandler::HandleError( nErrorCode );
@@ -1631,10 +1635,12 @@ void SfxLibraryContainer::implStoreLibraryIndexFile( SfxLibrary* pLib,
 			    xSFI->kill( aLibInfoPath );
 		    xOut = xSFI->openFileWrite( aLibInfoPath );
         }
-        catch( Exception& )
+        catch( Exception& e)
         {
 			if( bExport )
 				throw;
+					DBGLOG_TRACE_FUNCTION(BOOST_CURRENT_FUNCTION,__LINE__,"Error saving doc: %s",
+							      rtl::OUStringToOString( e.Message, RTL_TEXTENCODING_UTF8 ).getStr());
 
 			SfxErrorContext aEc( ERRCTX_SFX_SAVEDOC, aLibInfoPath );
             sal_uIntPtr nErrorCode = ERRCODE_IO_GENERAL;
@@ -2088,10 +2094,12 @@ void SfxLibraryContainer::storeLibraries_Impl( const uno::Reference< embed::XSto
 			    mxSFI->kill( aLibInfoPath );
 		    xOut = mxSFI->openFileWrite( aLibInfoPath );
         }
-        catch( Exception& )
+        catch( Exception& e)
         {
             xOut.clear();
 			SfxErrorContext aEc( ERRCTX_SFX_SAVEDOC, aLibInfoPath );
+					DBGLOG_TRACE_FUNCTION(BOOST_CURRENT_FUNCTION,__LINE__,"Error saving doc: %s",
+							      rtl::OUStringToOString( e.Message, RTL_TEXTENCODING_UTF8 ).getStr());
             sal_uIntPtr nErrorCode = ERRCODE_IO_GENERAL;
             ErrorHandler::HandleError( nErrorCode );
         }

@@ -110,14 +110,19 @@ oslFileError oslTranslateFileError (/*DWORD*/ unsigned long dwError)
 	for (i = 0; i < n; ++i )
 	{
 		if (dwError == errtable[i].oscode)
+          {
+            OSL_LOG_TRACE_FUNCTION(BOOST_CURRENT_FUNCTION,__LINE__,"Windows error - dwError: 0x%08x",dwError);
 			return (oslFileError)(errtable[i].errnocode);
+          }
 	}
 
 	/* The error code wasn't in the table.  We check for a range of 
 	   osl_File_E_ACCES errors or exec failure errors (ENOEXEC).  
 	   Otherwise osl_File_E_INVAL is returned.
 	*/
-	if ( (dwError >= MIN_EACCES_RANGE) && (dwError <= MAX_EACCES_RANGE) )
+    OSL_LOG_TRACE_FUNCTION(BOOST_CURRENT_FUNCTION,__LINE__,"ERROR NOT IN THE TABLE ===---------------> dwError: 0x%08x",dwError);
+
+    if ( (dwError >= MIN_EACCES_RANGE) && (dwError <= MAX_EACCES_RANGE) )
 		return osl_File_E_ACCES;
 	else if ( (dwError >= MIN_EXEC_ERROR) && (dwError <= MAX_EXEC_ERROR) )
 		return osl_File_E_NOEXEC;

@@ -41,6 +41,8 @@
 #include <svtools/svtools.hrc>
 #include <svtools/sfxecode.hxx>
 
+#include <tools/debuglogger.hxx>
+
 //=========================================================================
 
 static sal_uInt16 aWndFunc(
@@ -415,6 +417,7 @@ SfxErrorContext::SfxErrorContext(
 	sal_uInt16 nCtxIdP, Window *pWindow, sal_uInt16 nResIdP, ResMgr *pMgrP)
 :   ErrorContext(pWindow), nCtxId(nCtxIdP), nResId(nResIdP), pMgr(pMgrP)
 {
+  DBGLOG_TRACE_FUNCTION(BOOST_CURRENT_FUNCTION,__LINE__,"ctor - nCtxIdP: %u - nResIdP: %u",nCtxIdP,nResIdP);
 	if( nResId==USHRT_MAX )
 		nResId=RID_ERRCTX;
 }
@@ -427,6 +430,7 @@ SfxErrorContext::SfxErrorContext(
 :   ErrorContext(pWindow), nCtxId(nCtxIdP), nResId(nResIdP), pMgr(pMgrP),
 	aArg1(aArg1P)
 {
+  DBGLOG_TRACE_FUNCTION(BOOST_CURRENT_FUNCTION,__LINE__,"ctor - nCtxIdP: %u - nResIdP: %u",nCtxIdP,nResIdP);
 	if( nResId==USHRT_MAX )
 		nResId=RID_ERRCTX;
 }
