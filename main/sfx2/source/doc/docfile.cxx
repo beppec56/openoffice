@@ -149,6 +149,9 @@ using namespace ::com::sun::star::io;
 #define MAX_REDIRECT 5
 
 
+//debug only, remove when not needed
+#include <tools/debuglogger.hxx>
+
 sal_Bool IsReadonlyAccordingACL( const sal_Unicode* pFilePath );
 
 //==========================================================
@@ -1022,6 +1025,7 @@ sal_Int8 SfxMedium::ShowLockedDocumentDialog( const uno::Sequence< ::rtl::OUStri
 //------------------------------------------------------------------
 sal_Bool SfxMedium::LockOrigFileOnDemand( sal_Bool bLoading, sal_Bool bNoUI )
 {
+  DBGLOG_TRACE_FUNCTION(BOOST_CURRENT_FUNCTION,__LINE__,"LockOrigFileOnDemand");
     // returns true if the document can be opened for editing ( even if it should be a copy )
     // otherwise the document should be opened readonly
     // if user cancel the loading the ERROR_ABORT is set
