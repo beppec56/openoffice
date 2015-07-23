@@ -111,7 +111,7 @@ oslFileError oslTranslateFileError (/*DWORD*/ unsigned long dwError)
 	{
 		if (dwError == errtable[i].oscode)
           {
-            OSL_LOG_TRACE_FUNCTION("oslTranslateFileError",114,"Windows error - dwError: 0x%08x",dwError);
+            OSL_LOG_TRACE_FUNCTION("oslTranslateFileError",114,"Windows error - dwError: 0x%08x (%d)",dwError,dwError);
 			return (oslFileError)(errtable[i].errnocode);
           }
 	}
@@ -120,7 +120,7 @@ oslFileError oslTranslateFileError (/*DWORD*/ unsigned long dwError)
 	   osl_File_E_ACCES errors or exec failure errors (ENOEXEC).  
 	   Otherwise osl_File_E_INVAL is returned.
 	*/
-    OSL_LOG_TRACE_FUNCTION("oslTranslateFileError",123,"ERROR NOT IN THE TABLE ===---------------> dwError: 0x%08x",dwError);
+    OSL_LOG_TRACE_FUNCTION("oslTranslateFileError",123,"ERROR NOT IN THE TABLE ===---------------> dwError: 0x%08x (%d)",dwError,dwError);
 
     if ( (dwError >= MIN_EACCES_RANGE) && (dwError <= MAX_EACCES_RANGE) )
 		return osl_File_E_ACCES;
